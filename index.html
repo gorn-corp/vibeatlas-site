@@ -1,45 +1,75 @@
-<!--
-  Hit RUN to see this project in action!
-  
-  This project will auto-refresh as you edit the HTML, CSS and JS. See README.md for more info (including how to disable auto-refresh and install packages).
--->
-
 <!DOCTYPE html>
-<html>
-
+<html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>Replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VibeAtlas</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-  <main>
-    <h1 class="title">Welcome to HTML on Replit!</h1>
-    <p class="description">Get started by editing
-      <code class="code">index.html</code>. The webview will auto-refresh as you edit! (See <code
-        class="code">README.md</code> if you want to
-      disable auto-refresh.)
+  <!-- Навигация -->
+  <header class="nav-header">
+    <div class="container">
+      <div class="logo">🌍 VibeAtlas</div>
+      <nav>
+        <ul class="nav-list">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">О проекте</a></li>
+          <li><a href="#events">События</a></li>
+          <li><a href="#contact">Контакты</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Главная секция -->
+  <section id="home" class="hero">
+    <h1>VibeAtlas</h1>
+    <p>Праздники, фестивали и события по всему миру — в одном месте. Живи в ритме планеты.</p>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Globe_icon.svg/2048px-Globe_icon.svg.png" alt="Globe" class="globe" />
+    <button class="btn">Присоединиться</button>
+  </section>
+
+  <!-- О проекте -->
+  <section id="about" class="about">
+    <h2>О проекте</h2>
+    <p>
+      <strong>VibeAtlas</strong> объединяет информацию о праздниках и культурных событиях по всему миру.
+      Мы помогаем путешественникам и местным жителям быть в курсе происходящего, чтобы чувствовать пульс планеты.
     </p>
+  </section>
 
-    <section class="grid">
-      <a href="https://replit.com/learn" class='card'>
-        <h2>Learn &rarr;</h2>
-        <p>Find tutorials on Replit to learn more.</p>
-      </a>
+  <!-- События -->
+  <section id="events" class="events-section">
+    <h2>События</h2>
+    <div class="events-slider">
+      <!-- Пример карточки события -->
+      <div class="event-card dark">
+        <h3>Санктханский парад фонарей</h3>
+        <p>Ночная церемония в Сеуле с мягким светом фонарей и живой музыкой.</p>
+      </div>
+      <div class="event-card rain">
+        <h3>Oktoberfest</h3>
+        <p>Немецкий фестиваль пива под дождём: зонты, горячие огни палаток и атмосфера уюта.</p>
+      </div>
+      <div class="event-card day">
+        <h3>Карнавал в Венеции</h3>
+        <p>Дневной парад масок и костюмов на каналах и площадях Венеции.</p>
+      </div>
+    </div>
+  </section>
 
-      <a href="https://docs.replit.com/category/deployments" class='card'>
-        <h2>Deploy &rarr;</h2>
-        <p>
-          After you are happy with this app, deploy it on Replit!
-        </p>
-      </a>
-    </section>
-  </main>
+  <!-- Контакты / Подписка -->
+  <section id="contact" class="contact">
+    <h2>Подпишитесь на ранний доступ</h2>
+    <p>Будьте первыми, кто узнает о запуске и новых функциях!</p>
+    <form class="subscribe-form">
+      <input type="email" placeholder="Ваш email" required />
+      <button type="submit" class="btn">Подписаться</button>
+    </form>
+  </section>
 
-  <script type="module" src="script.js"></script>
-
+  <!-- Футер -->
+  <footer class="footer">© 2025 VibeAtlas</footer>
 </body>
-
 </html>
