@@ -33,3 +33,21 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+import { getTimeOfDay } from './weather.js';
+
+/**
+ * Устанавливает класс на <body> в зависимости от времени суток
+ */
+function applyTimeTheme() {
+  const phase = getTimeOfDay(); // 'morning' | 'day' | 'evening' | 'night'
+  document.body.classList.add(`theme-${phase}`);
+}
+
+// после DOMContentLoaded, сразу после update(defaultCity);
+window.addEventListener('DOMContentLoaded', () => {
+  // ...существующий код...
+
+  // Настройка темы
+  applyTimeTheme();
+});

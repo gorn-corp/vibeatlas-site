@@ -62,3 +62,31 @@ body {
 #get-weather-btn {
   padding: 0.5rem 1rem;
 }
+
+/* ---- Time-of-Day Themes ---- */
+body.theme-morning {
+  --bg-start: #a1c4fd;
+  --bg-end:   #c2e9fb;
+}
+body.theme-day {
+  --bg-start: #ffe47a;
+  --bg-end:   #ffd97a;
+}
+body.theme-evening {
+  --bg-start: #fbc2eb;
+  --bg-end:   #a6c1ee;
+}
+body.theme-night {
+  --bg-start: #0f0c29;
+  --bg-end:   #302b63;
+}
+
+/* Применяем переменные к фону */
+body {
+  background: linear-gradient(
+    to right,
+    var(--bg-start, #203a43),
+    var(--bg-end,   #2c5364)
+  );
+  transition: background 1s ease;
+}
