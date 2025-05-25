@@ -22,9 +22,21 @@
     </div>
   </header>
 
-  <!-- Weather Section -->
+    <!-- Weather Section -->
   <section id="weather" class="weather-section">
     <h2>Current Weather</h2>
+
+    <!-- Новое: форма выбора города -->
+    <div class="city-form">
+      <input
+        type="text"
+        id="city-input"
+        placeholder="Enter city name"
+        value="London"
+      />
+      <button id="get-weather-btn" class="btn">Get Weather</button>
+    </div>
+
     <div id="weather-container">
       <p><strong>City:</strong> <span id="city-name">Loading...</span></p>
       <p><strong>Temperature:</strong> <span id="temperature">--</span>°C</p>

@@ -1,20 +1,35 @@
 import { fetchWeather, getTimeOfDay } from './weather.js';
 
-console.log('API ключ:', import.meta.env.VITE_WEATHER_API_KEY);
+const defaultCity = 'London';
+const cityInput = document.getElementById('city-input');
+const getWeatherBtn = document.getElementById('get-weather-btn');
 
-// Пример работы функций (если они уже реализованы в weather.js)
-async function init() {
+async function update(city) {
   try {
-    const city = 'Moscow';
-    const weatherData = await fetchWeather(city);
-    console.log(`Погода в ${city}:`, weatherData);
-
-    const timeOfDay = getTimeOfDay();
-    console.log('Сейчас:', timeOfDay);
+    await fetchWeather(city);
   } catch (err) {
-    console.error('Ошибка при получении данных:', err);
+    console.error('Error fetching weather:', err);
+    alert(`Could not get weather for "${city}". Please check the city name.`);
   }
 }
 
-init();
+window.addEventListener('DOMContentLoaded', () => {
+  // 1) Загрузка по умолчанию
+  update(defaultCity);
 
+  // 2) Обработчик клика по кнопке
+  getWeatherBtn.addEventListener('click', () => {
+    const city = cityInput.value.trim();
+    if (city) {
+      update(city);
+    }
+  });
+
+  // 3) Обработка Enter в поле ввода
+  cityInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      getWeatherBtn.click();
+    }
+  });
+});
