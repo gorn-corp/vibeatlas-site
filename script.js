@@ -1,9 +1,14 @@
+// script.js
 import { fetchWeather, getTimeOfDay } from './weather.js';
 
 const defaultCity = 'London';
 const cityInput = document.getElementById('city-input');
 const getWeatherBtn = document.getElementById('get-weather-btn');
 
+/**
+ * Запрашивает и показывает погоду для города.
+ * @param {string} city
+ */
 async function update(city) {
   try {
     await fetchWeather(city);
@@ -13,6 +18,14 @@ async function update(city) {
   }
 }
 
+/**
+ * Устанавливает тему страницы по времени суток.
+ */
+function applyTimeTheme() {
+  const phase = getTimeOfDay(); // 'morning'|'day'|'evening'|'night'
+  document.body.classList.add(`theme-${phase}`);
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   // 1) Загрузка по умолчанию
   update(defaultCity);
@@ -20,9 +33,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // 2) Обработчик клика по кнопке
   getWeatherBtn.addEventListener('click', () => {
     const city = cityInput.value.trim();
-    if (city) {
-      update(city);
-    }
+    if (city) update(city);
   });
 
   // 3) Обработка Enter в поле ввода
@@ -32,22 +43,7 @@ window.addEventListener('DOMContentLoaded', () => {
       getWeatherBtn.click();
     }
   });
-});
 
-import { getTimeOfDay } from './weather.js';
-
-/**
- * Устанавливает класс на <body> в зависимости от времени суток
- */
-function applyTimeTheme() {
-  const phase = getTimeOfDay(); // 'morning' | 'day' | 'evening' | 'night'
-  document.body.classList.add(`theme-${phase}`);
-}
-
-// после DOMContentLoaded, сразу после update(defaultCity);
-window.addEventListener('DOMContentLoaded', () => {
-  // ...существующий код...
-
-  // Настройка темы
+  // 4) Применяем тему
   applyTimeTheme();
 });

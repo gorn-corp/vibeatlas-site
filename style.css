@@ -1,68 +1,6 @@
 /* Basic reset */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-  color: #ffffff;
-  line-height: 1.6;
-}
-
-.nav-header {
-  background: rgba(0,0,0,0.5);
-  padding: 1rem;
-}
-.container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
-.nav-list { list-style: none; display: flex; gap: 1rem; }
-.nav-list a { color: #fff; text-decoration: none; }
-
-.weather-section {
-  max-width: 400px;
-  margin: 2rem auto;
-  background: rgba(255,255,255,0.1);
-  padding: 1rem;
-  border-radius: 8px;
-}
-.weather-section h2 { margin-bottom: 1rem; }
-#weather-container p { margin: 0.5rem 0; }
-
-.hero {
-  text-align: center;
-  padding: 2rem;
-}
-.btn { background: #ff6b6b; color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; }
-
-.about, .events-section, .contact {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 1rem;
-}
-
-.events-slider { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; }
-.event-card { background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; min-width: 200px; }
-
-.footer { text-align: center; padding: 1rem; background: rgba(0,0,0,0.5); }
-
-/* Город-ввод */
-.city-form {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  justify-content: center;
-}
-
-#city-input {
-  flex: 1;
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: none;
-  outline: none;
-}
-
-#get-weather-btn {
-  padding: 0.5rem 1rem;
-}
-
 /* ---- Time-of-Day Themes ---- */
 body.theme-morning {
   --bg-start: #a1c4fd;
@@ -83,10 +21,125 @@ body.theme-night {
 
 /* Применяем переменные к фону */
 body {
+  font-family: Arial, sans-serif;
   background: linear-gradient(
     to right,
     var(--bg-start, #203a43),
     var(--bg-end,   #2c5364)
   );
+  color: #ffffff;
+  line-height: 1.6;
   transition: background 1s ease;
+}
+
+/* Navigation */
+.nav-header {
+  background: rgba(0,0,0,0.5);
+  padding: 1rem;
+}
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.nav-list {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+.nav-list a {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Weather Section */
+.weather-section {
+  max-width: 400px;
+  margin: 2rem auto;
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-radius: 8px;
+}
+.weather-section h2 {
+  margin-bottom: 1rem;
+}
+
+/* City input form */
+.city-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+#city-input {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: none;
+  outline: none;
+}
+#get-weather-btn {
+  padding: 0.5rem 1rem;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 2rem;
+}
+.btn {
+  background: #ff6b6b;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* About, Events, Contact */
+.about,
+.events-section,
+.contact {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+/* Events slider */
+.events-slider {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+}
+.event-card {
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  min-width: 200px;
+}
+
+/* Subscribe form */
+.subscribe-form {
+  display: flex;
+  gap: 0.5rem;
+}
+.subscribe-form input {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: none;
+  outline: none;
+}
+.subscribe-form button {
+  padding: 0.5rem 1rem;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(0,0,0,0.5);
 }
