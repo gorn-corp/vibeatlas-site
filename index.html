@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,70 +7,79 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Навигация -->
+  <!-- Navigation -->
   <header class="nav-header">
     <div class="container">
       <div class="logo">🌍 VibeAtlas</div>
       <nav>
         <ul class="nav-list">
           <li><a href="#home">Home</a></li>
-          <li><a href="#about">О проекте</a></li>
-          <li><a href="#events">События</a></li>
-          <li><a href="#contact">Контакты</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#events">Events</a></li>
+          <li><a href="#contact">Contact</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <!-- Главная секция -->
+  <!-- Weather Section -->
+  <section id="weather" class="weather-section">
+    <h2>Current Weather</h2>
+    <div id="weather-container">
+      <p><strong>City:</strong> <span id="city-name">Loading...</span></p>
+      <p><strong>Temperature:</strong> <span id="temperature">--</span>°C</p>
+      <p><strong>Condition:</strong> <span id="weather-condition">--</span></p>
+      <p><strong>Day/Night:</strong> <span id="day-status">--</span></p>
+    </div>
+  </section>
+
+  <!-- Hero Section -->
   <section id="home" class="hero">
     <h1>VibeAtlas</h1>
-    <p>Праздники, фестивали и события по всему миру — в одном месте. Живи в ритме планеты.</p>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Globe_icon.svg/2048px-Globe_icon.svg.png" alt="Globe" class="globe" />
-    <button class="btn">Присоединиться</button>
+    <p>Holidays, festivals and events around the world — all in one place. Live the planet's rhythm.</p>
+    <button class="btn">Join Now</button>
   </section>
 
-  <!-- О проекте -->
+  <!-- About Section -->
   <section id="about" class="about">
-    <h2>О проекте</h2>
-    <p>
-      <strong>VibeAtlas</strong> объединяет информацию о праздниках и культурных событиях по всему миру.
-      Мы помогаем путешественникам и местным жителям быть в курсе происходящего, чтобы чувствовать пульс планеты.
-    </p>
+    <h2>About</h2>
+    <p><strong>VibeAtlas</strong> brings together information on holidays and cultural events across the globe. We help travelers and locals stay in tune with the world’s pulse.</p>
   </section>
 
-  <!-- События -->
+  <!-- Events Section -->
   <section id="events" class="events-section">
-    <h2>События</h2>
+    <h2>Events</h2>
     <div class="events-slider">
-      <!-- Пример карточки события -->
-      <div class="event-card dark">
-        <h3>Санктханский парад фонарей</h3>
-        <p>Ночная церемония в Сеуле с мягким светом фонарей и живой музыкой.</p>
+      <!-- Sample event cards -->
+      <div class="event-card">
+        <h3>Lantern Parade in Seoul</h3>
+        <p>An evening ceremony with glowing lanterns and live music.</p>
       </div>
-      <div class="event-card rain">
+      <div class="event-card">
         <h3>Oktoberfest</h3>
-        <p>Немецкий фестиваль пива под дождём: зонты, горячие огни палаток и атмосфера уюта.</p>
+        <p>Germany’s famous beer festival under festive tents.</p>
       </div>
-      <div class="event-card day">
-        <h3>Карнавал в Венеции</h3>
-        <p>Дневной парад масок и костюмов на каналах и площадях Венеции.</p>
+      <div class="event-card">
+        <h3>Venice Carnival</h3>
+        <p>A daytime parade of masks and costumes along the canals.</p>
       </div>
     </div>
   </section>
 
-  <!-- Контакты / Подписка -->
+  <!-- Contact Section -->
   <section id="contact" class="contact">
-    <h2>Подпишитесь на ранний доступ</h2>
-    <p>Будьте первыми, кто узнает о запуске и новых функциях!</p>
+    <h2>Contact</h2>
+    <p>Subscribe for early access and updates!</p>
     <form class="subscribe-form">
-      <input type="email" placeholder="Ваш email" required />
-      <button type="submit" class="btn">Подписаться</button>
+      <input type="email" placeholder="Your email" required />
+      <button type="submit" class="btn">Subscribe</button>
     </form>
   </section>
 
-  <!-- Футер -->
+  <!-- Footer -->
   <footer class="footer">© 2025 VibeAtlas</footer>
+
+  <!-- Scripts -->
   <script type="module" src="./script.js"></script>
 </body>
 </html>
