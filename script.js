@@ -5,8 +5,12 @@ const defaultCity = 'London';
 const cityInput = document.getElementById('city-input');
 const getWeatherBtn = document.getElementById('get-weather-btn');
 
+// Элементы для splash-экрана
+const splash = document.getElementById('splash');
+const enterBtn = document.getElementById('enter-btn');
+
 /**
- * Запрашивает и показывает погоду для города.
+ * Запрашивает и показывает погоду для указанного города.
  * @param {string} city
  */
 async function update(city) {
@@ -19,7 +23,7 @@ async function update(city) {
 }
 
 /**
- * Устанавливает тему страницы по времени суток.
+ * Применяет тему страницы по времени суток.
  */
 function applyTimeTheme() {
   const phase = getTimeOfDay(); // 'morning'|'day'|'evening'|'night'
@@ -27,16 +31,21 @@ function applyTimeTheme() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  // 1) Загрузка по умолчанию
+  // 1) Скрытие splash-экрана при клике
+  enterBtn.addEventListener('click', () => {
+    splash.style.display = 'none';
+  });
+
+  // 2) Загрузка погоды по умолчанию
   update(defaultCity);
 
-  // 2) Обработчик клика по кнопке
+  // 3) Обработчик кнопки
   getWeatherBtn.addEventListener('click', () => {
     const city = cityInput.value.trim();
     if (city) update(city);
   });
 
-  // 3) Обработка Enter в поле ввода
+  // 4) Обработка Enter в поле ввода
   cityInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -44,6 +53,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 4) Применяем тему
+  // 5) Применяем тему фона
   applyTimeTheme();
 });

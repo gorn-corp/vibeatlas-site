@@ -143,3 +143,28 @@ body {
   padding: 1rem;
   background: rgba(0,0,0,0.5);
 }
+
+/* Splash screen */
+#splash {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #000 url("C:\Users\koval\Desktop\Новая папка\5303233946051540928.jpg") center/cover no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+.splash-content {
+  text-align: center;
+  color: #fff;
+  backdrop-filter: brightness(0.5);
+}
+#enter-btn {
+  margin-top: 1rem;
+  background: #ff6b6b;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
