@@ -1,146 +1,44 @@
-/* Обнуление отступов и стандартных стилей */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* Basic reset */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #0e0e0e;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
   color: #ffffff;
   line-height: 1.6;
 }
 
-/* Шапка */
-header {
-  background-color: #1a1a1a;
-  padding: 20px 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #333;
+.nav-header {
+  background: rgba(0,0,0,0.5);
+  padding: 1rem;
 }
+.container { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; }
+.nav-list { list-style: none; display: flex; gap: 1rem; }
+.nav-list a { color: #fff; text-decoration: none; }
 
-header h1 {
-  font-size: 28px;
-  color: #00ffe1;
-  letter-spacing: 1px;
-}
-
-nav a {
-  color: #ffffff;
-  text-decoration: none;
-  margin-left: 20px;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-nav a:hover {
-  color: #00ffe1;
-}
-
-/* Основной контейнер */
-main {
-  padding: 40px 20px;
-  max-width: 1200px;
-  margin: auto;
-}
-
-/* Секция событий */
-section#events h2 {
-  font-size: 24px;
-  margin-bottom: 30px;
-  color: #00ffe1;
-  text-align: center;
-}
-
-.event-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-}
-
-/* Карточка события */
-.event-card {
-  background-color: #1f1f1f;
-  border-radius: 16px;
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid #333;
-}
-
-.event-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 15px rgba(0, 255, 225, 0.2);
-}
-
-.event-card img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-}
-
-.event-content {
-  padding: 16px;
-}
-
-.event-content h3 {
-  font-size: 18px;
-  margin-bottom: 10px;
-  color: #ffffff;
-}
-
-.event-content p {
-  font-size: 14px;
-  color: #aaaaaa;
-}
-
-.event-content span {
-  display: block;
-  font-size: 12px;
-  color: #777777;
-  margin-top: 8px;
-}
-
-/* Форма подписки */
-section#subscribe {
-  margin-top: 60px;
-  background-color: #141414;
-  padding: 40px 20px;
-  border-radius: 16px;
-  text-align: center;
-  border: 1px solid #333;
-}
-
-section#subscribe h2 {
-  font-size: 20px;
-  margin-bottom: 20px;
-  color: #00ffe1;
-}
-
-section#subscribe input[type="email"] {
-  padding: 10px 16px;
-  font-size: 14px;
-  border: none;
+.weather-section {
+  max-width: 400px;
+  margin: 2rem auto;
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
   border-radius: 8px;
-  margin-right: 10px;
-  width: 250px;
-  max-width: 90%;
+}
+.weather-section h2 { margin-bottom: 1rem; }
+#weather-container p { margin: 0.5rem 0; }
+
+.hero {
+  text-align: center;
+  padding: 2rem;
+}
+.btn { background: #ff6b6b; color: #fff; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; }
+
+.about, .events-section, .contact {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
 }
 
-section#subscribe button {
-  padding: 10px 20px;
-  font-size: 14px;
-  background-color: #00ffe1;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #000;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
+.events-slider { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; }
+.event-card { background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; min-width: 200px; }
 
-section#subscribe button:hover {
-  background-color: #00bfa6;
-}
+.footer { text-align: center; padding: 1rem; background: rgba(0,0,0,0.5); }
