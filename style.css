@@ -168,3 +168,21 @@ body {
   border-radius: 4px;
   cursor: pointer;
 }
+
+/* Карточки событий */
+.event-card {
+  background: rgba(255,255,255,0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 0.5rem;
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.events-slider {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}

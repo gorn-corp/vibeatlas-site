@@ -1,5 +1,6 @@
 // script.js
 import { fetchWeather, getTimeOfDay } from './weather.js';
+import { events } from './events.js';
 
 const defaultCity = 'London';
 const cityInput = document.getElementById('city-input');
@@ -53,6 +54,29 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  /**
+ * Рендерит карточки событий в контейнер #events-container
+ */
+function renderEvents() {
+  const container = document.getElementById('events-container');
+  container.innerHTML = ''; // очищаем
+  events.forEach(event => {
+    const card = document.createElement('div');
+    card.className = 'event-card';
+    card.innerHTML = `
+      <h3>${event.title}</h3>
+      <p>${event.description}</p>
+      <p><small>${new Date(event.date).toLocaleString()}</small></p>
+      <p><em>${event.city} — ${event.category}</em></p>
+      <button class="btn">Join Event</button>
+    `;
+    container.appendChild(card);
+  });
+}
+
   // 5) Применяем тему фона
   applyTimeTheme();
+
+  // 6) Рендерим события
+  renderEvents();
 });
