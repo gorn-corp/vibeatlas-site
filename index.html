@@ -7,14 +7,19 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Splash Screen -->
   <div id="splash">
-  <div class="splash-content">
-    <!-- Здесь будет анимация или статичный рендер глобуса -->
-    <h1>VibeAtlas</h1>
-    <p>Your gateway to the world's heartbeat</p>
-    <button id="enter-btn" class="btn">Enter</button>
+    <div class="splash-content">
+      <h1>VibeAtlas</h1>
+      <input
+        type="text"
+        id="splash-city-input"
+        placeholder="Enter your city"
+        value="London"
+      />
+      <button id="enter-btn" class="btn">Enter</button>
+    </div>
   </div>
-</div>
 
   <!-- Navigation -->
   <header class="nav-header">
@@ -67,11 +72,23 @@
     <p><strong>VibeAtlas</strong> brings together information on holidays and cultural events across the globe. We help travelers and locals stay in tune with the world’s pulse.</p>
   </section>
 
-  <!-- Events Section -->
-<section id="events" class="events-section">
-  <h2>Events</h2>
-  <div id="events-container" class="events-slider"></div>
-</section>
+    <!-- Events Section -->
+  <section id="events" class="events-section">
+    <h2>Events</h2>
+    
+    <!-- Фильтры -->
+    <div class="filters">
+      <select id="city-filter">
+        <option value="">All Cities</option>
+      </select>
+      <select id="category-filter">
+        <option value="">All Categories</option>
+      </select>
+    </div>
+    
+    <!-- Контейнер для карточек -->
+    <div id="events-container" class="events-slider"></div>
+  </section>
 
   <!-- Contact Section -->
   <section id="contact" class="contact">

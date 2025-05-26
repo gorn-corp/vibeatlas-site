@@ -1,18 +1,27 @@
-// script.js
+// ─── 1. Импорты ────────────────────────────────────────────────────────────
 import { fetchWeather, getTimeOfDay } from './weather.js';
 import { events } from './events.js';
 
-const defaultCity = 'London';
-const cityInput = document.getElementById('city-input');
-const getWeatherBtn = document.getElementById('get-weather-btn');
+// ─── 2. Переменные DOM ────────────────────────────────────────────────────
+const defaultCity       = 'London';
 
-// Элементы для splash-экрана
-const splash = document.getElementById('splash');
-const enterBtn = document.getElementById('enter-btn');
+// Splash-screen
+const splash            = document.getElementById('splash');           // линия ~8
+const enterBtn          = document.getElementById('enter-btn');       // линия ~9
+const splashCityInput   = document.getElementById('splash-city-input'); // линия ~10
+
+// Weather
+const cityInput         = document.getElementById('city-input');      // линия ~12
+const getWeatherBtn     = document.getElementById('get-weather-btn'); // линия ~13
+
+// Event filters
+const cityFilter        = document.getElementById('city-filter');     // линия ~15
+const categoryFilter    = document.getElementById('category-filter'); // линия ~16
+
+// ─── 3. Функции ────────────────────────────────────────────────────────────
 
 /**
- * Запрашивает и показывает погоду для указанного города.
- * @param {string} city
+ * 3.1 Fetch & display weather for a given city
  */
 async function update(city) {
   try {
@@ -24,59 +33,94 @@ async function update(city) {
 }
 
 /**
- * Применяет тему страницы по времени суток.
+ * 3.2 Apply page theme based on time of day
  */
 function applyTimeTheme() {
   const phase = getTimeOfDay(); // 'morning'|'day'|'evening'|'night'
   document.body.classList.add(`theme-${phase}`);
 }
 
+/**
+ * 3.3 Render events into #events-container,
+ *      taking into account current filters
+ */
+function renderEvents() {
+  const container   = document.getElementById('events-container');
+  const cityValue   = cityFilter.value;
+  const categoryVal = categoryFilter.value;
+
+  container.innerHTML = ''; // clear
+
+  events
+    .filter(e => (!cityValue || e.city === cityValue))
+    .filter(e => (!categoryVal || e.category === categoryVal))
+    .forEach(event => {
+      const card = document.createElement('div');
+      card.className = 'event-card';
+      card.innerHTML = `
+        <h3>${event.title}</h3>
+        <p>${event.description}</p>
+        <p><small>${new Date(event.date).toLocaleString()}</small></p>
+        <p><em>${event.city} — ${event.category}</em></p>
+        <button class="btn">Join Event</button>
+      `;
+      container.appendChild(card);
+    });
+}
+
+/**
+ * 3.4 Populate filter dropdowns with unique cities and categories
+ */
+function populateFilters() {
+  // Cities
+  const cities = [...new Set(events.map(e => e.city))].sort();
+  cities.forEach(city => {
+    const opt = document.createElement('option');
+    opt.value = city;
+    opt.textContent = city;
+    cityFilter.appendChild(opt);
+  });
+  // Categories
+  const cats = [...new Set(events.map(e => e.category))].sort();
+  cats.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    categoryFilter.appendChild(opt);
+  });
+}
+
+// ─── 4. Инициализация после загрузки страницы ───────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  // 1) Скрытие splash-экрана при клике
+
+  // 4.1 Splash-screen: выбор города и вход
   enterBtn.addEventListener('click', () => {
+    const chosen = splashCityInput.value.trim();
+    const city   = chosen || defaultCity;
     splash.style.display = 'none';
+    update(city);
+    applyTimeTheme();
+    // После первой загрузки обновляем main-input, чтобы он совпадал
+    cityInput.value = city;
   });
 
-  // 2) Загрузка погоды по умолчанию
-  update(defaultCity);
-
-  // 3) Обработчик кнопки
+  // 4.2 Weather: кнопка и Enter
   getWeatherBtn.addEventListener('click', () => {
     const city = cityInput.value.trim();
     if (city) update(city);
   });
-
-  // 4) Обработка Enter в поле ввода
-  cityInput.addEventListener('keydown', (e) => {
+  cityInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
       getWeatherBtn.click();
     }
   });
 
-  /**
- * Рендерит карточки событий в контейнер #events-container
- */
-function renderEvents() {
-  const container = document.getElementById('events-container');
-  container.innerHTML = ''; // очищаем
-  events.forEach(event => {
-    const card = document.createElement('div');
-    card.className = 'event-card';
-    card.innerHTML = `
-      <h3>${event.title}</h3>
-      <p>${event.description}</p>
-      <p><small>${new Date(event.date).toLocaleString()}</small></p>
-      <p><em>${event.city} — ${event.category}</em></p>
-      <button class="btn">Join Event</button>
-    `;
-    container.appendChild(card);
-  });
-}
+  // 4.3 Populate & bind event filters
+  populateFilters();
+  cityFilter.addEventListener('change', renderEvents);
+  categoryFilter.addEventListener('change', renderEvents);
 
-  // 5) Применяем тему фона
-  applyTimeTheme();
-
-  // 6) Рендерим события
+  // 4.4 Initial render of events
   renderEvents();
 });
