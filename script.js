@@ -123,4 +123,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 4.4 Initial render of events
   renderEvents();
+
+  // 4.5) Stub для кнопок “Join Event”
+  document.querySelectorAll('#events-container .event-card .btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      alert('🎉 You joined the event! (Placeholder action)');
+    });
+  });
 });
