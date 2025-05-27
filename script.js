@@ -17,6 +17,8 @@ const getWeatherBtn     = document.getElementById('get-weather-btn'); // лин�
 // Event filters
 const cityFilter        = document.getElementById('city-filter');     // линия ~15
 const categoryFilter    = document.getElementById('category-filter'); // линия ~16
+const sortDateBtn = document.getElementById('sort-date-btn');
+let sortByDate = false;
 
 // ─── 3. Функции ────────────────────────────────────────────────────────────
 
@@ -49,23 +51,28 @@ function renderEvents() {
   const cityValue   = cityFilter.value;
   const categoryVal = categoryFilter.value;
 
-  container.innerHTML = ''; // clear
+  container.innerHTML = '';
 
-  events
+  let filtered = events
     .filter(e => (!cityValue || e.city === cityValue))
-    .filter(e => (!categoryVal || e.category === categoryVal))
-    .forEach(event => {
-      const card = document.createElement('div');
-      card.className = 'event-card';
-      card.innerHTML = `
-        <h3>${event.title}</h3>
-        <p>${event.description}</p>
-        <p><small>${new Date(event.date).toLocaleString()}</small></p>
-        <p><em>${event.city} — ${event.category}</em></p>
-        <button class="btn">Join Event</button>
-      `;
-      container.appendChild(card);
-    });
+    .filter(e => (!categoryVal || e.category === categoryVal));
+
+  if (sortByDate) {
+    filtered = filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+  }
+
+  filtered.forEach(event => {
+    const card = document.createElement('div');
+    card.className = 'event-card';
+    card.innerHTML = `
+      <h3>${event.title}</h3>
+      <p>${event.description}</p>
+      <p><small>${new Date(event.date).toLocaleString()}</small></p>
+      <p><em>${event.city} — ${event.category}</em></p>
+      <button class="btn">Join Event</button>
+    `;
+    container.appendChild(card);
+  });
 }
 
 /**
@@ -120,6 +127,13 @@ window.addEventListener('DOMContentLoaded', () => {
   populateFilters();
   cityFilter.addEventListener('change', renderEvents);
   categoryFilter.addEventListener('change', renderEvents);
+
+  // 4.3.1 Sort button logic
+  sortDateBtn.addEventListener('click', () => {
+    sortByDate = !sortByDate;
+    sortDateBtn.textContent = sortByDate ? 'Unsort' : 'Sort by Date';
+    renderEvents();
+  });
 
   // 4.4 Initial render of events
   renderEvents();
