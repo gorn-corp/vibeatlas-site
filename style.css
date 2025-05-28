@@ -194,11 +194,30 @@ body {
   justify-content: center;
   margin-bottom: 1rem;
 }
-.filters select {
+
+/* Селект и кнопка с фильтрами */
+.filters select,
+.filters button {
   padding: 0.5rem;
   border-radius: 4px;
   border: none;
   outline: none;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
+  background-color: rgba(0, 0, 0, 0.7); /* тёмный полупрозрачный фон */
+  color: #fff;                             /* белый текст */
+  cursor: pointer;
 }
+
+/* При фокусе/ховере делаем фон чуть ярче */
+.filters select:hover,
+.filters select:focus,
+.filters button:hover,
+.filters button:focus {
+  background-color: rgba(0, 0, 0, 0.85);
+}
+
+/* Опции выпадающего списка */
+.filters select option {
+  background-color: #fff; /* белая подложка для опций */
+  color: #000;            /* чёрный текст опций */
+}
+
