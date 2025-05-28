@@ -1,29 +1,33 @@
 // ─── 1. Импорты ────────────────────────────────────────────────────────────
 import { fetchWeather, getTimeOfDay } from './weather.js';
-import { events } from './events.js';
+import { events }              from './events.js';
+import { cities }              from './cities.js';
 
-// ─── 2. Переменные DOM ────────────────────────────────────────────────────
-const defaultCity       = 'London';
+// ─── 2. Глобальные константы и переменные ──────────────────────────────────
+const defaultCity     = 'London';
+let selectedCity      = defaultCity;
+let sortByDate        = false;
 
+// ─── 3. DOM-элементы ──────────────────────────────────────────────────────
 // Splash-screen
-const splash            = document.getElementById('splash');           // линия ~8
-const enterBtn          = document.getElementById('enter-btn');       // линия ~9
-const splashCityInput   = document.getElementById('splash-city-input'); // линия ~10
+const splash          = document.getElementById('splash');
+const enterBtn        = document.getElementById('enter-btn');
+const splashCityInput = document.getElementById('splash-city-input');
 
 // Weather
-const cityInput         = document.getElementById('city-input');      // линия ~12
-const getWeatherBtn     = document.getElementById('get-weather-btn'); // линия ~13
+const cityInput       = document.getElementById('city-input');
+const getWeatherBtn   = document.getElementById('get-weather-btn');
 
-// Event filters
-const cityFilter        = document.getElementById('city-filter');     // линия ~15
-const categoryFilter    = document.getElementById('category-filter'); // линия ~16
-const sortDateBtn = document.getElementById('sort-date-btn');
-let sortByDate = false;
+// Filters & sorting
+const cityFilter      = document.getElementById('city-filter');
+const categoryFilter  = document.getElementById('category-filter');
+const sortDateBtn     = document.getElementById('sort-date-btn');
 
-// ─── 3. Функции ────────────────────────────────────────────────────────────
+// ─── 4. Функции ────────────────────────────────────────────────────────────
 
 /**
- * 3.1 Fetch & display weather for a given city
+ * 4.1 Fetch & display weather for a given city
+ * @param {string} city
  */
 async function update(city) {
   try {
@@ -35,7 +39,7 @@ async function update(city) {
 }
 
 /**
- * 3.2 Apply page theme based on time of day
+ * 4.2 Apply page theme based on time of day
  */
 function applyTimeTheme() {
   const phase = getTimeOfDay(); // 'morning'|'day'|'evening'|'night'
@@ -43,22 +47,60 @@ function applyTimeTheme() {
 }
 
 /**
- * 3.3 Render events into #events-container,
- *      taking into account current filters
+ * 4.3 Apply background image for a given city
+ * @param {string} city
+ */
+function applyCityBackground(city) {
+  const config = cities.find(c => c.name === city);
+  if (!config) return;
+  document.body.style.backgroundImage    = `url("${config.background}")`;
+  document.body.style.backgroundSize     = 'cover';
+  document.body.style.backgroundPosition = 'center';
+  document.body.style.backgroundRepeat   = 'no-repeat';
+}
+
+/**
+ * 4.4 Populate city/category filters
+ */
+function populateFilters() {
+  const citiesList = [...new Set(events.map(e => e.city))].sort();
+  citiesList.forEach(city => {
+    const opt = document.createElement('option');
+    opt.value = city;
+    opt.textContent = city;
+    cityFilter.appendChild(opt);
+  });
+
+  const categories = [...new Set(events.map(e => e.category))].sort();
+  categories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    categoryFilter.appendChild(opt);
+  });
+}
+
+/**
+ * 4.5 Render event cards, respecting filters, sorting and selectedCity
  */
 function renderEvents() {
   const container   = document.getElementById('events-container');
   const cityValue   = cityFilter.value;
   const categoryVal = categoryFilter.value;
 
-  container.innerHTML = '';
+  container.innerHTML = ''; // clear
 
   let filtered = events
-    .filter(e => (!cityValue || e.city === cityValue))
+    // filter by Splash-selected city first
+    .filter(e => e.city === selectedCity)
+    // then by filter selects
+    .filter(e => (!cityValue   || e.city     === cityValue))
     .filter(e => (!categoryVal || e.category === categoryVal));
 
   if (sortByDate) {
-    filtered = filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+    filtered = filtered.sort((a, b) =>
+      new Date(a.date) - new Date(b.date)
+    );
   }
 
   filtered.forEach(event => {
@@ -73,48 +115,38 @@ function renderEvents() {
     `;
     container.appendChild(card);
   });
+
+  // attach Join Event stub
+  document.querySelectorAll('#events-container .event-card .btn')
+    .forEach(btn => {
+      btn.addEventListener('click', () => {
+        alert('🎉 You joined the event! (Placeholder action)');
+      });
+    });
 }
 
-/**
- * 3.4 Populate filter dropdowns with unique cities and categories
- */
-function populateFilters() {
-  // Cities
-  const cities = [...new Set(events.map(e => e.city))].sort();
-  cities.forEach(city => {
-    const opt = document.createElement('option');
-    opt.value = city;
-    opt.textContent = city;
-    cityFilter.appendChild(opt);
-  });
-  // Categories
-  const cats = [...new Set(events.map(e => e.category))].sort();
-  cats.forEach(cat => {
-    const opt = document.createElement('option');
-    opt.value = cat;
-    opt.textContent = cat;
-    categoryFilter.appendChild(opt);
-  });
-}
-
-// ─── 4. Инициализация после загрузки страницы ───────────────────────────────
+// ─── 5. Инициализация после загрузки страницы ───────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-
-  // 4.1 Splash-screen: выбор города и вход
+  // 5.1 Splash-screen: выбор города и вход
   enterBtn.addEventListener('click', () => {
     const chosen = splashCityInput.value.trim();
     const city   = chosen || defaultCity;
+    selectedCity = city;
     splash.style.display = 'none';
     update(city);
     applyTimeTheme();
-    // После первой загрузки обновляем main-input, чтобы он совпадал
+    applyCityBackground(city);
     cityInput.value = city;
+    renderEvents();
   });
 
-  // 4.2 Weather: кнопка и Enter
+  // 5.2 Weather controls (button + Enter key)
   getWeatherBtn.addEventListener('click', () => {
     const city = cityInput.value.trim();
-    if (city) update(city);
+    if (city) {
+      update(city);
+      applyCityBackground(city);
+    }
   });
   cityInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
@@ -123,25 +155,18 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 4.3 Populate & bind event filters
+  // 5.3 Populate & bind filters
   populateFilters();
   cityFilter.addEventListener('change', renderEvents);
   categoryFilter.addEventListener('change', renderEvents);
 
-  // 4.3.1 Sort button logic
+  // 5.4 Bind sort button
   sortDateBtn.addEventListener('click', () => {
     sortByDate = !sortByDate;
     sortDateBtn.textContent = sortByDate ? 'Unsort' : 'Sort by Date';
     renderEvents();
   });
 
-  // 4.4 Initial render of events
+  // 5.5 Initial render (before Splash—фоновый код Splash его перезапишет)
   renderEvents();
-
-  // 4.5) Stub для кнопок “Join Event”
-  document.querySelectorAll('#events-container .event-card .btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      alert('🎉 You joined the event! (Placeholder action)');
-    });
-  });
 });
