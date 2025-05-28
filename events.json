@@ -9,6 +9,14 @@
   },
   {
     "id": 2,
+    "city": "Seoul",
+    "title": "Night Market Stroll",
+    "description": "Explore street food and crafts under the neon sky.",
+    "date": "2025-09-15T18:00",
+    "category": "Food"
+  },
+  {
+    "id": 3,
     "city": "Munich",
     "title": "Oktoberfest",
     "description": "Germany’s famous beer festival under festive tents.",
@@ -16,7 +24,15 @@
     "category": "Festival"
   },
   {
-    "id": 3,
+    "id": 4,
+    "city": "Munich",
+    "title": "Bavarian Folk Concert",
+    "description": "Live brass band music in the old town square.",
+    "date": "2025-08-05T20:00",
+    "category": "Music"
+  },
+  {
+    "id": 5,
     "city": "Venice",
     "title": "Venice Carnival",
     "description": "A daytime parade of masks and costumes along the canals.",
@@ -24,11 +40,27 @@
     "category": "Parade"
   },
   {
-    "id": 4,
+    "id": 6,
+    "city": "Venice",
+    "title": "Gondola Serenade",
+    "description": "Private gondola ride with live mandolin music.",
+    "date": "2025-07-30T19:30",
+    "category": "Romantic"
+  },
+  {
+    "id": 7,
     "city": "Berlin",
     "title": "Techno Rave Under the Bridge",
     "description": "Underground techno party in a hidden river tunnel.",
     "date": "2025-07-05T22:00",
     "category": "Music"
+  },
+  {
+    "id": 8,
+    "city": "Berlin",
+    "title": "Street Art Walk",
+    "description": "Guided tour of the coolest graffiti spots in Kreuzberg.",
+    "date": "2025-06-12T16:00",
+    "category": "Art"
   }
 ]

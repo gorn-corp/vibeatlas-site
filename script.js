@@ -1,11 +1,15 @@
 // ─── 1. Импорты ────────────────────────────────────────────────────────────
+import Papa from 'papaparse';
 import { fetchWeather, getTimeOfDay } from './weather.js';
 import { cities }              from './cities.js';
 
-// ─── 2. Глобальные константы и переменные ──────────────────────────────────
-const defaultCity     = 'London';
-let selectedCity      = defaultCity;
-let sortByDate        = false;
+// ─── 2. Константы и переменные ─────────────────────────────────────────────
+const defaultCity    = 'Seoul';
+const SHEET_CSV_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwhCOoNnWCX5qUX_8KuIVoBHkohSlP_N4Rwedjr7z8lrhLWx064VnBRFicyoUXOxkQSpvDC92PwRJY/pub?output=csv';
+
+let events          = [];
+let selectedCity    = defaultCity;
+let sortByDate      = false;
 
 // ─── 3. DOM-элементы ──────────────────────────────────────────────────────
 // Splash-screen
@@ -25,8 +29,30 @@ const sortDateBtn     = document.getElementById('sort-date-btn');
 // ─── 4. Функции ────────────────────────────────────────────────────────────
 
 /**
+ * 4.0 Load events from Google Sheets CSV
+ */
+async function loadEvents() {
+  try {
+    const res = await fetch(SHEET_CSV_URL);
+    const csv = await res.text();
+    const parsed = Papa.parse(csv, { header: true, dynamicTyping: true });
+    events = parsed.data.map(row => ({
+      id:          row.id,
+      city:        row.city,
+      title:       row.title,
+      description: row.description,
+      date:        row.date,
+      category:    row.category
+    }));
+    console.log('✅ events loaded from sheet:', events);
+  } catch (err) {
+    console.error('❌ Failed to load events from sheet:', err);
+    events = [];
+  }
+}
+
+/**
  * 4.1 Fetch & display weather for a given city
- * @param {string} city
  */
 async function update(city) {
   try {
@@ -61,21 +87,6 @@ function applyCityBackground(city) {
 /**
  * 4.4 Populate city/category filters
  */
-let events = [];  
-
-/**
- * 3.0 Load events from external JSON
- */
-async function loadEvents() {
-  try {
-    const res = await fetch('/events.json');
-    events = await res.json();
-  } catch (err) {
-    console.error('Failed to load events:', err);
-    events = [];
-  }
-}
-
 function populateFilters() {
   const citiesList = [...new Set(events.map(e => e.city))].sort();
   citiesList.forEach(city => {
@@ -105,9 +116,9 @@ function renderEvents() {
   container.innerHTML = ''; // clear
 
   let filtered = events
-    // filter by Splash-selected city first
+    // сначала фильтр по Splash-выбранному городу
     .filter(e => e.city === selectedCity)
-    // then by filter selects
+    // затем по селектам
     .filter(e => (!cityValue   || e.city     === cityValue))
     .filter(e => (!categoryVal || e.category === categoryVal));
 
@@ -130,19 +141,18 @@ function renderEvents() {
     container.appendChild(card);
   });
 
-  // attach Join Event stub
+  // нажимаем Join Event
   document.querySelectorAll('#events-container .event-card .btn')
-    .forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert('🎉 You joined the event! (Placeholder action)');
-      });
-    });
+    .forEach(btn => btn.addEventListener('click', () => {
+      alert('🎉 You joined the event! (Placeholder action)');
+    }));
 }
 
 // ─── 5. Инициализация после загрузки страницы ───────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  // 5.0 Load events 
+  // 5.0 Load events first
   await loadEvents();
+
   // 5.1 Splash-screen: выбор города и вход
   enterBtn.addEventListener('click', () => {
     const chosen = splashCityInput.value.trim();
@@ -173,7 +183,16 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // 5.3 Populate & bind filters
   populateFilters();
-  cityFilter.addEventListener('change', renderEvents);
+  cityFilter.addEventListener('change', () => {
+    const city = cityFilter.value;
+    if (city) {
+      update(city);
+      applyCityBackground(city);
+      cityInput.value = city;
+      selectedCity = city;
+    }
+    renderEvents();
+  });
   categoryFilter.addEventListener('change', renderEvents);
 
   // 5.4 Bind sort button
@@ -183,6 +202,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     renderEvents();
   });
 
-  // 5.5 Initial render (before Splash—фоновый код Splash его перезапишет)
+  // 5.5 Initial render (до Splash, чтобы не было пусто)
   renderEvents();
 });
