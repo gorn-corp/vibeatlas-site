@@ -1,6 +1,5 @@
 // ─── 1. Импорты ────────────────────────────────────────────────────────────
 import { fetchWeather, getTimeOfDay } from './weather.js';
-import { events }              from './events.js';
 import { cities }              from './cities.js';
 
 // ─── 2. Глобальные константы и переменные ──────────────────────────────────
@@ -62,6 +61,21 @@ function applyCityBackground(city) {
 /**
  * 4.4 Populate city/category filters
  */
+let events = [];  
+
+/**
+ * 3.0 Load events from external JSON
+ */
+async function loadEvents() {
+  try {
+    const res = await fetch('/events.json');
+    events = await res.json();
+  } catch (err) {
+    console.error('Failed to load events:', err);
+    events = [];
+  }
+}
+
 function populateFilters() {
   const citiesList = [...new Set(events.map(e => e.city))].sort();
   citiesList.forEach(city => {
@@ -126,7 +140,9 @@ function renderEvents() {
 }
 
 // ─── 5. Инициализация после загрузки страницы ───────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+  // 5.0 Load events 
+  await loadEvents();
   // 5.1 Splash-screen: выбор города и вход
   enterBtn.addEventListener('click', () => {
     const chosen = splashCityInput.value.trim();
