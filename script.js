@@ -115,6 +115,7 @@ function renderEvents() {
 
   container.innerHTML = ''; // clear
 
+  // 1) Собираем отфильтрованный массив
   let filtered = events
     // сначала фильтр по Splash-выбранному городу
     .filter(e => e.city === selectedCity)
@@ -122,12 +123,23 @@ function renderEvents() {
     .filter(e => (!cityValue   || e.city     === cityValue))
     .filter(e => (!categoryVal || e.category === categoryVal));
 
+  // 2) Если нет ни одного события — показываем placeholder и выходим
+  if (filtered.length === 0) {
+    const msg = document.createElement('div');
+    msg.className = 'no-events';
+    msg.textContent = 'No events found for this selection.';
+    container.appendChild(msg);
+    return;
+  }
+
+  // 3) Сортируем, если нужно
   if (sortByDate) {
     filtered = filtered.sort((a, b) =>
       new Date(a.date) - new Date(b.date)
     );
   }
 
+  // 4) Рендерим карточки
   filtered.forEach(event => {
     const card = document.createElement('div');
     card.className = 'event-card';
@@ -141,7 +153,7 @@ function renderEvents() {
     container.appendChild(card);
   });
 
-  // нажимаем Join Event
+  // 5) Повторно вешаем обработчики на новые кнопки
   document.querySelectorAll('#events-container .event-card .btn')
     .forEach(btn => btn.addEventListener('click', () => {
       alert('🎉 You joined the event! (Placeholder action)');
