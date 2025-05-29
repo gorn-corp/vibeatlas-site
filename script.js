@@ -1,184 +1,175 @@
 // ─── 1. Импорты ────────────────────────────────────────────────────────────
 import Papa from 'papaparse';
 import { fetchWeather, getTimeOfDay } from './weather.js';
-import { cities }              from './cities.js';
+import { cities }                    from './cities.js';
 
 // ─── 2. Константы и переменные ─────────────────────────────────────────────
-const defaultCity    = 'Seoul';
-const SHEET_CSV_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwhCOoNnWCX5qUX_8KuIVoBHkohSlP_N4Rwedjr7z8lrhLWx064VnBRFicyoUXOxkQSpvDC92PwRJY/pub?output=csv';
+const defaultCity   = 'Seoul';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwhCOoNnWCX5qUX_8KuIVoBHkohSlP_N4Rwedjr7z8lrhLWx064VnBRFicyoUXOxkQSpvDC92PwRJY/pub?output=csv';
 
-let events          = [];
-let selectedCity    = defaultCity;
-let sortByDate      = false;
+let events         = [];
+let selectedCity   = defaultCity;
+let sortByDate     = false;
 
 // ─── 3. DOM-элементы ──────────────────────────────────────────────────────
-// Splash-screen
-const splash          = document.getElementById('splash');
-const enterBtn        = document.getElementById('enter-btn');
-const splashCityInput = document.getElementById('splash-city-input');
+const splash            = document.getElementById('splash');
+const enterBtn          = document.getElementById('enter-btn');
+const heroEnterBtn      = document.getElementById('enter-hero-btn');
+const splashCityInput   = document.getElementById('splash-city-input');
 
-// Weather
-const cityInput       = document.getElementById('city-input');
-const getWeatherBtn   = document.getElementById('get-weather-btn');
+const cityInput         = document.getElementById('city-input');
+const getWeatherBtn     = document.getElementById('get-weather-btn');
 
-// Filters & sorting
-const cityFilter      = document.getElementById('city-filter');
-const categoryFilter  = document.getElementById('category-filter');
-const sortDateBtn     = document.getElementById('sort-date-btn');
+const cityFilter        = document.getElementById('city-filter');
+const categoryFilter    = document.getElementById('category-filter');
+const sortDateBtn       = document.getElementById('sort-date-btn');
+const eventsContainer   = document.getElementById('events-container');
 
 // ─── 4. Функции ────────────────────────────────────────────────────────────
 
-/**
- * 4.0 Load events from Google Sheets CSV
- */
+/** 4.0 Загрузка событий из Google Sheets CSV */
 async function loadEvents() {
   try {
-    const res = await fetch(SHEET_CSV_URL);
-    const csv = await res.text();
+    const res    = await fetch(SHEET_CSV_URL);
+    const csv    = await res.text();
     const parsed = Papa.parse(csv, { header: true, dynamicTyping: true });
-    events = parsed.data.map(row => ({
-      id:          row.id,
-      city:        row.city,
-      title:       row.title,
-      description: row.description,
-      date:        row.date,
-      category:    row.category
+    events = parsed.data.map(r => ({
+      id:          r.id,
+      city:        r.city,
+      title:       r.title,
+      description: r.description,
+      date:        r.date,
+      category:    r.category
     }));
-    console.log('✅ events loaded from sheet:', events);
+    console.log('✅ events loaded:', events);
   } catch (err) {
-    console.error('❌ Failed to load events from sheet:', err);
+    console.error('❌ loadEvents error', err);
     events = [];
   }
 }
 
-/**
- * 4.1 Fetch & display weather for a given city
- */
+/** 4.1 Получение и отображение погоды */
 async function update(city) {
   try {
     await fetchWeather(city);
-  } catch (err) {
-    console.error('Error fetching weather:', err);
-    alert(`Could not get weather for "${city}". Please check the city name.`);
+  } catch (e) {
+    console.error(e);
+    alert(`Could not fetch weather for "${city}"`);
   }
 }
 
-/**
- * 4.2 Apply page theme based on time of day
- */
+/** 4.2 Тема дня */
 function applyTimeTheme() {
   const phase = getTimeOfDay(); // 'morning'|'day'|'evening'|'night'
   document.body.classList.add(`theme-${phase}`);
 }
 
-/**
- * 4.3 Apply background image for a given city
- * @param {string} city
- */
+/** 4.3 Фон по городу */
 function applyCityBackground(city) {
-  const config = cities.find(c => c.name === city);
-  if (!config) return;
-  document.body.style.backgroundImage    = `url("${config.background}")`;
-  document.body.style.backgroundSize     = 'cover';
-  document.body.style.backgroundPosition = 'center';
-  document.body.style.backgroundRepeat   = 'no-repeat';
+  const cfg = cities.find(c => c.name === city);
+  if (!cfg) return;
+  Object.assign(document.body.style, {
+    backgroundImage:    `url("${cfg.background}")`,
+    backgroundSize:     'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat:   'no-repeat'
+  });
 }
 
-/**
- * 4.4 Populate city/category filters
- */
+/** 4.4 Заполнение фильтров */
 function populateFilters() {
-  const citiesList = [...new Set(events.map(e => e.city))].sort();
-  citiesList.forEach(city => {
+  // город
+  const cityList = [...new Set(events.map(e => e.city))].sort();
+  cityFilter.innerHTML = `<option value="">All Cities</option>`;
+  cityList.forEach(city => {
     const opt = document.createElement('option');
-    opt.value = city;
-    opt.textContent = city;
+    opt.value = city; opt.textContent = city;
     cityFilter.appendChild(opt);
   });
-
-  const categories = [...new Set(events.map(e => e.category))].sort();
-  categories.forEach(cat => {
+  // категория
+  const catList = [...new Set(events.map(e => e.category))].sort();
+  categoryFilter.innerHTML = `<option value="">All Categories</option>`;
+  catList.forEach(cat => {
     const opt = document.createElement('option');
-    opt.value = cat;
-    opt.textContent = cat;
+    opt.value = cat; opt.textContent = cat;
     categoryFilter.appendChild(opt);
   });
 }
 
-/**
- * 4.5 Render event cards, respecting filters, sorting and selectedCity
- */
+/** 4.5 Рендер событий */
 function renderEvents() {
-  const container   = document.getElementById('events-container');
-  const cityValue   = cityFilter.value;
-  const categoryVal = categoryFilter.value;
-
-  container.innerHTML = ''; // clear
-
-  // 1) Собираем отфильтрованный массив
+  eventsContainer.innerHTML = '';
   let filtered = events
-    // сначала фильтр по Splash-выбранному городу
     .filter(e => e.city === selectedCity)
-    // затем по селектам
-    .filter(e => (!cityValue   || e.city     === cityValue))
-    .filter(e => (!categoryVal || e.category === categoryVal));
+    .filter(e => (!cityFilter.value    || e.city     === cityFilter.value))
+    .filter(e => (!categoryFilter.value|| e.category === categoryFilter.value));
 
-  // 2) Если нет ни одного события — показываем placeholder и выходим
   if (filtered.length === 0) {
     const msg = document.createElement('div');
     msg.className = 'no-events';
     msg.textContent = 'No events found for this selection.';
-    container.appendChild(msg);
+    eventsContainer.appendChild(msg);
     return;
   }
 
-  // 3) Сортируем, если нужно
   if (sortByDate) {
     filtered = filtered.sort((a, b) =>
       new Date(a.date) - new Date(b.date)
     );
   }
 
-  // 4) Рендерим карточки
-  filtered.forEach(event => {
+  filtered.forEach(e => {
     const card = document.createElement('div');
     card.className = 'event-card';
     card.innerHTML = `
-      <h3>${event.title}</h3>
-      <p>${event.description}</p>
-      <p><small>${new Date(event.date).toLocaleString()}</small></p>
-      <p><em>${event.city} — ${event.category}</em></p>
-      <button class="btn">Join Event</button>
+      <h3>${e.title}</h3>
+      <p>${e.description}</p>
+      <p><small>${new Date(e.date).toLocaleString()}</small></p>
+      <p><em>${e.city} — ${e.category}</em></p>
+      <button class="btn join-btn">Join Event</button>
     `;
-    container.appendChild(card);
+    eventsContainer.appendChild(card);
   });
 
-  // 5) Повторно вешаем обработчики на новые кнопки
-  document.querySelectorAll('#events-container .event-card .btn')
+  // обработчик кнопок
+  eventsContainer.querySelectorAll('.join-btn')
     .forEach(btn => btn.addEventListener('click', () => {
-      alert('🎉 You joined the event! (Placeholder action)');
+      alert('🎉 You joined the event! (Placeholder)');
     }));
 }
 
-// ─── 5. Инициализация после загрузки страницы ───────────────────────────────
+// ─── 5. Инициализация ───────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  // 5.0 Load events first
+  // 5.0 загрузить события
   await loadEvents();
 
-  // 5.1 Splash-screen: выбор города и вход
+  // 5.1 ENTER на Splash-input
+  splashCityInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') enterBtn.click();
+  });
+
+  // 5.2 клик Splash Enter
   enterBtn.addEventListener('click', () => {
-    const chosen = splashCityInput.value.trim();
-    const city   = chosen || defaultCity;
+    const city = splashCityInput.value.trim() || defaultCity;
     selectedCity = city;
     splash.style.display = 'none';
     update(city);
     applyTimeTheme();
     applyCityBackground(city);
-    cityInput.value = city;
+    populateFilters();
     renderEvents();
   });
 
-  // 5.2 Weather controls (button + Enter key)
+  // 5.3 Hero Get Started
+  heroEnterBtn.addEventListener('click', () => enterBtn.click());
+
+  // 5.4 Weather controls: кнопка + Enter
+  cityInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      getWeatherBtn.click();
+    }
+  });
   getWeatherBtn.addEventListener('click', () => {
     const city = cityInput.value.trim();
     if (city) {
@@ -186,34 +177,25 @@ window.addEventListener('DOMContentLoaded', async () => {
       applyCityBackground(city);
     }
   });
-  cityInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      getWeatherBtn.click();
-    }
-  });
 
-  // 5.3 Populate & bind filters
-  populateFilters();
+  // 5.5 фильтр города
   cityFilter.addEventListener('change', () => {
     const city = cityFilter.value;
     if (city) {
+      selectedCity = city;
       update(city);
       applyCityBackground(city);
-      cityInput.value = city;
-      selectedCity = city;
     }
     renderEvents();
   });
+
+  // 5.6 фильтр категории
   categoryFilter.addEventListener('change', renderEvents);
 
-  // 5.4 Bind sort button
+  // 5.7 сортировка
   sortDateBtn.addEventListener('click', () => {
     sortByDate = !sortByDate;
     sortDateBtn.textContent = sortByDate ? 'Unsort' : 'Sort by Date';
     renderEvents();
   });
-
-  // 5.5 Initial render (до Splash, чтобы не было пусто)
-  renderEvents();
 });

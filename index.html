@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <!-- Splash Screen -->
   <div id="splash">
     <div class="splash-content">
@@ -15,20 +16,20 @@
         type="text"
         id="splash-city-input"
         placeholder="Enter your city"
-        value="London"
+        value="Seoul"
         autofocus
       />
       <button id="enter-btn" class="btn">Enter</button>
     </div>
   </div>
 
-  <!-- Navigation -->
+  <!-- Навигация -->
   <header class="nav-header">
     <div class="container">
       <div class="logo">🌍 VibeAtlas</div>
       <nav>
         <ul class="nav-list">
-          <li><a href="#home">Home</a></li>
+          <li><a href="#hero">Home</a></li>
           <li><a href="#about">About</a></li>
           <li><a href="#events">Events</a></li>
           <li><a href="#contact">Contact</a></li>
@@ -37,75 +38,73 @@
     </div>
   </header>
 
-    <!-- Weather Section -->
+  <main>
+
+    <!-- Hero (твой слоган + кнопка) -->
+    <section id="hero" class="hero">
+      <h1>VibeAtlas</h1>
+      <p>Holidays, festivals and events around the world — all in one place. Live the planet's rhythm.</p>
+      <button id="enter-hero-btn" class="btn">Get Started</button>
+    </section>
+
+    <!-- Events -->
+    <section id="events" class="events-section">
+      <h2>Events</h2>
+      <div class="filters">
+        <select id="city-filter">
+          <option value="">All Cities</option>
+        </select>
+        <select id="category-filter">
+          <option value="">All Categories</option>
+        </select>
+        <button id="sort-date-btn" class="btn">Sort by Date</button>
+      </div>
+      <div id="events-container" class="events-slider"></div>
+    </section>
+
+      <!-- Weather Section  -->
   <section id="weather" class="weather-section">
     <h2>Current Weather</h2>
-
-    <!-- Новое: форма выбора города -->
-    <div class="city-form">
+    <div class="weather-card">
       <input
         type="text"
         id="city-input"
-        placeholder="Enter city name"
-        value="London"
+        placeholder="Enter city for weather"
       />
       <button id="get-weather-btn" class="btn">Get Weather</button>
+      <div class="weather-info">
+        <p>City: <span id="city-name">—</span></p>
+        <p>Temp: <span id="temperature">—</span>°C</p>
+        <p>Condition: <span id="weather-condition">—</span></p>
+        <p>Day/Night: <span id="day-status">—</span></p>
+      </div>
     </div>
-
-    <div id="weather-container">
-      <p><strong>City:</strong> <span id="city-name">Loading...</span></p>
-      <p><strong>Temperature:</strong> <span id="temperature">--</span>°C</p>
-      <p><strong>Condition:</strong> <span id="weather-condition">--</span></p>
-      <p><strong>Day/Night:</strong> <span id="day-status">--</span></p>
-    </div>
   </section>
 
-  <!-- Hero Section -->
-  <section id="home" class="hero">
-    <h1>VibeAtlas</h1>
-    <p>Holidays, festivals and events around the world — all in one place. Live the planet's rhythm.</p>
-    <button class="btn">Join Now</button>
-  </section>
+    <!-- Contact / Subscribe -->
+    <section id="contact" class="contact">
+      <h2>Subscribe for early access</h2>
+      <p>Be the first to know about new features and launches!</p>
+      <form class="subscribe-form">
+        <input type="email" placeholder="Your email" required />
+        <button type="submit" class="btn">Subscribe</button>
+      </form>
+    </section>
 
-  <!-- About Section -->
-  <section id="about" class="about">
-    <h2>About</h2>
-    <p><strong>VibeAtlas</strong> brings together information on holidays and cultural events across the globe. We help travelers and locals stay in tune with the world’s pulse.</p>
-  </section>
+    <!-- About -->
+    <section id="about" class="about">
+      <h2>About VibeAtlas</h2>
+      <p>
+        <strong>VibeAtlas</strong> maps the world’s pulse in real time,
+        connecting travelers and locals through shared experiences.
+      </p>
+    </section>
 
-    <!-- Events Section -->
-  <section id="events" class="events-section">
-    <h2>Events</h2>
-    
-    <!-- Фильтры -->
-    <div class="filters">
-      <select id="city-filter">
-        <option value="">All Cities</option>
-      </select>
-      <select id="category-filter">
-        <option value="">All Categories</option>
-      </select>
-      <button id="sort-date-btn" class="btn">Sort by Date</button>
-    </div>
-    
-    <!-- Контейнер для карточек -->
-    <div id="events-container" class="events-slider"></div>
-  </section>
-
-  <!-- Contact Section -->
-  <section id="contact" class="contact">
-    <h2>Contact</h2>
-    <p>Subscribe for early access and updates!</p>
-    <form class="subscribe-form">
-      <input type="email" placeholder="Your email" required />
-      <button type="submit" class="btn">Subscribe</button>
-    </form>
-  </section>
+  </main>
 
   <!-- Footer -->
   <footer class="footer">© 2025 VibeAtlas</footer>
 
-  <!-- Scripts -->
   <script type="module" src="./script.js"></script>
 </body>
 </html>

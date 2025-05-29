@@ -229,3 +229,29 @@ body {
   color: rgba(255,255,255,0.8);
   padding: 2rem;
 }
+
+/* Секция погоды */
+.weather-section {
+  padding: 2rem;
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  text-align: center;
+}
+.weather-card {
+  display: inline-block;
+  padding: 1rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+.weather-card input {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+}
+.weather-card .btn {
+  margin-bottom: 1rem;
+}
+.weather-info p {
+  margin: 0.25rem 0;
+}
