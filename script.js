@@ -20,6 +20,7 @@ const splashCityInput   = document.getElementById('splash-city-input');
 const cityInput         = document.getElementById('city-input');
 const getWeatherBtn     = document.getElementById('get-weather-btn');
 
+const searchInput       = document.getElementById('search-input');
 const cityFilter        = document.getElementById('city-filter');
 const categoryFilter    = document.getElementById('category-filter');
 const sortDateBtn       = document.getElementById('sort-date-btn');
@@ -104,6 +105,14 @@ function renderEvents() {
     .filter(e => (!cityFilter.value    || e.city     === cityFilter.value))
     .filter(e => (!categoryFilter.value|| e.category === categoryFilter.value));
 
+  const query = searchInput.value.trim().toLowerCase();
+  if (query) {
+    filtered = filtered.filter(e =>
+      e.title.toLowerCase().includes(query) ||
+      e.description.toLowerCase().includes(query)
+    );
+  }
+
   if (filtered.length === 0) {
     const msg = document.createElement('div');
     msg.className = 'no-events';
@@ -177,6 +186,9 @@ window.addEventListener('DOMContentLoaded', async () => {
       applyCityBackground(city);
     }
   });
+
+  // Поиск по вводу Enter или live
+  searchInput.addEventListener('input', renderEvents);
 
   // 5.5 фильтр города
   cityFilter.addEventListener('change', () => {
