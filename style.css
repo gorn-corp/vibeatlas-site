@@ -255,3 +255,52 @@ body {
 .weather-info p {
   margin: 0.25rem 0;
 }
+
+/* ─── Carousel Styles ─────────────────────────────────────── */
+
+/* Внешняя обёртка */
+.carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+}
+
+/* Кнопки перелистывания */
+.carousel-btn {
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border: none;
+  font-size: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1;
+}
+.prev-btn  { margin-right: 0.5rem; }
+.next-btn  { margin-left: 0.5rem; }
+
+/* Область прокрутки */
+.carousel {
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+
+/* Сами карточки */
+.events-slider {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.event-card {
+  scroll-snap-align: start;
+  flex: 0 0 300px;
+  /* остальные ваши стили карточки */
+}
+
+/* Скрываем скроллбар (опционально) */
+.carousel::-webkit-scrollbar { display: none; }

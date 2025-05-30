@@ -198,4 +198,14 @@ window.addEventListener('DOMContentLoaded', async () => {
     sortDateBtn.textContent = sortByDate ? 'Unsort' : 'Sort by Date';
     renderEvents();
   });
+
+  // ─── 6. Карусель: кнопки пролистывания
+const carousel = document.querySelector('.carousel');
+document.querySelector('.prev-btn').addEventListener('click', () => {
+  carousel.scrollBy({ left: -320, behavior: 'smooth' });
+});
+document.querySelector('.next-btn').addEventListener('click', () => {
+  carousel.scrollBy({ left: +320, behavior: 'smooth' });
+});
+
 });
