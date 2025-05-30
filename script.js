@@ -1,13 +1,14 @@
 // ─── 1. Импорты ────────────────────────────────────────────────────────────
 import Papa from 'papaparse';
 import { fetchWeather, getTimeOfDay } from './weather.js';
-import { cities }                    from './cities.js';
 
 // ─── 2. Константы и переменные ─────────────────────────────────────────────
 const defaultCity   = 'Seoul';
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwhCOoNnWCX5qUX_8KuIVoBHkohSlP_N4Rwedjr7z8lrhLWx064VnBRFicyoUXOxkQSpvDC92PwRJY/pub?output=csv';
+const CITIES_JSON   = '/cities.json';     // <-- новый путь
 
 let events         = [];
+let citiesList     = [];                  // <-- сюда запишем города из JSON
 let selectedCity   = defaultCity;
 let sortByDate     = false;
 
@@ -27,6 +28,18 @@ const sortDateBtn       = document.getElementById('sort-date-btn');
 const eventsContainer   = document.getElementById('events-container');
 
 // ─── 4. Функции ────────────────────────────────────────────────────────────
+
+/** 4.0.0 Загрузка списка городов из public/cities.json */
+async function loadCities() {
+  try {
+    const res = await fetch(CITIES_JSON);
+    citiesList = await res.json();
+    console.log('✅ cities loaded:', citiesList);
+  } catch (err) {
+    console.error('❌ loadCities error', err);
+    citiesList = [];
+  }
+}
 
 /** 4.0 Загрузка событий из Google Sheets CSV */
 async function loadEvents() {
@@ -67,7 +80,7 @@ function applyTimeTheme() {
 
 /** 4.3 Фон по городу */
 function applyCityBackground(city) {
-  const cfg = cities.find(c => c.name === city);
+  const cfg = citiesList.find(c => c.name === city);
   if (!cfg) return;
   Object.assign(document.body.style, {
     backgroundImage:    `url("${cfg.background}")`,
@@ -79,15 +92,15 @@ function applyCityBackground(city) {
 
 /** 4.4 Заполнение фильтров */
 function populateFilters() {
-  // город
-  const cityList = [...new Set(events.map(e => e.city))].sort();
+  // города из JSON
   cityFilter.innerHTML = `<option value="">All Cities</option>`;
-  cityList.forEach(city => {
+  citiesList.forEach(c => {
     const opt = document.createElement('option');
-    opt.value = city; opt.textContent = city;
+    opt.value = c.name;
+    opt.textContent = c.name;
     cityFilter.appendChild(opt);
   });
-  // категория
+  // категории из events 
   const catList = [...new Set(events.map(e => e.category))].sort();
   categoryFilter.innerHTML = `<option value="">All Categories</option>`;
   catList.forEach(cat => {
@@ -149,7 +162,8 @@ function renderEvents() {
 
 // ─── 5. Инициализация ───────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  // 5.0 загрузить события
+  // 5.0 загружаем города и события
+  await loadCities();
   await loadEvents();
 
   // 5.1 ENTER на Splash-input
