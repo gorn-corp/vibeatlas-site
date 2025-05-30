@@ -172,6 +172,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   // 5.3 Hero Get Started
   heroEnterBtn.addEventListener('click', () => enterBtn.click());
 
+  // live-поиск
+searchInput.addEventListener('input', renderEvents);
+
   // 5.4 фильтр города
   cityFilter.addEventListener('change', () => {
     const city = cityFilter.value;

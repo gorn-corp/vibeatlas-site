@@ -148,7 +148,11 @@ body {
 #splash {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: #000 url("C:\Users\koval\Desktop\Новая папка\Новая папка\vibeatlas-site\public\images\globe.gif") center/cover no-repeat;
+  background: 
+    #000 
+    url("/images/globe.gif") 
+    center/cover 
+    no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
