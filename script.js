@@ -172,25 +172,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // 5.3 Hero Get Started
   heroEnterBtn.addEventListener('click', () => enterBtn.click());
 
-  // 5.4 Weather controls: кнопка + Enter
-  cityInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      getWeatherBtn.click();
-    }
-  });
-  getWeatherBtn.addEventListener('click', () => {
-    const city = cityInput.value.trim();
-    if (city) {
-      update(city);
-      applyCityBackground(city);
-    }
-  });
-
-  // Поиск по вводу Enter или live
-  searchInput.addEventListener('input', renderEvents);
-
-  // 5.5 фильтр города
+  // 5.4 фильтр города
   cityFilter.addEventListener('change', () => {
     const city = cityFilter.value;
     if (city) {
@@ -201,10 +183,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     renderEvents();
   });
 
-  // 5.6 фильтр категории
+  // 5.5 фильтр категории
   categoryFilter.addEventListener('change', renderEvents);
 
-  // 5.7 сортировка
+  // 5.6 сортировка
   sortDateBtn.addEventListener('click', () => {
     sortByDate = !sortByDate;
     sortDateBtn.textContent = sortByDate ? 'Unsort' : 'Sort by Date';
