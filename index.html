@@ -74,6 +74,44 @@
 </div>
     </section>
 
+    <!-- 1) Сюда вставим кнопку «Add Event» -->
+  <div class="add-event-section" style="margin-top: 1rem; text-align: center;">
+    <button id="add-event-btn" class="btn">Add Event</button>
+  </div>
+
+    <!-- 2) Сюда вставим скрытую форму -->
+  <div id="event-form-container" class="event-form-container" style="display: none;">
+    <form id="event-form" class="event-form">
+      <h3>Add New Event</h3>
+      <label>
+        Title:<br/>
+        <input type="text" id="evt-title" required />
+      </label><br/><br/>
+      <label>
+        Description:<br/>
+        <textarea id="evt-desc" rows="3" required></textarea>
+      </label><br/><br/>
+      <label>
+        Date:<br/>
+        <input type="datetime-local" id="evt-date" required />
+      </label><br/><br/>
+      <label>
+        City:<br/>
+        <select id="evt-city" required>
+          <option value="">Select City</option>
+          <!-- Опции заполнятся из JS -->
+        </select>
+      </label><br/><br/>
+      <label>
+        Category:<br/>
+        <input type="text" id="evt-category" required placeholder="e.g. Music, Food, Culture" />
+      </label><br/><br/>
+      <button type="submit" class="btn">Submit Event</button>
+      <button type="button" id="evt-cancel-btn" class="btn" style="margin-left: 0.5rem; background:#999;">Cancel</button>
+    </form>
+  </div>
+</section>
+
       <!-- Weather Section -->
 <section id="weather" class="weather-section">
   <h2>Current Weather</h2>

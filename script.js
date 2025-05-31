@@ -20,6 +20,16 @@ const splashCityInput   = document.getElementById('splash-city-input');
 
 const cityInput         = document.getElementById('city-input');
 const getWeatherBtn     = document.getElementById('get-weather-btn');
+// ───  DOM-элементы для Add Event ─────────────────────────────────
+const addEventBtn       = document.getElementById('add-event-btn');
+const eventFormContainer= document.getElementById('event-form-container');
+const eventForm         = document.getElementById('event-form');
+const evtTitleInput     = document.getElementById('evt-title');
+const evtDescInput      = document.getElementById('evt-desc');
+const evtDateInput      = document.getElementById('evt-date');
+const evtCitySelect     = document.getElementById('evt-city');
+const evtCategoryInput  = document.getElementById('evt-category');
+const evtCancelBtn      = document.getElementById('evt-cancel-btn');
 
 const searchInput       = document.getElementById('search-input');
 const cityFilter        = document.getElementById('city-filter');
@@ -100,7 +110,15 @@ function populateFilters() {
     opt.textContent = c.name;
     cityFilter.appendChild(opt);
   });
-  // категории из events 
+  // Город (для формы Add Event):
+  evtCitySelect.innerHTML = `<option value="">Select City</option>`;
+  citiesList.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.name;
+    opt.textContent = c.name;
+    evtCitySelect.appendChild(opt);
+  });
+  // категории (фильтр) 
   const catList = [...new Set(events.map(e => e.category))].sort();
   categoryFilter.innerHTML = `<option value="">All Categories</option>`;
   catList.forEach(cat => {
@@ -217,6 +235,66 @@ document.querySelector('.prev-btn').addEventListener('click', () => {
 });
 document.querySelector('.next-btn').addEventListener('click', () => {
   carousel.scrollBy({ left: +320, behavior: 'smooth' });
+});
+
+// ─── 7. Показ/скрытие формы Add Event ────────────────────────────────────
+
+// Показ формы
+addEventBtn.addEventListener('click', () => {
+  eventFormContainer.style.display = 'flex';
+});
+
+// Отмена (скрытие) без добавления
+evtCancelBtn.addEventListener('click', () => {
+  eventFormContainer.style.display = 'none';
+});
+
+// Обработка submit формы
+eventForm.addEventListener('submit', e => {
+  e.preventDefault();
+  // Простейшая валидация
+  const title    = evtTitleInput.value.trim();
+  const desc     = evtDescInput.value.trim();
+  const dateVal  = evtDateInput.value;
+  const cityVal  = evtCitySelect.value;
+  const catVal   = evtCategoryInput.value.trim();
+
+  if (!title || !desc || !dateVal || !cityVal || !catVal) {
+    alert('Please fill in all fields.');
+    return;
+  }
+
+  // Сгенерируем простое уникальное ID (можно timestamp)
+  const newId = Date.now().toString();
+
+  // Создаём объект события
+  const newEvent = {
+    id:          newId,
+    city:        cityVal,
+    title:       title,
+    description: desc,
+    date:        dateVal,
+    category:    catVal
+  };
+
+  // Добавляем в массив и перерисовываем
+  events.push(newEvent);
+
+  // Обновляем фильтр категорий (вдруг новая категория)
+  populateFilters();
+
+  // Закрываем форму
+  eventFormContainer.style.display = 'none';
+
+  // Очищаем поля формы
+  evtTitleInput.value = '';
+  evtDescInput.value  = '';
+  evtDateInput.value  = '';
+  evtCitySelect.value = '';
+  evtCategoryInput.value = '';
+
+  // Рендерим события заново
+  renderEvents();
 });
 
 });

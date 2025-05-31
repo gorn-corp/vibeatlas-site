@@ -320,3 +320,45 @@ body {
 
 /* Скрываем скроллбар (опционально) */
 .carousel::-webkit-scrollbar { display: none; }
+
+/* ─── Стили для формы добавления события ───────────────────────────────── */
+.event-form-container {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.event-form {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 320px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  color: #333;
+}
+
+.event-form h3 {
+  margin-top: 0;
+}
+
+.event-form label {
+  font-size: 0.9rem;
+  display: block;
+}
+
+.event-form input,
+.event-form textarea,
+.event-form select {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+.event-form .btn {
+  margin-top: 0.5rem;
+}
