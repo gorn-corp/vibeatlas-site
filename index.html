@@ -67,8 +67,12 @@
       </div>
       <div class="carousel-wrapper">
   <button class="carousel-btn prev-btn">‹</button>
-  <div class="carousel">
-    <div id="events-container" class="events-slider"></div>
+  <div class="embla">
+    <div class="embla__viewport">
+      <div class="embla__container" id="events-container">
+        <!-- Карточки будут рендериться сюда -->
+      </div>
+    </div>
   </div>
   <button class="carousel-btn next-btn">›</button>
 </div>
@@ -148,6 +152,18 @@
 
   <!-- Footer -->
   <footer class="footer">© 2025 VibeAtlas</footer>
+
+  <!-- Модальное окно события -->
+<div id="event-modal" class="modal hidden">
+  <div class="modal-content">
+    <span id="modal-close" class="modal-close">&times;</span>
+    <h3 id="modal-title"></h3>
+    <p id="modal-description"></p>
+    <p><strong>Date:</strong> <span id="modal-date"></span></p>
+    <p><strong>City:</strong> <span id="modal-city"></span></p>
+    <p><strong>Category:</strong> <span id="modal-category"></span></p>
+  </div>
+</div>
 
   <script type="module" src="./script.js"></script>
 </body>

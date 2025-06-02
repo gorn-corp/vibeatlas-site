@@ -369,3 +369,68 @@ body {
 .event-form .btn {
   margin-top: 0.5rem;
 }
+
+/* Embla Carousel Overrides */
+.embla {
+  overflow: hidden;
+  flex: 1;
+}
+.embla__viewport {
+  overflow: hidden;
+  width: 100%;
+}
+.embla__container {
+  display: flex;
+  gap: 1.5rem;
+  will-change: transform;
+  padding: 0 1rem;
+}
+
+.embla__slide {
+  flex: 0 0 280px; /* чуть уже */
+  scroll-snap-align: start;
+}
+
+@media (min-width: 768px) {
+  .embla__slide {
+    flex: 0 0 33%; /* влезает 3 на средних экранах */
+  }
+}
+
+@media (min-width: 1024px) {
+  .embla__slide {
+    flex: 0 0 25%; /* влезает 4 на больших */
+  }
+}
+
+/* ─── Модальное окно ───────────────────────────────────────────── */
+.modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+.modal.hidden {
+  display: none;
+}
+.modal-content {
+  background: #fff;
+  color: #333;
+  padding: 2rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+.modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+}

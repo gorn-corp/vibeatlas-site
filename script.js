@@ -1,6 +1,20 @@
 // ─── 1. Импорты ────────────────────────────────────────────────────────────
 import Papa from 'papaparse';
+import EmblaCarousel from 'embla-carousel';
 import { fetchWeather, getTimeOfDay } from './weather.js';
+
+// ─── 1.1 Вспомогательные функции для работы с датами ───────────────
+function isSameDay(d1, d2) {
+  return d1.getFullYear() === d2.getFullYear()
+      && d1.getMonth() === d2.getMonth()
+      && d1.getDate() === d2.getDate();
+}
+
+function addDays(date, days) {
+  const copy = new Date(date);
+  copy.setDate(copy.getDate() + days);
+  return copy;
+}
 
 // ─── 2. Константы и переменные ─────────────────────────────────────────────
 const defaultCity   = 'Seoul';
@@ -65,6 +79,53 @@ async function loadEvents() {
       date:        r.date,
       category:    r.category
     }));
+        // Добавим тестовые события для Kyoto
+    const now = new Date();
+    const testKyotoEvents = [
+      {
+        id: 'kyoto1',
+        city: 'Kyoto',
+        title: 'Zen Meditation Workshop',
+        description: 'Morning meditation in a 600-year-old temple.',
+        date: new Date(now).toISOString(),
+        category: 'Spiritual'
+      },
+      {
+        id: 'kyoto2',
+        city: 'Kyoto',
+        title: 'Gion Matsuri Night Parade',
+        description: 'The ancient float festival in full neon glow.',
+        date: new Date(now.setDate(now.getDate() + 1)).toISOString(),
+        category: 'Culture'
+      },
+      {
+        id: 'kyoto3',
+        city: 'Kyoto',
+        title: 'Street Food Fiesta',
+        description: 'Local snacks and tea tasting near Nishiki Market.',
+        date: new Date(now.setDate(now.getDate() + 2)).toISOString(),
+        category: 'Food'
+      },
+      {
+        id: 'kyoto4',
+        city: 'Kyoto',
+        title: 'Anime Music Live',
+        description: 'Orchestra playing Studio Ghibli and classics.',
+        date: new Date(now.setDate(now.getDate() + 3)).toISOString(),
+        category: 'Music'
+      },
+      {
+        id: 'kyoto5',
+        city: 'Kyoto',
+        title: 'AI + Zen Symposium',
+        description: 'Nova тоже будет, но в голограмме.',
+        date: new Date(now.setDate(now.getDate() + 5)).toISOString(),
+        category: 'Tech'
+      }
+    ];
+
+    events = [...events, ...testKyotoEvents];
+
     console.log('✅ events loaded:', events);
   } catch (err) {
     console.error('❌ loadEvents error', err);
@@ -131,6 +192,7 @@ function populateFilters() {
 /** 4.5 Рендер событий */
 function renderEvents() {
   eventsContainer.innerHTML = '';
+
   let filtered = events
     .filter(e => e.city === selectedCity)
     .filter(e => (!cityFilter.value    || e.city     === cityFilter.value))
@@ -144,6 +206,17 @@ function renderEvents() {
     );
   }
 
+  if (sortByDate) {
+    filtered = filtered.sort((a, b) =>
+      new Date(a.date) - new Date(b.date)
+    );
+  }
+
+  const now = new Date();
+  const today = filtered.filter(e => isSameDay(new Date(e.date), now));
+  const tomorrow = filtered.filter(e => isSameDay(new Date(e.date), addDays(now, 1)));
+  const later = filtered.filter(e => new Date(e.date) > addDays(now, 1));
+
   if (filtered.length === 0) {
     const msg = document.createElement('div');
     msg.className = 'no-events';
@@ -152,24 +225,50 @@ function renderEvents() {
     return;
   }
 
-  if (sortByDate) {
-    filtered = filtered.sort((a, b) =>
-      new Date(a.date) - new Date(b.date)
-    );
+  function renderGroup(title, list) {
+    if (list.length === 0) return;
+    const titleEl = document.createElement('h3');
+    titleEl.textContent = title;
+    titleEl.style.margin = '1rem 0 0.5rem';
+    eventsContainer.appendChild(titleEl);
+
+    list.forEach(e => {
+      const card = document.createElement('div');
+      card.className = 'event-card';
+      card.innerHTML = `
+  <h3>${e.title}</h3>
+  <p>${e.description}</p>
+  <p><small>${new Date(e.date).toLocaleString()}</small></p>
+  <p><em>${e.city} — ${e.category}</em></p>
+  <button class="btn details-btn">View Details</button>
+`;
+
+      const slide = document.createElement('div');
+      slide.className = 'embla__slide';
+      slide.appendChild(card);
+      eventsContainer.appendChild(slide);
+    });
   }
 
-  filtered.forEach(e => {
-    const card = document.createElement('div');
-    card.className = 'event-card';
-    card.innerHTML = `
-      <h3>${e.title}</h3>
-      <p>${e.description}</p>
-      <p><small>${new Date(e.date).toLocaleString()}</small></p>
-      <p><em>${e.city} — ${e.category}</em></p>
-      <button class="btn join-btn">Join Event</button>
-    `;
-    eventsContainer.appendChild(card);
+  renderGroup("Today", today);
+  renderGroup("Tomorrow", tomorrow);
+  renderGroup("Upcoming", later);
+
+  // Обработка кнопок "View Details"
+eventsContainer.querySelectorAll('.details-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const card = e.target.closest('.event-card');
+    if (!card) return;
+
+    document.getElementById('modal-title').textContent = card.querySelector('h3').textContent;
+    document.getElementById('modal-description').textContent = card.querySelector('p').textContent;
+    document.getElementById('modal-date').textContent = card.querySelector('small')?.textContent || '';
+    document.getElementById('modal-city').textContent = card.querySelector('em')?.textContent?.split(' — ')[0] || '';
+    document.getElementById('modal-category').textContent = card.querySelector('em')?.textContent?.split(' — ')[1] || '';
+
+    document.getElementById('event-modal').classList.remove('hidden');
   });
+});
 
   // обработчик кнопок
   eventsContainer.querySelectorAll('.join-btn')
@@ -199,15 +298,19 @@ window.addEventListener('DOMContentLoaded', async () => {
     applyCityBackground(city);
     populateFilters();
     renderEvents();
+    initEmbla(); // 🔧 запускаем Embla после рендера
   });
 
   // 5.3 Hero Get Started
   heroEnterBtn.addEventListener('click', () => enterBtn.click());
 
-  // live-поиск
-searchInput.addEventListener('input', renderEvents);
+  // 5.4 live-поиск
+  searchInput.addEventListener('input', () => {
+    renderEvents();
+    initEmbla();
+  });
 
-  // 5.4 фильтр города
+  // 5.5 фильтр города
   cityFilter.addEventListener('change', () => {
     const city = cityFilter.value;
     if (city) {
@@ -216,85 +319,108 @@ searchInput.addEventListener('input', renderEvents);
       applyCityBackground(city);
     }
     renderEvents();
+    initEmbla();
   });
 
-  // 5.5 фильтр категории
-  categoryFilter.addEventListener('change', renderEvents);
+  // 5.6 фильтр категории
+  categoryFilter.addEventListener('change', () => {
+    renderEvents();
+    initEmbla();
+  });
 
-  // 5.6 сортировка
+  // 5.7 сортировка
   sortDateBtn.addEventListener('click', () => {
     sortByDate = !sortByDate;
     sortDateBtn.textContent = sortByDate ? 'Unsort' : 'Sort by Date';
     renderEvents();
+    initEmbla();
   });
 
-  // ─── 6. Карусель: кнопки пролистывания
-const carousel = document.querySelector('.carousel');
-document.querySelector('.prev-btn').addEventListener('click', () => {
-  carousel.scrollBy({ left: -320, behavior: 'smooth' });
-});
-document.querySelector('.next-btn').addEventListener('click', () => {
-  carousel.scrollBy({ left: +320, behavior: 'smooth' });
-});
+  // ─── 6. Показ/скрытие формы Add Event ─────────────────────────────
 
-// ─── 7. Показ/скрытие формы Add Event ────────────────────────────────────
+  // Показ формы
+  addEventBtn.addEventListener('click', () => {
+    eventFormContainer.style.display = 'flex';
+  });
 
-// Показ формы
-addEventBtn.addEventListener('click', () => {
-  eventFormContainer.style.display = 'flex';
-});
+  // Отмена (скрытие) без добавления
+  evtCancelBtn.addEventListener('click', () => {
+    eventFormContainer.style.display = 'none';
+  });
 
-// Отмена (скрытие) без добавления
-evtCancelBtn.addEventListener('click', () => {
-  eventFormContainer.style.display = 'none';
-});
+  // Обработка submit формы
+  eventForm.addEventListener('submit', e => {
+    e.preventDefault();
+    // Простейшая валидация
+    const title    = evtTitleInput.value.trim();
+    const desc     = evtDescInput.value.trim();
+    const dateVal  = evtDateInput.value;
+    const cityVal  = evtCitySelect.value;
+    const catVal   = evtCategoryInput.value.trim();
 
-// Обработка submit формы
-eventForm.addEventListener('submit', e => {
-  e.preventDefault();
-  // Простейшая валидация
-  const title    = evtTitleInput.value.trim();
-  const desc     = evtDescInput.value.trim();
-  const dateVal  = evtDateInput.value;
-  const cityVal  = evtCitySelect.value;
-  const catVal   = evtCategoryInput.value.trim();
+    if (!title || !desc || !dateVal || !cityVal || !catVal) {
+      alert('Please fill in all fields.');
+      return;
+    }
 
-  if (!title || !desc || !dateVal || !cityVal || !catVal) {
-    alert('Please fill in all fields.');
-    return;
+    // Сгенерируем простое уникальное ID
+    const newId = Date.now().toString();
+
+    // Создаём объект события
+    const newEvent = {
+      id:          newId,
+      city:        cityVal,
+      title:       title,
+      description: desc,
+      date:        dateVal,
+      category:    catVal
+    };
+
+    // Добавляем в массив и перерисовываем
+    events.push(newEvent);
+
+    // Обновляем фильтр категорий
+    populateFilters();
+
+    // Закрываем форму
+    eventFormContainer.style.display = 'none';
+
+    // Очищаем поля формы
+    evtTitleInput.value = '';
+    evtDescInput.value  = '';
+    evtDateInput.value  = '';
+    evtCitySelect.value = '';
+    evtCategoryInput.value = '';
+
+    // Рендерим события заново
+    renderEvents();
+    initEmbla();
+  });
+
+  // ─── 7. Embla Carousel Setup ─────────────────────────────────────
+  let embla;
+
+  function initEmbla() {
+    const viewport = document.querySelector('.embla__viewport');
+    if (!viewport) return;
+
+    embla = EmblaCarousel(viewport, {
+      loop: false,
+      align: 'start',
+      dragFree: true,
+    });
+
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+
+    if (prevBtn && nextBtn) {
+      prevBtn.addEventListener('click', () => embla.scrollPrev());
+      nextBtn.addEventListener('click', () => embla.scrollNext());
+    }
   }
 
-  // Сгенерируем простое уникальное ID (можно timestamp)
-  const newId = Date.now().toString();
-
-  // Создаём объект события
-  const newEvent = {
-    id:          newId,
-    city:        cityVal,
-    title:       title,
-    description: desc,
-    date:        dateVal,
-    category:    catVal
-  };
-
-  // Добавляем в массив и перерисовываем
-  events.push(newEvent);
-
-  // Обновляем фильтр категорий (вдруг новая категория)
-  populateFilters();
-
-  // Закрываем форму
-  eventFormContainer.style.display = 'none';
-
-  // Очищаем поля формы
-  evtTitleInput.value = '';
-  evtDescInput.value  = '';
-  evtDateInput.value  = '';
-  evtCitySelect.value = '';
-  evtCategoryInput.value = '';
-
-  // Рендерим события заново
-  renderEvents();
+// Закрытие модалки
+document.getElementById('modal-close').addEventListener('click', () => {
+  document.getElementById('event-modal').classList.add('hidden');
 });
-
 });
