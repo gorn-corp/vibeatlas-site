@@ -1,27 +1,29 @@
-# HTML, CSS, JS (Auto Refresh)
+# VibeAtlas
 
-This template is a starter for building a website with HTML, CSS and JS, powered by [Vite](https://vitejs.dev/). HTML provides the basic structure, CSS controls formatting, and JavaScript controls the behavior of different elements.
+**A living map of cultures, atmospheres, and events.**
 
-Hit run to see this project in action. It will auto-refresh as you edit the HTML, CSS and JS files.
+VibeAtlas is a conscious city guide that lets people explore the world by its energy — not just by sights.  
+We’re building a system where technology reflects reality rather than escaping it.
 
-## Disable Auto Refresh
+---
 
-If you find the auto refresh getting in your way, go to [vite.config.js](./vite.config.js) and update it set `hmr` to false to disable hot module reloading (HMR). The full config will look like this:
+## 🔧 Current version: MVP v1.2
 
-```js
-export default defineConfig({
-  plugins: [],
-  server: {
-    host: '0.0.0.0',
-    hmr: false, // Change this line to `false` disable auto-refreshing.
-  }
-})
-```
+### ✨ Features implemented:
 
-## Packages
+- ✅ City-based event filtering (by city, category, and date)
+- ✅ Event carousel powered by Embla (responsive & smooth)
+- ✅ Automatic grouping: Today / Tomorrow / Upcoming
+- ✅ Mobile-friendly layout and design
+- ✅ Demo events for testing (Kyoto dataset)
+- ✅ Modal window for detailed event view
 
-Because this template uses Vite to build your code, you can add install and use npm packages. Simple open the Packager tool to search and manage your packages.
+---
 
-## Learn More
+## 🧪 How to run locally
 
-Check out [the vite docs](https://vitejs.dev) to learn more about configuring a frontend application.
+1. Clone the repo:
+
+```bash
+git clone https://github.com/your-profile/vibeatlas.git
+cd vibeatlas
