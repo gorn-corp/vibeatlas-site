@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VibeAtlas</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- Leaflet CSS -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<!-- Leaflet JS -->
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  defer
+></script>
 </head>
 <body>
 
@@ -166,5 +176,10 @@
 </div>
 
   <script type="module" src="./script.js"></script>
+  <div id="map-container" class="hidden">
+  <button id="map-close">×</button>
+  <div id="map"></div>
+</div>
+
 </body>
 </html>

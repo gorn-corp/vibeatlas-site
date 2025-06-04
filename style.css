@@ -434,3 +434,36 @@ body {
   font-size: 1.5rem;
   cursor: pointer;
 }
+
+  #map-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  #map {
+    width: 80vw;
+    height: 80vh;
+    border: 2px solid white;
+    border-radius: 8px;
+  }
+
+  #map-close {
+    position: absolute;
+    top: 20px; right: 30px;
+    font-size: 2rem;
+    background: transparent;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  #map-container.hidden {
+  display: none !important;
+}
+

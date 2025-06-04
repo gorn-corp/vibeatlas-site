@@ -240,7 +240,10 @@ function renderEvents() {
   <p>${e.description}</p>
   <p><small>${new Date(e.date).toLocaleString()}</small></p>
   <p><em>${e.city} — ${e.category}</em></p>
-  <button class="btn details-btn">View Details</button>
+  <div class="event-actions">
+    <button class="btn details-btn">View Details</button>
+    <button class="btn map-btn">📍 Show on Map</button>
+  </div>
 `;
 
       const slide = document.createElement('div');
@@ -267,6 +270,17 @@ eventsContainer.querySelectorAll('.details-btn').forEach(btn => {
     document.getElementById('modal-category').textContent = card.querySelector('em')?.textContent?.split(' — ')[1] || '';
 
     document.getElementById('event-modal').classList.remove('hidden');
+  });
+});
+
+// Обработка кнопок "Show on Map"
+eventsContainer.querySelectorAll('.map-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const card = e.target.closest('.event-card');
+    const title = card.querySelector('h3')?.textContent || '[Unknown Event]';
+
+    // Временно все события отправляем в Киото
+    showMap(35.0116, 135.7681, title);
   });
 });
 
@@ -424,3 +438,31 @@ document.getElementById('modal-close').addEventListener('click', () => {
   document.getElementById('event-modal').classList.add('hidden');
 });
 });
+
+// ─── MAP LOGIC ─────────────────────────────────────────────
+const mapContainer = document.getElementById('map-container');
+const mapCloseBtn = document.getElementById('map-close');
+let mapInstance;
+
+// Закрыть карту
+mapCloseBtn.addEventListener('click', () => {
+  mapContainer.classList.add('hidden');
+});
+
+// Показать карту (временно с координатами Киото)
+function showMap(lat = 35.0116, lon = 135.7681, label = "Kyoto") {
+  mapContainer.classList.remove('hidden');
+
+  if (!mapInstance) {
+    mapInstance = L.map('map').setView([lat, lon], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(mapInstance);
+  } else {
+    mapInstance.setView([lat, lon], 13);
+  }
+
+  L.marker([lat, lon]).addTo(mapInstance)
+    .bindPopup(label)
+    .openPopup();
+}
