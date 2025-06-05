@@ -5,7 +5,9 @@
     "title": "Lantern Parade in Seoul",
     "description": "An evening ceremony with glowing lanterns and live music.",
     "date": "2025-10-27T19:00",
-    "category": "Culture"
+    "category": "Culture",
+    "lat": 37.566500,
+    "lon": 126.970000
   },
   {
     "id": 2,
@@ -13,7 +15,9 @@
     "title": "Night Market Stroll",
     "description": "Explore street food and crafts under the neon sky.",
     "date": "2025-09-15T18:00",
-    "category": "Food"
+    "category": "Food",
+    "lat": 37.566500,
+    "lon": 126.970000
   },
   {
     "id": 3,
@@ -21,7 +25,9 @@
     "title": "Oktoberfest",
     "description": "Germany’s famous beer festival under festive tents.",
     "date": "2025-10-20T12:00",
-    "category": "Festival"
+    "category": "Festival",
+    "lat": 48.137154,
+    "lon": 11.576124
   },
   {
     "id": 4,
@@ -29,7 +35,9 @@
     "title": "Bavarian Folk Concert",
     "description": "Live brass band music in the old town square.",
     "date": "2025-08-05T20:00",
-    "category": "Music"
+    "category": "Music",
+    "lat": 48.137154,
+    "lon": 11.576124
   },
   {
     "id": 5,
@@ -37,7 +45,9 @@
     "title": "Venice Carnival",
     "description": "A daytime parade of masks and costumes along the canals.",
     "date": "2025-02-15T10:00",
-    "category": "Parade"
+    "category": "Parade",
+    "lat": 19.5324,
+    "lon": 37.7220
   },
   {
     "id": 6,
@@ -45,7 +55,9 @@
     "title": "Gondola Serenade",
     "description": "Private gondola ride with live mandolin music.",
     "date": "2025-07-30T19:30",
-    "category": "Romantic"
+    "category": "Romantic",
+    "lat": 19.5324,
+    "lon": 37.7220
   },
   {
     "id": 7,
@@ -53,7 +65,9 @@
     "title": "Techno Rave Under the Bridge",
     "description": "Underground techno party in a hidden river tunnel.",
     "date": "2025-07-05T22:00",
-    "category": "Music"
+    "category": "Music",
+    "lat": 52.520008,
+    "lon": 13.404954
   },
   {
     "id": 8,
@@ -61,6 +75,18 @@
     "title": "Street Art Walk",
     "description": "Guided tour of the coolest graffiti spots in Kreuzberg.",
     "date": "2025-06-12T16:00",
-    "category": "Art"
+    "category": "Art",
+    "lat": 52.520008,
+    "lon": 13.404954
+  },
+  {
+    "id": "9",
+    "city": "Kyoto",
+    "title": "AI + Zen",
+    "description": "Fusion of meditation and future tech",
+    "date": "2025-06-08T18:00",
+    "category": "Tech",
+    "lat": 35.0116,
+    "lon": 135.7681
   }
 ]

@@ -22,11 +22,7 @@ body.theme-night {
 /* Применяем переменные к фону */
 body {
   font-family: Arial, sans-serif;
-  background: linear-gradient(
-    to right,
-    var(--bg-start, #203a43),
-    var(--bg-end,   #2c5364)
-  );
+  background: linear-gradient(to right, var(--bg-start, #203a43), var(--bg-end, #2c5364));
   color: #ffffff;
   line-height: 1.6;
   transition: background 1s ease;
