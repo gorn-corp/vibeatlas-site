@@ -196,7 +196,19 @@ function populateFilters() {
   categoryFilter.innerHTML = `<option value="">All Categories</option>`;
   catList.forEach(cat => {
     const opt = document.createElement('option');
-    opt.value = cat; opt.textContent = cat;
+    opt.value = cat; 
+    const emojis = {
+  Music: "🎵",
+  Food: "🍜",
+  Culture: "🎭",
+  Tech: "🤖",
+  Parade: "🎉",
+  Romantic: "💖",
+  Art: "🎨",
+  Festival: "🎪",
+  Spiritual: "🧘"
+};
+opt.textContent = `${emojis[cat] || ''} ${cat}`;
     categoryFilter.appendChild(opt);
   });
 }
@@ -286,6 +298,30 @@ function renderEvents() {
         document.getElementById('modal-city').textContent        = e.city;
         document.getElementById('modal-category').textContent    = e.category;
         document.getElementById('event-modal').classList.remove('hidden');
+        // если есть координаты — показываем мини-карту в модалке
+setTimeout(() => {
+  const lat = parseFloat(e.lat);
+  const lon = parseFloat(e.lon);
+
+  if (!isNaN(lat) && !isNaN(lon)) {
+    const modalMap = L.map('modal-map', {
+      attributionControl: false,
+      zoomControl: false,
+      dragging: false
+    }).setView([lat, lon], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
+    L.marker([lat, lon]).addTo(modalMap).bindPopup(e.title).openPopup();
+
+    // уничтожаем при закрытии, чтобы не баговалось
+    document.getElementById('modal-close').addEventListener('click', () => {
+      modalMap.remove();
+    });
+  } else {
+    document.getElementById('modal-map').innerHTML = '<p style="color:gray;">No map available</p>';
+  }
+}, 100);
+
       });
 
       // Show on Map

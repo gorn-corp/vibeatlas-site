@@ -93,6 +93,11 @@ body {
   border-radius: 4px;
   cursor: pointer;
 }
+.btn:hover {
+  background-color: #ff8787;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
 
 /* About, Events, Contact */
 .about,
