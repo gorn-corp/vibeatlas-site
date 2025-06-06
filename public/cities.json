@@ -1,12 +1,12 @@
 [
-  { "name": "Banff",    "background": "/images/banff.jpg" },
-  { "name": "Kyoto",    "background": "/images/kyoto.jpg" },
-  { "name": "Florence", "background": "/images/florence.jpg" },
-  { "name": "London",   "background": "/images/london.jpg"   },
-  { "name": "Paris",    "background": "/images/paris.jpg"    },
-  { "name": "New York", "background": "/images/newyork.jpg" },
-  { "name": "Berlin",   "background": "/images/berlin.jpg"   },
-  { "name": "Seoul",    "background": "/images/seoul.jpg"    },
-  { "name": "Munich",   "background": "/images/munich.jpg"   },
-  { "name": "Venice",   "background": "/images/venice.jpg"   }
+  { "name": "Banff",    "lat": 51.1784, "lon": 115.5708, "background": "/images/banff.jpg" },
+  { "name": "Kyoto",    "lat": 35.0116, "lon": 135.7681, "background": "/images/kyoto.jpg" },
+  { "name": "Florence", "lat": 43.7696, "lon": 11.2558,  "background": "/images/florence.jpg" },
+  { "name": "London",   "lat": 51.5074, "lon": 0.1278,   "background": "/images/london.jpg"   },
+  { "name": "Paris",    "lat": 48.8566, "lon": 2.3522,   "background": "/images/paris.jpg"    },
+  { "name": "New York", "lat": 40.7128, "lon": -74.0060, "background": "/images/newyork.jpg" },
+  { "name": "Berlin",   "lat": 52.5200, "lon": 13.4050,  "background": "/images/berlin.jpg"   },
+  { "name": "Seoul",    "lat": 37.5665, "lon": 126.9780, "background": "/images/seoul.jpg"    },
+  { "name": "Munich",   "lat": 48.1351, "lon": 11.5820,  "background": "/images/munich.jpg"   },
+  { "name": "Venice",   "lat": 45.4408, "lon": 12.3155,  "background": "/images/venice.jpg"   }
 ]

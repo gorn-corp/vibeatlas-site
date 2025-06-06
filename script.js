@@ -19,11 +19,12 @@ function addDays(date, days) {
 // ─── 2. Константы и переменные ─────────────────────────────────────────────
 const defaultCity   = 'Seoul';
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwhCOoNnWCX5qUX_8KuIVoBHkohSlP_N4Rwedjr7z8lrhLWx064VnBRFicyoUXOxkQSpvDC92PwRJY/pub?output=csv';
-const CITIES_JSON   = '/cities.json';     // <-- новый путь
+const CITIES_JSON   = '/cities.json';   
 
 let events         = [];
-let citiesList     = [];                  // сюда запишем города из JSON
+let citiesList     = [];               
 let selectedCity   = defaultCity;
+let cityCoordsMap = {};
 let sortByDate     = false;
 
 // ─── 3. DOM-элементы ──────────────────────────────────────────────────────
@@ -58,7 +59,25 @@ async function loadCities() {
   try {
     const res = await fetch(CITIES_JSON);
     citiesList = await res.json();
+    // Создаём карту координат по названиям
+cityCoordsMap = {};
+citiesList.forEach(c => {
+  cityCoordsMap[c.name.trim()] = {
+    lat: parseFloat(c.lat),
+    lon: parseFloat(c.lon)
+  };
+});
+console.log('✅ cityCoordsMap:', cityCoordsMap);
     console.log('✅ cities loaded:', citiesList);
+
+    // Сформируем вспомогательную карту: { "Kyoto": {lat, lon}, ... }
+    window.cityCoordsMap = {};
+    citiesList.forEach(c => {
+      if (c.name && c.lat && c.lon) {
+        cityCoordsMap[c.name] = { lat: parseFloat(c.lat), lon: parseFloat(c.lon) };
+      }
+    });
+
   } catch (err) {
     console.error('❌ loadCities error', err);
     citiesList = [];
@@ -419,45 +438,84 @@ window.addEventListener('DOMContentLoaded', async () => {
     eventFormContainer.style.display = 'flex';
   });
 
+  // При выборе города — подставим координаты из cityCoordsMap
+evtCitySelect.addEventListener('change', () => {
+  const selected = evtCitySelect.value;
+  const coords = cityCoordsMap?.[selected];
+  if (coords) {
+    evtCitySelect.dataset.lat = coords.lat;
+    evtCitySelect.dataset.lon = coords.lon;
+  } else {
+    delete evtCitySelect.dataset.lat;
+    delete evtCitySelect.dataset.lon;
+  }
+});
+
   evtCancelBtn.addEventListener('click', () => {
     eventFormContainer.style.display = 'none';
   });
 
-  eventForm.addEventListener('submit', e => {
-    e.preventDefault();
-    // Валидация
-    const title    = evtTitleInput.value.trim();
-    const desc     = evtDescInput.value.trim();
-    const dateVal  = evtDateInput.value;
-    const cityVal  = evtCitySelect.value;
-    const catVal   = evtCategoryInput.value.trim();
+// ─── Обработка submit формы ──────────────────────
+eventForm.addEventListener('submit', e => {
+  e.preventDefault();
 
-    if (!title || !desc || !dateVal || !cityVal || !catVal) {
-      alert('Please fill in all fields.');
-      return;
-    }
+  const title    = evtTitleInput.value.trim();
+  const desc     = evtDescInput.value.trim();
+  const dateVal  = evtDateInput.value;
+  const cityVal  = evtCitySelect.value.trim(); // ← обрезаем пробелы
+  const catVal   = evtCategoryInput.value.trim();
 
-    const newId = Date.now().toString();
-    const newEvent = {
-      id:          newId,
-      city:        cityVal,
-      title:       title,
-      description: desc,
-      date:        dateVal,
-      category:    catVal
-    };
+  if (!title || !desc || !dateVal || !cityVal || !catVal) {
+    alert('Please fill in all fields.');
+    return;
+  }
 
-    events.push(newEvent);
-    populateFilters();
-    eventFormContainer.style.display = 'none';
-    evtTitleInput.value = '';
-    evtDescInput.value  = '';
-    evtDateInput.value  = '';
-    evtCitySelect.value = '';
-    evtCategoryInput.value = '';
-    renderEvents();
-    initEmbla();
-  });
+  const newId = Date.now().toString();
+
+  // 🧭 Берём координаты по названию города
+  let lat = undefined;
+  let lon = undefined;
+
+  const coords = cityCoordsMap?.[cityVal];
+  if (coords) {
+    lat = parseFloat(coords.lat);
+    lon = parseFloat(coords.lon);
+  }
+
+  // ⚠️ если координаты так и не нашлись — логгируем предупреждение
+  if (isNaN(lat) || isNaN(lon)) {
+    console.warn(`⚠️ No coordinates found for city "${cityVal}"`);
+    lat = undefined;
+    lon = undefined;
+  }
+
+  const newEvent = {
+    id:          newId,
+    city:        cityVal,
+    title:       title,
+    description: desc,
+    date:        dateVal,
+    category:    catVal,
+    lat,
+    lon
+  };
+
+  // Добавляем и рендерим
+  events.push(newEvent);
+  populateFilters();
+  renderEvents();
+  initEmbla();
+
+  // Закрываем форму
+  eventFormContainer.style.display = 'none';
+
+  // Очищаем поля
+  evtTitleInput.value = '';
+  evtDescInput.value  = '';
+  evtDateInput.value  = '';
+  evtCitySelect.value = '';
+  evtCategoryInput.value = '';
+});
 
   // ─── 7. Embla Carousel Setup ─────────────────────────────────────
   let embla;
