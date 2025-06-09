@@ -227,6 +227,15 @@ body {
   cursor: pointer;
 }
 
+.save-btn {
+  background: transparent;
+  color: #ffd700;
+  font-weight: bold;
+}
+.save-btn:hover {
+  opacity: 0.8;
+}
+
 /* При фокусе/ховере делаем фон чуть ярче */
 .filters select:hover,
 .filters select:focus,
@@ -468,3 +477,8 @@ body {
   display: none !important;
 }
 
+.countdown {
+  font-size: 0.9rem;
+  color: #ffd700;
+  margin-top: 0.5rem;
+}

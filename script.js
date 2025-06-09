@@ -16,6 +16,19 @@ function addDays(date, days) {
   return copy;
 }
 
+function getTimeRemaining(dateStr) {
+  const eventDate = new Date(dateStr);
+  const now = new Date();
+  const diffMs = eventDate - now;
+
+  if (diffMs <= 0) return null;
+
+  const totalSec = Math.floor(diffMs / 1000);
+  const hours = Math.floor(totalSec / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  return { hours, minutes };
+}
+
 // ─── 2. Константы и переменные ─────────────────────────────────────────────
 const defaultCity   = 'Seoul';
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwhCOoNnWCX5qUX_8KuIVoBHkohSlP_N4Rwedjr7z8lrhLWx064VnBRFicyoUXOxkQSpvDC92PwRJY/pub?output=csv';
@@ -26,6 +39,17 @@ let citiesList     = [];
 let selectedCity   = defaultCity;
 let cityCoordsMap = {};
 let sortByDate     = false;
+let savedEvents = JSON.parse(localStorage.getItem('savedEvents') || '[]');
+
+function toggleSaveEvent(id) {
+  if (savedEvents.includes(id)) {
+    savedEvents = savedEvents.filter(eid => eid !== id);
+  } else {
+    savedEvents.push(id);
+  }
+  localStorage.setItem('savedEvents', JSON.stringify(savedEvents));
+  renderEvents(); // перерисуем карточки
+}
 
 // ─── 3. DOM-элементы ──────────────────────────────────────────────────────
 const splash            = document.getElementById('splash');
@@ -297,7 +321,13 @@ function renderEvents() {
         <div class="event-actions">
           <button class="btn details-btn">View Details</button>
           <button class="btn map-btn">📍 Show on Map</button>
+          <button class="btn save-btn">${savedEvents.includes(e.id) ? '★ Saved' : '☆ Save'}</button>
         </div>
+        ${isSameDay(new Date(e.date), now) ? (() => {
+        const remaining = getTimeRemaining(e.date);
+        if (!remaining) return '<p class="countdown">⏰ Started</p>';
+        return `<p class="countdown">⏳ Starts in ${remaining.hours}h ${remaining.minutes}m</p>`;
+        })() : ''}
       `;
 
       // Embla wrap
@@ -353,6 +383,11 @@ setTimeout(() => {
         } else {
           alert("This event has no coordinates yet.");
         }
+      });
+      
+      const saveBtn = card.querySelector('.save-btn');
+      saveBtn.addEventListener('click', () => {
+        toggleSaveEvent(e.id);
       });
 
       // Join Event (если есть)
