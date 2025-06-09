@@ -203,6 +203,18 @@ body {
   margin-bottom: 1rem;
 }
 
+.favorites-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: white;
+  font-size: 0.9rem;
+}
+.favorites-toggle input[type="checkbox"] {
+  transform: scale(1.2);
+  accent-color: #ff6b6b;
+}
+
 /* Поисковое поле */
 .search-input {
   padding: 0.5rem;
@@ -481,4 +493,16 @@ body {
   font-size: 0.9rem;
   color: #ffd700;
   margin-top: 0.5rem;
+}
+
+.favorites-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #fff;
+  font-size: 0.9rem;
+}
+.favorites-toggle input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
 }

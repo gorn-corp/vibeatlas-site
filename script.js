@@ -40,6 +40,7 @@ let selectedCity   = defaultCity;
 let cityCoordsMap = {};
 let sortByDate     = false;
 let savedEvents = JSON.parse(localStorage.getItem('savedEvents') || '[]');
+let showOnlyFavorites = false;
 
 function toggleSaveEvent(id) {
   if (savedEvents.includes(id)) {
@@ -75,6 +76,7 @@ const cityFilter        = document.getElementById('city-filter');
 const categoryFilter    = document.getElementById('category-filter');
 const sortDateBtn       = document.getElementById('sort-date-btn');
 const eventsContainer   = document.getElementById('events-container');
+const favoritesOnlyCheckbox = document.getElementById('favorites-only');
 
 // ─── 4. Функции ────────────────────────────────────────────────────────────
 
@@ -260,17 +262,20 @@ opt.textContent = `${emojis[cat] || ''} ${cat}`;
 function renderEvents() {
   // Очищаем контейнер
   eventsContainer.innerHTML = '';
+  const showOnlyFavorites = favoritesOnlyCheckbox.checked;
 
   // 1) Фильтруем по selectedCity + по фильтрам UI
   const now = new Date();
   const allFiltered = events
     .filter(e => e.city === selectedCity)
     .filter(e => (!cityFilter.value     || e.city     === cityFilter.value))
-    .filter(e => (!categoryFilter.value || e.category === categoryFilter.value));
+    .filter(e => (!categoryFilter.value || e.category === categoryFilter.value))
+    .filter(e => !showOnlyFavorites || savedEvents.includes(String(e.id)));
 
   // 2) Live search
   const query = searchInput.value.trim().toLowerCase();
   let filtered = allFiltered;
+
   if (query) {
     filtered = filtered.filter(e =>
       e.title.toLowerCase().includes(query) ||
@@ -459,6 +464,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     initEmbla();
   });
 
+  favoritesOnlyCheckbox.addEventListener('change', () => {
+  renderEvents();
+  initEmbla();
+});
+
   // 5.7 сортировка
   sortDateBtn.addEventListener('click', () => {
     sortByDate = !sortByDate;
@@ -466,6 +476,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     renderEvents();
     initEmbla();
   });
+
+  document.getElementById('favorites-only').addEventListener('change', (e) => {
+  showOnlyFavorites = e.target.checked;
+  renderEvents();
+  initEmbla();
+});
 
   // ─── 6. Показ/скрытие формы Add Event ─────────────────────────────
 

@@ -58,73 +58,91 @@
     </section>
 
     <!-- Events -->
-    <section id="events" class="events-section">
-      <h2>Events</h2>
-      <div class="filters">
-        <input
-    type="text"
-    id="search-input"
-    placeholder="Search events…"
-    class="search-input"
-  />
-        <select id="city-filter">
-          <option value="">All Cities</option>
-        </select>
-        <select id="category-filter">
-          <option value="">All Categories</option>
-        </select>
-        <button id="sort-date-btn" class="btn">Sort by Date</button>
-      </div>
-      <div class="carousel-wrapper">
-  <button class="carousel-btn prev-btn">‹</button>
-  <div class="embla">
-    <div class="embla__viewport">
-      <div class="embla__container" id="events-container">
-        <!-- Карточки будут рендериться сюда -->
+<section id="events" class="events-section">
+  <h2>Events</h2>
+  <div class="filters">
+    <input
+      type="text"
+      id="search-input"
+      placeholder="Search events…"
+      class="search-input"
+    />
+    <select id="city-filter">
+      <option value="">All Cities</option>
+    </select>
+    <select id="category-filter">
+      <option value="">All Categories</option>
+    </select>
+    <button id="sort-date-btn" class="btn">Sort by Date</button>
+
+    <!-- 🎯 Только один чекбокс -->
+    <label for="favorites-only" style="color: white; display: flex; align-items: center; gap: 0.3rem;">
+      <input type="checkbox" id="favorites-only" />
+      Favorites only
+    </label>
+  </div>
+
+  <div class="carousel-wrapper">
+    <button class="carousel-btn prev-btn">‹</button>
+    <div class="embla">
+      <div class="embla__viewport">
+        <div class="embla__container" id="events-container">
+          <!-- Карточки будут рендериться сюда -->
+        </div>
       </div>
     </div>
-  </div>
-  <button class="carousel-btn next-btn">›</button>
-</div>
-    </section>
-
-    <!-- 1) Сюда вставим кнопку «Add Event» -->
-  <div class="add-event-section" style="margin-top: 1rem; text-align: center;">
-    <button id="add-event-btn" class="btn">Add Event</button>
-  </div>
-
-    <!-- 2) Сюда вставим скрытую форму -->
-  <div id="event-form-container" class="event-form-container" style="display: none;">
-    <form id="event-form" class="event-form">
-      <h3>Add New Event</h3>
-      <label>
-        Title:<br/>
-        <input type="text" id="evt-title" required />
-      </label><br/><br/>
-      <label>
-        Description:<br/>
-        <textarea id="evt-desc" rows="3" required></textarea>
-      </label><br/><br/>
-      <label>
-        Date:<br/>
-        <input type="datetime-local" id="evt-date" required />
-      </label><br/><br/>
-      <label>
-        City:<br/>
-        <select id="evt-city" required>
-          <option value="">Select City</option>
-          <!-- Опции заполнятся из JS -->
-        </select>
-      </label><br/><br/>
-      <label>
-        Category:<br/>
-        <input type="text" id="evt-category" required placeholder="e.g. Music, Food, Culture" />
-      </label><br/><br/>
-      <button type="submit" class="btn">Submit Event</button>
-      <button type="button" id="evt-cancel-btn" class="btn" style="margin-left: 0.5rem; background:#999;">Cancel</button>
-    </form>
+    <button class="carousel-btn next-btn">›</button>
   </div>
 </section>
+
+<!-- 1) Кнопка Add Event -->
+<div class="add-event-section" style="margin-top: 1rem; text-align: center;">
+  <button id="add-event-btn" class="btn">Add Event</button>
+</div>
+
+<!-- 2) Форма -->
+<div id="event-form-container" class="event-form-container" style="display: none;">
+  <form id="event-form" class="event-form">
+    <h3>Add New Event</h3>
+    <label>
+      Title:<br />
+      <input type="text" id="evt-title" required />
+    </label><br /><br />
+    <label>
+      Description:<br />
+      <textarea id="evt-desc" rows="3" required></textarea>
+    </label><br /><br />
+    <label>
+      Date:<br />
+      <input type="datetime-local" id="evt-date" required />
+    </label><br /><br />
+    <label>
+      City:<br />
+      <select id="evt-city" required>
+        <option value="">Select City</option>
+        <!-- Заполняется из JS -->
+      </select>
+    </label><br /><br />
+    <label>
+      Category:<br />
+      <input
+        type="text"
+        id="evt-category"
+        required
+        placeholder="e.g. Music, Food, Culture"
+      />
+    </label><br /><br />
+    <button type="submit" class="btn">Submit Event</button>
+    <button
+      type="button"
+      id="evt-cancel-btn"
+      class="btn"
+      style="margin-left: 0.5rem; background: #999"
+    >
+      Cancel
+    </button>
+  </form>
+</div>
 
       <!-- Weather Section -->
 <section id="weather" class="weather-section">
