@@ -19,19 +19,19 @@
 <body>
 
   <!-- Splash Screen -->
-  <div id="splash">
-    <div class="splash-content">
-      <h1>VibeAtlas</h1>
-      <input
-        type="text"
-        id="splash-city-input"
-        placeholder="Enter your city"
-        value="Seoul"
-        autofocus
-      />
-      <button id="enter-btn" class="btn">Enter</button>
-    </div>
+<div id="splash">
+  <div class="splash-content">
+    <h1>VibeAtlas</h1>
+    <input
+      type="text"
+      id="splash-city-input"
+      placeholder="Enter your city"
+      value="Seoul"
+      autofocus
+    />
+    <button id="enter-btn" class="btn">Enter</button>
   </div>
+</div>
 
   <!-- Навигация -->
   <header class="nav-header">
@@ -43,6 +43,7 @@
           <li><a href="#about">About</a></li>
           <li><a href="#events">Events</a></li>
           <li><a href="#contact">Contact</a></li>
+          <li><button id="user-btn" class="btn">👤 User</button></li>
         </ul>
       </nav>
     </div>
@@ -176,12 +177,25 @@
       </p>
     </section>
 
-  </main>
+<!-- 👤 Панель пользователя -->
+<div id="user-panel" class="user-panel hidden">
+  <div class="user-panel-header">
+    <h3>User Panel</h3>
+    <button id="close-user-panel" class="btn" style="background:#999;">✖</button>
+  </div>
+  <div class="user-panel-tabs">
+    <button class="btn active" data-tab="saved-tab">★ Saved</button>
+    <button class="btn" data-tab="settings-tab">⚙️ Settings</button>
+  </div>
+  <div id="saved-tab" class="user-tab active">
+    <div id="saved-events-container"></div>
+  </div>
+  <div id="settings-tab" class="user-tab">
+    <p style="color:#ccc;">Settings coming soon…</p>
+  </div>
+</div>
 
-  <!-- Footer -->
-  <footer class="footer">© 2025 VibeAtlas • Built with 🧠 by Gorn Corp</footer>
-
-  <!-- Модальное окно события -->
+<!-- Модальное окно события -->
 <div id="event-modal" class="modal hidden">
   <div class="modal-content">
     <span id="modal-close" class="modal-close">&times;</span>
@@ -190,12 +204,13 @@
     <p><strong>Date:</strong> <span id="modal-date"></span></p>
     <p><strong>City:</strong> <span id="modal-city"></span></p>
     <p><strong>Category:</strong> <span id="modal-category"></span></p>
-    <div id="modal-map" style="margin-top: 1rem; height: 200px;"></div>
+    <div id="modal-map" style="height: 200px; margin-top: 1rem;"></div>
   </div>
 </div>
 
-  <script type="module" src="./script.js"></script>
-  <div id="map-container" class="hidden">
+<script type="module" src="./script.js"></script>
+
+<div id="map-container" class="hidden">
   <button id="map-close">×</button>
   <div id="map"></div>
 </div>
