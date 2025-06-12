@@ -38,7 +38,6 @@ let events         = [];
 let citiesList     = [];
 let selectedCity   = defaultCity;
 let cityCoordsMap  = {};
-let sortByDate     = false;
 let savedEvents    = JSON.parse(localStorage.getItem('savedEvents') || '[]');
 
 // ─── 3. DOM Elements ───────────────────────────────────────────────────────────
@@ -62,7 +61,6 @@ const evtCancelBtn      = document.getElementById('evt-cancel-btn');
 const searchInput       = document.getElementById('search-input');
 const cityFilter        = document.getElementById('city-filter');
 const categoryFilter    = document.getElementById('category-filter');
-const sortDateBtn       = document.getElementById('sort-date-btn');
 const eventsContainer   = document.getElementById('events-container');
 const favoritesOnlyCheckbox = document.getElementById('favorites-only');
 const tabSaved          = document.getElementById('saved-tab');
@@ -269,11 +267,9 @@ function renderEvents() {
     );
   }
 
-  if (sortByDate) {
-    filtered = filtered.sort((a, b) =>
-      new Date(a.date) - new Date(b.date)
-    );
-  }
+  filtered = filtered.sort((a, b) =>
+  new Date(a.date) - new Date(b.date)
+);
 
   const today    = filtered.filter(e => isSameDay(new Date(e.date), now));
   const tomorrow = filtered.filter(e => isSameDay(new Date(e.date), addDays(now, 1)));
@@ -330,6 +326,8 @@ function renderEvents() {
         document.getElementById('modal-city').textContent        = e.city;
         document.getElementById('modal-category').textContent    = e.category;
         document.getElementById('event-modal').classList.remove('hidden');
+        
+        loadEventWeather(e.city, e.date);
 
         setTimeout(() => {
           const lat = parseFloat(e.lat);
@@ -442,13 +440,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
 
   favoritesOnlyCheckbox.addEventListener('change', () => {
-    renderEvents();
-    initEmbla();
-  });
-
-  sortDateBtn.addEventListener('click', () => {
-    sortByDate = !sortByDate;
-    sortDateBtn.textContent = sortByDate ? 'Unsort' : 'Sort by Date';
     renderEvents();
     initEmbla();
   });
@@ -613,6 +604,51 @@ function renderSavedEvents() {
     });
     savedEventsContainer.appendChild(div);
   });
+}
+
+// Погода для события 
+async function loadEventWeather(city, dateStr) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffDays = Math.floor((date - now) / (1000 * 60 * 60 * 24));
+
+  const weatherEl = document.getElementById('modal-weather');
+
+  if (diffDays < 0) {
+    weatherEl.textContent = 'Event already happened.';
+    return;
+  }
+
+  if (diffDays > 4) {
+    // если слишком далеко — показываем фразу-заглушку
+    weatherEl.textContent = `Typical weather in ${city} in ${date.toLocaleString('en-US', { month: 'long' })} is often unpredictable.`;
+    return;
+  }
+
+  try {
+    const coords = cityCoordsMap?.[city];
+    if (!coords) {
+      weatherEl.textContent = 'No weather data (missing coordinates).';
+      return;
+    }
+
+    const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}&units=metric`);
+    const data = await res.json();
+
+    const targetDateStr = date.toISOString().split('T')[0];
+    const forecast = data.list.find(item => item.dt_txt.startsWith(targetDateStr));
+
+    if (forecast) {
+      const temp = forecast.main.temp.toFixed(1);
+      const desc = forecast.weather[0].description;
+      weatherEl.textContent = `Forecast: ${desc}, ${temp}°C`;
+    } else {
+      weatherEl.textContent = `No forecast available yet.`;
+    }
+  } catch (err) {
+    weatherEl.textContent = 'Weather unavailable.';
+    console.error('❌ Weather fetch failed', err);
+  }
 }
 
 // ─── 9. Map Logic ──────────────────────────────────────────────────────
