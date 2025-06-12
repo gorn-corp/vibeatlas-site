@@ -3,6 +3,8 @@ import Papa from 'papaparse';
 import EmblaCarousel from 'embla-carousel';
 import { fetchWeather, getTimeOfDay } from './weather.js';
 
+const API_KEY = '4fa7ffeee5d231eb59154b86e43cdbbe';
+
 // 1.1 Date helpers
 function isSameDay(d1, d2) {
   return d1.getFullYear() === d2.getFullYear()
@@ -326,14 +328,15 @@ function renderEvents() {
         document.getElementById('modal-city').textContent        = e.city;
         document.getElementById('modal-category').textContent    = e.category;
         document.getElementById('event-modal').classList.remove('hidden');
-        
-        loadEventWeather(e.city, e.date);
 
+          loadEventWeather(e.city, e.date);
+        
         setTimeout(() => {
           const lat = parseFloat(e.lat);
           const lon = parseFloat(e.lon);
 
           if (!isNaN(lat) && !isNaN(lon)) {
+            document.getElementById('modal-map').innerHTML = ''; // 👈 Очистка перед повторной инициализацией
             const modalMap = L.map('modal-map', {
               attributionControl: false,
               zoomControl: false,
@@ -606,26 +609,27 @@ function renderSavedEvents() {
   });
 }
 
-// Погода для события 
+// ─── Прогноз погоды для события (View Details) ─────────────────────────────
 async function loadEventWeather(city, dateStr) {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffDays = Math.floor((date - now) / (1000 * 60 * 60 * 24));
-
   const weatherEl = document.getElementById('modal-weather');
-
-  if (diffDays < 0) {
-    weatherEl.textContent = 'Event already happened.';
-    return;
-  }
-
-  if (diffDays > 4) {
-    // если слишком далеко — показываем фразу-заглушку
-    weatherEl.textContent = `Typical weather in ${city} in ${date.toLocaleString('en-US', { month: 'long' })} is often unpredictable.`;
-    return;
-  }
+  weatherEl.textContent = 'Loading weather forecast...';
 
   try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffDays = Math.floor((date - now) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      weatherEl.textContent = 'Event already happened.';
+      return;
+    }
+
+    if (diffDays > 4) {
+      // если слишком далеко — показываем фразу-заглушку
+      weatherEl.textContent = `Typical weather in ${city} in ${date.toLocaleString('en-US', { month: 'long' })} is often unpredictable.`;
+      return;
+    }
+
     const coords = cityCoordsMap?.[city];
     if (!coords) {
       weatherEl.textContent = 'No weather data (missing coordinates).';
@@ -635,19 +639,26 @@ async function loadEventWeather(city, dateStr) {
     const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${coords.lat}&lon=${coords.lon}&appid=${API_KEY}&units=metric`);
     const data = await res.json();
 
-    const targetDateStr = date.toISOString().split('T')[0];
-    const forecast = data.list.find(item => item.dt_txt.startsWith(targetDateStr));
+    const targetDate = date.toISOString().split('T')[0];
 
-    if (forecast) {
-      const temp = forecast.main.temp.toFixed(1);
-      const desc = forecast.weather[0].description;
+    const forecast = data.list.find(item => {
+      const [dateStr, timeStr] = item.dt_txt.split(' ');
+      return dateStr === targetDate && timeStr >= '12:00:00';
+    });
+
+    const fallback = data.list.find(item => item.dt_txt.startsWith(targetDate));
+    const forecastToUse = forecast || fallback;
+
+    if (forecastToUse) {
+      const temp = forecastToUse.main.temp.toFixed(1);
+      const desc = forecastToUse.weather[0].description;
       weatherEl.textContent = `Forecast: ${desc}, ${temp}°C`;
     } else {
       weatherEl.textContent = `No forecast available yet.`;
     }
   } catch (err) {
     weatherEl.textContent = 'Weather unavailable.';
-    console.error('❌ Weather fetch failed', err);
+    console.error('❌ Weather fetch failed:', err.message, err);
   }
 }
 
