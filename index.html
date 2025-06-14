@@ -3,64 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VibeAtlas</title>
+  <title data-i18n="title">VibeAtlas</title>
   <link rel="stylesheet" href="style.css" />
   <!-- Leaflet CSS -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
-<!-- Leaflet JS -->
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  defer
-></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 </head>
 <body>
 
   <!-- Splash Screen -->
-<div id="splash">
+  <div id="splash" class="splash-screen">
   <div class="splash-content">
-    <h1>VibeAtlas</h1>
-    <input
-      type="text"
-      id="splash-city-input"
-      placeholder="Enter your city"
-      value="Seoul"
-      autofocus
-    />
-    <button id="enter-btn" class="btn">Enter</button>
+    <h1 id="splash-title" data-i18n="splash_welcome">VibeAtlas</h1>
+    <input id="splash-city-input" placeholder="Your city..." data-i18n-placeholder="splash_placeholder" />
+    <button id="enter-btn" class="btn" data-i18n="splash_button">Enter</button>
   </div>
 </div>
 
   <!-- Навигация -->
   <header class="nav-header">
     <div class="container">
-      <div class="logo">🌍 VibeAtlas</div>
+      <div class="logo" data-i18n="title">🌍 VibeAtlas</div>
       <nav>
         <ul class="nav-list">
-          <li><a href="#hero">Home</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#events">Events</a></li>
-          <li><a href="#contact">Contact</a></li>
-          <li><button id="user-btn" class="btn">👤 User</button></li>
+          <li><a href="#hero" data-i18n="nav_home">Home</a></li>
+          <li><a href="#about" data-i18n="nav_about">About</a></li>
+          <li><a href="#events" data-i18n="nav_events">Events</a></li>
+          <li><a href="#contact" data-i18n="nav_contact">Contact</a></li>
+          <li><button id="user-btn" class="btn" data-i18n="nav_user">👤 User</button></li>
         </ul>
       </nav>
     </div>
   </header>
 
   <main>
-
-    <!-- Hero (твой слоган + кнопка) -->
+    <!-- Hero -->
     <section id="hero" class="hero">
-      <h1>VibeAtlas</h1>
-      <p>Holidays, festivals and events around the world — all in one place. Live the planet's rhythm.</p>
-      <button id="enter-hero-btn" class="btn">Get Started</button>
+      <h1 data-i18n="title">VibeAtlas</h1>
+      <p data-i18n="hero_tagline">Holidays, festivals and events around the world — all in one place. Live the planet's rhythm.</p>
+      <button id="enter-hero-btn" class="btn" data-i18n="get_started">Get Started</button>
     </section>
 
     <!-- Events -->
 <section id="events" class="events-section">
-  <h2>Events</h2>
+  <h2 data-i18n="nav_events">Events</h2>
   <div class="filters">
     <input
       type="text"
@@ -146,7 +133,7 @@
 
       <!-- Weather Section -->
 <section id="weather" class="weather-section">
-  <h2>Current Weather</h2>
+  <h2 data-i18n="current_weather">Current Weather</h2>
   <div class="weather-card">
     <div class="weather-info">
       <p>City: <span id="city-name">—</span></p>
@@ -159,7 +146,7 @@
 
     <!-- Contact / Subscribe -->
     <section id="contact" class="contact">
-      <h2>Subscribe for early access</h2>
+      <h2 data-i18n="subscribe_heading">Subscribe for Early Access</h2>
       <p>Be the first to know about new features and launches!</p>
       <form class="subscribe-form">
         <input type="email" placeholder="Your email" required />
@@ -169,29 +156,38 @@
 
     <!-- About -->
     <section id="about" class="about">
-      <h2>About VibeAtlas</h2>
+      <h2 data-i18n="nav_about">About VibeAtlas</h2>
       <p>
         <strong>VibeAtlas</strong> maps the world’s pulse in real time,
         connecting travelers and locals through shared experiences.
       </p>
     </section>
 
-<!-- 👤 Панель пользователя -->
+<!-- 👤 User Panel -->
 <div id="user-panel" class="user-panel hidden">
   <div class="user-panel-header">
     <h3>User Panel</h3>
     <button id="close-user-panel" class="btn" style="background:#999;">✖</button>
   </div>
+
+  <!-- Вкладки -->
   <div class="user-panel-tabs">
-    <button class="btn active" data-tab="saved-tab">★ Saved</button>
-    <button class="btn" data-tab="settings-tab">⚙️ Settings</button>
+    <button class="btn active" data-tab="saved-tab" data-i18n="saved_events">★ Saved</button>
+    <button class="btn" data-tab="settings-tab" data-i18n="settings">⚙️ Settings</button>
   </div>
+
+  <!-- Сохранённые события -->
   <div id="saved-tab" class="user-tab active">
     <div id="saved-events-container"></div>
   </div>
+
+  <!-- Настройки -->
   <div id="settings-tab" class="user-tab">
-    <p style="color:#ccc;">Settings coming soon…</p>
-  </div>
+  <label for="lang-switcher" style="color: white; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+    🌐 Language:
+  </label>
+  <select id="lang-switcher" class="lang-dropdown">
+  </select>
 </div>
 
 <!-- Модальное окно события -->

@@ -5,6 +5,53 @@ import { fetchWeather, getTimeOfDay } from './weather.js';
 
 const API_KEY = '4fa7ffeee5d231eb59154b86e43cdbbe';
 
+// ─── 1.0.1. Language Detection and i18n ──────────────────────────────────────────
+const supportedLanguages = ['en', 'fr', 'es', 'pt', 'ja'];
+let currentLang = navigator.language.slice(0, 2);
+if (!supportedLanguages.includes(currentLang)) currentLang = 'en';
+
+let translations = {};
+
+async function loadTranslations(lang = 'en') {
+  try {
+    const res = await fetch(`/locales/${lang}.json`);
+    translations = await res.json();
+    applyTranslations();
+  } catch (err) {
+    console.error(`❌ Failed to load translations for ${lang}`, err);
+  }
+}
+
+function t(key) {
+  return translations[key] || key;
+}
+
+function applyTranslations() {
+  // Обновление текста вручную
+  const splashTitle = document.getElementById('splash-title');
+  const enterBtn = document.getElementById('enter-btn');
+  const tabSavedBtn = document.querySelector('[data-tab="saved-tab"]');
+  const tabSettingsBtn = document.querySelector('[data-tab="settings-tab"]');
+
+  if (splashTitle) splashTitle.textContent = t('title');
+  if (enterBtn) enterBtn.textContent = t('get_started');
+  if (tabSavedBtn) tabSavedBtn.textContent = t('saved_events');
+  if (tabSettingsBtn) tabSettingsBtn.textContent = t('settings');
+
+  // Обновление всех элементов с data-i18n
+  const elements = document.querySelectorAll('[data-i18n]');
+  elements.forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const translation = translations[key];
+    if (translation) {
+      el.textContent = translation;
+    }
+  });
+
+  // Обновляем заголовок вкладки
+  document.title = t('title');
+}
+
 // 1.1 Date helpers
 function isSameDay(d1, d2) {
   return d1.getFullYear() === d2.getFullYear()
@@ -69,6 +116,7 @@ const tabSaved          = document.getElementById('saved-tab');
 const tabSettings       = document.getElementById('settings-tab');
 const tabSavedBtn       = document.querySelector('[data-tab="saved-tab"]');
 const tabSettingsBtn    = document.querySelector('[data-tab="settings-tab"]');
+const langSwitcher = document.getElementById('lang-switcher');
 
 // ─── 4. Core Functions ──────────────────────────────────────────────────────────
 
@@ -393,8 +441,86 @@ function toggleSaveEvent(id) {
 
 // ─── 5. Initialization and Event Listeners ──────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
+  // 5.0 Загружаем переводы
+  await loadTranslations(currentLang);
+
+  // 5.0.1 Populate language switcher
+  if (langSwitcher) {
+    supportedLanguages.forEach(lang => {
+      const opt = document.createElement('option');
+      opt.value = lang;
+      opt.textContent = lang.toUpperCase();
+      langSwitcher.appendChild(opt);
+    });
+    langSwitcher.value = currentLang;
+
+    langSwitcher.addEventListener('change', async () => {
+      currentLang = langSwitcher.value;
+      await loadTranslations(currentLang);
+      applyTranslations();
+    });
+  }
+
   await loadCities();
   await loadEvents();
+
+  // 5.0.2 ENTER на Splash input
+  splashCityInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      enterBtn.click();
+    }
+  });
+
+  // 5.0.3 Splash Enter Click
+  enterBtn.addEventListener('click', () => {
+    const city = splashCityInput.value.trim() || defaultCity;
+    selectedCity = city;
+    cityFilter.value = city;
+
+    splash.style.display = 'none';
+    update(city);
+    applyTimeTheme();
+    applyCityBackground(city);
+    populateFilters();
+    cityFilter.value = selectedCity;
+    renderEvents();
+    initEmbla();
+  });
+
+  // 5.0.4 Hero Get Started
+  heroEnterBtn.addEventListener('click', () => enterBtn.click());
+
+  // 5.0.5 Live-поиск
+  searchInput.addEventListener('input', () => {
+    renderEvents();
+    initEmbla();
+  });
+
+  // 5.0.6 Фильтр города
+  cityFilter.addEventListener('change', () => {
+    const city = cityFilter.value;
+    if (city) {
+      selectedCity = city;
+      update(city);
+      applyCityBackground(city);
+    }
+    renderEvents();
+    initEmbla();
+  });
+
+  // 5.0.7 Фильтр категории
+  categoryFilter.addEventListener('change', () => {
+    renderEvents();
+    initEmbla();
+  });
+
+  // 5.0.8 Показывать только избранное
+  favoritesOnlyCheckbox.addEventListener('change', () => {
+    showOnlyFavorites = favoritesOnlyCheckbox.checked;
+    renderEvents();
+    initEmbla();
+  });
 
   // 5.1 ENTER on Splash input
   splashCityInput.addEventListener('keydown', e => {
@@ -686,4 +812,5 @@ function showMap(lat = 35.0116, lon = 135.7681, label = "Kyoto") {
   L.marker([lat, lon]).addTo(mapInstance)
     .bindPopup(label)
     .openPopup();
+    
 }
