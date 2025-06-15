@@ -346,21 +346,29 @@ function renderEvents() {
       card.dataset.id = e.id;
 
       card.innerHTML = `
-        <h3>${e.title}</h3>
-        <p>${e.description}</p>
-        <p><small>${new Date(e.date).toLocaleString()}</small></p>
-        <p><em>${e.city} — ${e.category}</em></p>
-        <div class="event-actions">
-          <button class="btn details-btn">View Details</button>
-          <button class="btn map-btn">📍 Show on Map</button>
-          <button class="btn save-btn">${savedEvents.includes(String(e.id)) ? '★ Saved' : '☆ Save'}</button>
-        </div>
-        ${isSameDay(new Date(e.date), now) ? (() => {
+  <h3>${e.title}</h3>
+  <p>${e.description}</p>
+  <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
+  <p><em>${e.city} — ${e.category}</em></p>
+  <div class="event-actions">
+    <button class="btn details-btn">${t('view_details')}</button>
+    <button class="btn map-btn">${t('show_on_map')}</button>
+    <button class="btn save-btn">
+      ${savedEvents.includes(String(e.id)) ? t('saved_event') : t('save_event')}
+    </button>
+  </div>
+  ${
+    isSameDay(new Date(e.date), now)
+      ? (() => {
           const remaining = getTimeRemaining(e.date);
-          if (!remaining) return '<p class="countdown">⏰ Started</p>';
-          return `<p class="countdown">⏳ Starts in ${remaining.hours}h ${remaining.minutes}m</p>`;
-        })() : ''}
-      `;
+          if (!remaining) return `<p class="countdown">${t('event_started')}</p>`;
+          return `<p class="countdown">${t('starts_in')
+            .replace('{hours}', remaining.hours)
+            .replace('{minutes}', remaining.minutes)}</p>`;
+        })()
+      : ''
+  }
+`;
 
       const slide = document.createElement('div');
       slide.className = 'embla__slide';
@@ -369,39 +377,46 @@ function renderEvents() {
 
       // Event handlers
       const detailsBtn = card.querySelector('.details-btn');
-      detailsBtn.addEventListener('click', () => {
-        document.getElementById('modal-title').textContent       = e.title;
-        document.getElementById('modal-description').textContent = e.description;
-        document.getElementById('modal-date').textContent        = new Date(e.date).toLocaleString();
-        document.getElementById('modal-city').textContent        = e.city;
-        document.getElementById('modal-category').textContent    = e.category;
-        document.getElementById('event-modal').classList.remove('hidden');
+detailsBtn.addEventListener('click', () => {
+  document.getElementById('modal-title').textContent       = e.title;
+  document.getElementById('modal-description').textContent = e.description;
+  document.getElementById('modal-date').textContent     = `${t('modal_date')}: ${new Date(e.date).toLocaleString(currentLang)}`;
+  document.getElementById('modal-city').textContent     = `${t('modal_city')}: ${e.city}`;
+  document.getElementById('modal-category').textContent = `${t('modal_category')}: ${e.category}`;
+  document.getElementById('event-modal').classList.remove('hidden');
 
-          loadEventWeather(e.city, e.date);
-        
-        setTimeout(() => {
-          const lat = parseFloat(e.lat);
-          const lon = parseFloat(e.lon);
+  loadEventWeather(e.city, e.date);
 
-          if (!isNaN(lat) && !isNaN(lon)) {
-            document.getElementById('modal-map').innerHTML = ''; // 👈 Очистка перед повторной инициализацией
-            const modalMap = L.map('modal-map', {
-              attributionControl: false,
-              zoomControl: false,
-              dragging: false
-            }).setView([lat, lon], 13);
+  setTimeout(() => {
+    const lat = parseFloat(e.lat);
+    const lon = parseFloat(e.lon);
+    const mapEl = document.getElementById('modal-map');
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
-            L.marker([lat, lon]).addTo(modalMap).bindPopup(e.title).openPopup();
+    if (!isNaN(lat) && !isNaN(lon)) {
+      if (mapEl._leaflet_id) {
+        const oldMap = L.map(mapEl);
+        oldMap.remove();
+      }
 
-            document.getElementById('modal-close').addEventListener('click', () => {
-              modalMap.remove();
-            });
-          } else {
-            document.getElementById('modal-map').innerHTML = '<p style="color:gray;">No map available</p>';
-          }
-        }, 100);
-      });
+      mapEl.innerHTML = ''; // на всякий случай
+      const modalMap = L.map(mapEl, {
+        attributionControl: false,
+        zoomControl: false,
+        dragging: false
+      }).setView([lat, lon], 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
+      L.marker([lat, lon]).addTo(modalMap).bindPopup(e.title).openPopup();
+
+      const closeBtn = document.getElementById('modal-close');
+      closeBtn.addEventListener('click', () => {
+        modalMap.remove();
+      }, { once: true }); // удаляет только один раз
+    } else {
+      mapEl.innerHTML = `<p style="color:gray;">${t('no_map')}</p>`;
+    }
+  }, 100);
+});
 
       const mapBtn = card.querySelector('.map-btn');
       mapBtn.addEventListener('click', () => {
@@ -421,9 +436,9 @@ function renderEvents() {
     });
   }
 
-  renderGroup("Today",    today);
-  renderGroup("Tomorrow", tomorrow);
-  renderGroup("Upcoming", later);
+  renderGroup(t('event_today'), today);
+  renderGroup(t('event_tomorrow'), tomorrow);
+  renderGroup(t('event_upcoming'), later);
 }
 
 /** Toggle save/unsave event */
