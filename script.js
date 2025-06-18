@@ -6,7 +6,7 @@ import { fetchWeather, getTimeOfDay } from './weather.js';
 const API_KEY = '4fa7ffeee5d231eb59154b86e43cdbbe';
 
 // ─── 1.0.1. Language Detection and i18n ──────────────────────────────────────────
-const supportedLanguages = ['en', 'fr', 'es', 'pt', 'ja'];
+const supportedLanguages = ['ar', 'de', 'en', 'fr', 'es', 'it', 'pt', 'ja', 'zh'];
 let currentLang = navigator.language.slice(0, 2);
 if (!supportedLanguages.includes(currentLang)) currentLang = 'en';
 
@@ -26,56 +26,57 @@ function t(key) {
   return translations[key] || key;
 }
 
+// 🔧 Добавить до renderEvents (или до места, где вызывается isSameDay)
+function isSameDay(date1, date2) {
+  return date1.getFullYear() === date2.getFullYear()
+    && date1.getMonth() === date2.getMonth()
+    && date1.getDate() === date2.getDate();
+}
+
+// ─── 1.0.2 Apply Translations ───────────────────────────────────────────
 function applyTranslations() {
-  // Обновление текста вручную
-  const splashTitle = document.getElementById('splash-title');
-  const enterBtn = document.getElementById('enter-btn');
-  const tabSavedBtn = document.querySelector('[data-tab="saved-tab"]');
-  const tabSettingsBtn = document.querySelector('[data-tab="settings-tab"]');
-
-  if (splashTitle) splashTitle.textContent = t('title');
-  if (enterBtn) enterBtn.textContent = t('get_started');
-  if (tabSavedBtn) tabSavedBtn.textContent = t('saved_events');
-  if (tabSettingsBtn) tabSettingsBtn.textContent = t('settings');
-
-  // Обновление всех элементов с data-i18n
-  const elements = document.querySelectorAll('[data-i18n]');
-  elements.forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    const translation = translations[key];
-    if (translation) {
-      el.textContent = translation;
-    }
-  });
-
   // Обновляем заголовок вкладки
   document.title = t('title');
-}
 
-// 1.1 Date helpers
-function isSameDay(d1, d2) {
-  return d1.getFullYear() === d2.getFullYear()
-      && d1.getMonth() === d2.getMonth()
-      && d1.getDate() === d2.getDate();
-}
+  // Обновление вручную (если не попадает под data-i18n)
+  const splashTitle     = document.getElementById('splash-title');
+  const enterBtn        = document.getElementById('enter-btn');
+  const tabSavedBtn     = document.querySelector('[data-tab="saved-tab"]');
+  const tabSettingsBtn  = document.querySelector('[data-tab="settings-tab"]');
+  const heroBtn         = document.getElementById('enter-hero-btn');
 
-function addDays(date, days) {
-  const copy = new Date(date);
-  copy.setDate(copy.getDate() + days);
-  return copy;
-}
+  if (splashTitle) splashTitle.textContent = t('title');
+  if (enterBtn)    enterBtn.textContent    = t('get_started');
+  if (heroBtn)     heroBtn.textContent     = t('get_started');
+  if (tabSavedBtn)    tabSavedBtn.textContent = t('saved_events');
+  if (tabSettingsBtn) tabSettingsBtn.textContent = t('settings');
 
-function getTimeRemaining(dateStr) {
-  const eventDate = new Date(dateStr);
-  const now = new Date();
-  const diffMs = eventDate - now;
+  // Обновляем все элементы с data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const translation = t(key);
+    if (translation) el.textContent = translation;
+  });
 
-  if (diffMs <= 0) return null;
+  // Обновляем плейсхолдеры
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const translation = t(key);
+    if (translation) el.setAttribute('placeholder', translation);
+  });
 
-  const totalSec = Math.floor(diffMs / 1000);
-  const hours = Math.floor(totalSec / 3600);
-  const minutes = Math.floor((totalSec % 3600) / 60);
-  return { hours, minutes };
+  // Обновляем текст <option> внутри <select>
+  document.querySelectorAll('option[data-i18n]').forEach(opt => {
+    const key = opt.getAttribute('data-i18n');
+    const translation = t(key);
+    if (translation) opt.textContent = translation;
+  });
+
+  // Дополнительно: плейсхолдер для поля категории (если не помечен data-i18n-placeholder)
+  const catInput = document.getElementById('evt-category');
+  if (catInput && t('category_placeholder')) {
+    catInput.setAttribute('placeholder', t('category_placeholder'));
+  }
 }
 
 // ─── 2. Constants and Variables ───────────────────────────────────────────────
@@ -255,30 +256,43 @@ function applyCityBackground(city) {
 
 /** 4.4 Populate filters */
 function populateFilters() {
+  if (!cityFilter || !categoryFilter) {
+    console.warn('❌ Filters (city/category) not found.');
+    return;
+  }
+
+  // Собираем объединённый список городов из citiesList и events
+  const citiesFromConfig = citiesList.map(c => c.name.trim());
+  const citiesFromEvents = [...new Set(events.map(e => e.city))];
+  const allCities = Array.from(new Set([...citiesFromConfig, ...citiesFromEvents])).sort();
+
   // Cities filter
-  cityFilter.innerHTML = `<option value="">All Cities</option>`;
-  citiesList.forEach(c => {
+  cityFilter.innerHTML = `<option value="" data-i18n="all_cities">${t('all_cities')}</option>`;
+  allCities.forEach(name => {
     const opt = document.createElement('option');
-    opt.value = c.name;
-    opt.textContent = c.name;
+    opt.value = name;
+    opt.textContent = name;
     cityFilter.appendChild(opt);
   });
 
   // For Add Event form
-  evtCitySelect.innerHTML = `<option value="">Select City</option>`;
-  citiesList.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.name;
-    opt.textContent = c.name;
-    evtCitySelect.appendChild(opt);
-  });
+  if (evtCitySelect) {
+    evtCitySelect.innerHTML = `<option value="" data-i18n="select_city">${t('select_city')}</option>`;
+    allCities.forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      evtCitySelect.appendChild(opt);
+    });
+  }
 
   // Categories filter
   const catList = [...new Set(events.map(e => e.category).filter(Boolean))].sort();
-  categoryFilter.innerHTML = `<option value="">All Categories</option>`;
+  categoryFilter.innerHTML = `<option value="" data-i18n="all_categories">${t('all_categories')}</option>`;
   catList.forEach(cat => {
     const opt = document.createElement('option');
     opt.value = cat;
+
     const emojis = {
       Music: "🎵",
       Food: "🍜",
@@ -290,7 +304,8 @@ function populateFilters() {
       Festival: "🎪",
       Spiritual: "🧘"
     };
-    opt.textContent = `${emojis[cat] || ''} ${cat}`;
+
+    opt.textContent = `${emojis[cat] || ''} ${cat}`.trim();
     categoryFilter.appendChild(opt);
   });
 }
@@ -298,16 +313,19 @@ function populateFilters() {
 /** 4.5 Render events */
 function renderEvents() {
   eventsContainer.innerHTML = '';
-  const showOnlyFavorites = favoritesOnlyCheckbox.checked;
+  const showOnlyFavorites = favoritesOnlyCheckbox?.checked;
 
   const now = new Date();
+  // Вычисляем завтрашний день прямо здесь
+  const tomorrowDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
   const allFiltered = events
     .filter(e => e.city === selectedCity)
-    .filter(e => (!cityFilter.value     || e.city     === cityFilter.value))
-    .filter(e => (!categoryFilter.value || e.category === categoryFilter.value))
+    .filter(e => (!cityFilter?.value || e.city === cityFilter.value))
+    .filter(e => (!categoryFilter?.value || e.category === categoryFilter.value))
     .filter(e => !showOnlyFavorites || savedEvents.includes(String(e.id)));
 
-  const query = searchInput.value.trim().toLowerCase();
+  const query = searchInput?.value.trim().toLowerCase();
   let filtered = allFiltered;
 
   if (query) {
@@ -317,26 +335,24 @@ function renderEvents() {
     );
   }
 
-  filtered = filtered.sort((a, b) =>
-  new Date(a.date) - new Date(b.date)
-);
+  filtered = filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
 
   const today    = filtered.filter(e => isSameDay(new Date(e.date), now));
-  const tomorrow = filtered.filter(e => isSameDay(new Date(e.date), addDays(now, 1)));
-  const later    = filtered.filter(e => new Date(e.date) > addDays(now, 1));
+  const tomorrow = filtered.filter(e => isSameDay(new Date(e.date), tomorrowDate));
+  const later    = filtered.filter(e => new Date(e.date) > tomorrowDate);
 
   if (filtered.length === 0) {
     const msg = document.createElement('div');
     msg.className = 'no-events';
-    msg.textContent = 'No events found for this selection.';
+    msg.textContent = t('no_events_found');
     eventsContainer.appendChild(msg);
     return;
   }
 
-  function renderGroup(title, list) {
+  function renderGroup(titleKey, list) {
     if (list.length === 0) return;
     const titleEl = document.createElement('h3');
-    titleEl.textContent = title;
+    titleEl.textContent = t(titleKey);
     titleEl.style.margin = '1rem 0 0.5rem';
     eventsContainer.appendChild(titleEl);
 
@@ -345,31 +361,35 @@ function renderEvents() {
       card.className = 'event-card';
       card.dataset.id = e.id;
 
+      // inline вычисление оставшегося времени вместо getTimeRemaining
+      let countdownHtml = '';
+      if (isSameDay(new Date(e.date), now)) {
+        const diffMs = new Date(e.date) - now;
+        const hours   = Math.floor(diffMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        if (diffMs <= 0) {
+          countdownHtml = `<p class="countdown">${t('event_started')}</p>`;
+        } else {
+          countdownHtml = `<p class="countdown">${t('starts_in')
+            .replace('{hours}', hours)
+            .replace('{minutes}', minutes)}</p>`;
+        }
+      }
+
       card.innerHTML = `
   <h3>${e.title}</h3>
   <p>${e.description}</p>
   <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
   <p><em>${e.city} — ${e.category}</em></p>
   <div class="event-actions">
-    <button class="btn details-btn">${t('view_details')}</button>
-    <button class="btn map-btn">${t('show_on_map')}</button>
-    <button class="btn save-btn">
+    <button class="btn details-btn" data-i18n="view_details">${t('view_details')}</button>
+    <button class="btn map-btn" data-i18n="show_on_map">${t('show_on_map')}</button>
+    <button class="btn save-btn" data-i18n="${savedEvents.includes(String(e.id)) ? 'saved_event' : 'save_event'}">
       ${savedEvents.includes(String(e.id)) ? t('saved_event') : t('save_event')}
     </button>
   </div>
-  ${
-    isSameDay(new Date(e.date), now)
-      ? (() => {
-          const remaining = getTimeRemaining(e.date);
-          if (!remaining) return `<p class="countdown">${t('event_started')}</p>`;
-          return `<p class="countdown">${t('starts_in')
-            .replace('{hours}', remaining.hours)
-            .replace('{minutes}', remaining.minutes)}</p>`;
-        })()
-      : ''
-  }
+  ${countdownHtml}
 `;
-
       const slide = document.createElement('div');
       slide.className = 'embla__slide';
       slide.appendChild(card);
@@ -377,46 +397,41 @@ function renderEvents() {
 
       // Event handlers
       const detailsBtn = card.querySelector('.details-btn');
-detailsBtn.addEventListener('click', () => {
-  document.getElementById('modal-title').textContent       = e.title;
-  document.getElementById('modal-description').textContent = e.description;
-  document.getElementById('modal-date').textContent     = `${t('modal_date')}: ${new Date(e.date).toLocaleString(currentLang)}`;
-  document.getElementById('modal-city').textContent     = `${t('modal_city')}: ${e.city}`;
-  document.getElementById('modal-category').textContent = `${t('modal_category')}: ${e.category}`;
-  document.getElementById('event-modal').classList.remove('hidden');
+      detailsBtn.addEventListener('click', () => {
+        document.getElementById('modal-title').textContent       = e.title;
+        document.getElementById('modal-description').textContent = e.description;
+        document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(e.date).toLocaleString(currentLang)}`;
+        document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${e.city}`;
+        document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${e.category}`;
+        document.getElementById('event-modal').classList.remove('hidden');
 
-  loadEventWeather(e.city, e.date);
+        loadEventWeather(e.city, e.date);
 
-  setTimeout(() => {
-    const lat = parseFloat(e.lat);
-    const lon = parseFloat(e.lon);
-    const mapEl = document.getElementById('modal-map');
+        setTimeout(() => {
+          const lat = parseFloat(e.lat);
+          const lon = parseFloat(e.lon);
+          const mapEl = document.getElementById('modal-map');
 
-    if (!isNaN(lat) && !isNaN(lon)) {
-      if (mapEl._leaflet_id) {
-        const oldMap = L.map(mapEl);
-        oldMap.remove();
-      }
+          if (!isNaN(lat) && !isNaN(lon)) {
+            mapEl.innerHTML = '';
+            const modalMap = L.map(mapEl, {
+              attributionControl: false,
+              zoomControl: false,
+              dragging: false
+            }).setView([lat, lon], 13);
 
-      mapEl.innerHTML = ''; // на всякий случай
-      const modalMap = L.map(mapEl, {
-        attributionControl: false,
-        zoomControl: false,
-        dragging: false
-      }).setView([lat, lon], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
+            L.marker([lat, lon]).addTo(modalMap).bindPopup(e.title).openPopup();
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
-      L.marker([lat, lon]).addTo(modalMap).bindPopup(e.title).openPopup();
-
-      const closeBtn = document.getElementById('modal-close');
-      closeBtn.addEventListener('click', () => {
-        modalMap.remove();
-      }, { once: true }); // удаляет только один раз
-    } else {
-      mapEl.innerHTML = `<p style="color:gray;">${t('no_map')}</p>`;
-    }
-  }, 100);
-});
+            const closeBtn = document.getElementById('modal-close');
+            closeBtn.addEventListener('click', () => {
+              modalMap.remove();
+            }, { once: true });
+          } else {
+            mapEl.innerHTML = `<p style="color:gray;">${t('no_map')}</p>`;
+          }
+        }, 100);
+      });
 
       const mapBtn = card.querySelector('.map-btn');
       mapBtn.addEventListener('click', () => {
@@ -425,7 +440,7 @@ detailsBtn.addEventListener('click', () => {
         if (!isNaN(lat) && !isNaN(lon)) {
           showMap(lat, lon, e.title);
         } else {
-          alert("This event has no coordinates yet.");
+          alert(t('no_coordinates'));
         }
       });
 
@@ -436,9 +451,10 @@ detailsBtn.addEventListener('click', () => {
     });
   }
 
-  renderGroup(t('event_today'), today);
-  renderGroup(t('event_tomorrow'), tomorrow);
-  renderGroup(t('event_upcoming'), later);
+  renderGroup("event_today", today);
+  renderGroup("event_tomorrow", tomorrow);
+  renderGroup("event_upcoming", later);
+  applyTranslations();
 }
 
 /** Toggle save/unsave event */
@@ -456,10 +472,10 @@ function toggleSaveEvent(id) {
 
 // ─── 5. Initialization and Event Listeners ──────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
-  // 5.0 Загружаем переводы
+  // 5.0 Load Translations
   await loadTranslations(currentLang);
 
-  // 5.0.1 Populate language switcher
+  // 5.1 Language Switcher
   if (langSwitcher) {
     supportedLanguages.forEach(lang => {
       const opt = document.createElement('option');
@@ -476,201 +492,183 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // 5.2 Load core data
   await loadCities();
   await loadEvents();
 
-  // 5.0.2 ENTER на Splash input
-  splashCityInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      enterBtn.click();
-    }
-  });
+  // 5.3 Splash input and button
+  const splashInput = document.getElementById('splash-city-input');
+  const splashBtn   = document.getElementById('enter-btn');
 
-  // 5.0.3 Splash Enter Click
-  enterBtn.addEventListener('click', () => {
-    const city = splashCityInput.value.trim() || defaultCity;
-    selectedCity = city;
-    cityFilter.value = city;
+  if (splashInput && splashBtn) {
+    splashInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        splashBtn.click();
+      }
+    });
 
-    splash.style.display = 'none';
-    update(city);
-    applyTimeTheme();
-    applyCityBackground(city);
-    populateFilters();
-    cityFilter.value = selectedCity;
-    renderEvents();
-    initEmbla();
-  });
-
-  // 5.0.4 Hero Get Started
-  heroEnterBtn.addEventListener('click', () => enterBtn.click());
-
-  // 5.0.5 Live-поиск
-  searchInput.addEventListener('input', () => {
-    renderEvents();
-    initEmbla();
-  });
-
-  // 5.0.6 Фильтр города
-  cityFilter.addEventListener('change', () => {
-    const city = cityFilter.value;
-    if (city) {
+    splashBtn.addEventListener('click', () => {
+      const city = splashInput.value.trim() || defaultCity;
       selectedCity = city;
+      splash.style.display = 'none';
+
       update(city);
+      applyTimeTheme();
       applyCityBackground(city);
-    }
-    renderEvents();
-    initEmbla();
-  });
+      populateFilters();
+      cityFilter.value = selectedCity;
+      renderEvents();
+      initEmbla();
+    });
+  } else {
+    console.warn("❌ splashInput or splashBtn not found in DOM");
+  }
 
-  // 5.0.7 Фильтр категории
-  categoryFilter.addEventListener('change', () => {
-    renderEvents();
-    initEmbla();
-  });
+  // 5.4 Hero enter button
+  const heroEnterBtn = document.getElementById('enter-hero-btn');
+  if (heroEnterBtn && splashBtn) {
+    heroEnterBtn.addEventListener('click', () => splashBtn.click());
+  } else {
+    console.warn('⚠️ heroEnterBtn or splashBtn not found in DOM');
+  }
 
-  // 5.0.8 Показывать только избранное
-  favoritesOnlyCheckbox.addEventListener('change', () => {
-    showOnlyFavorites = favoritesOnlyCheckbox.checked;
-    renderEvents();
-    initEmbla();
-  });
+  // 5.5 Live search
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      renderEvents();
+      initEmbla();
+    });
+  }
 
-  // 5.1 ENTER on Splash input
-  splashCityInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      enterBtn.click();
-    }
-  });
+  // 5.6 City filter
+  if (cityFilter) {
+    cityFilter.addEventListener('change', () => {
+      const city = cityFilter.value;
+      if (city) {
+        selectedCity = city;
+        update(city);
+        applyCityBackground(city);
+      }
+      renderEvents();
+      initEmbla();
+    });
+  }
 
-  enterBtn.addEventListener('click', () => {
-    const city = splashCityInput.value.trim() || defaultCity;
-    selectedCity = city;
-    cityFilter.value = city;
+  // 5.7 Category filter
+  if (categoryFilter) {
+    categoryFilter.addEventListener('change', () => {
+      renderEvents();
+      initEmbla();
+    });
+  }
 
-    splash.style.display = 'none';
-    update(city);
-    applyTimeTheme();
-    applyCityBackground(city);
-    populateFilters();
-    cityFilter.value = selectedCity;
-    renderEvents();
-    initEmbla();
-  });
-
-  heroEnterBtn.addEventListener('click', () => enterBtn.click());
-
-  searchInput.addEventListener('input', () => {
-    renderEvents();
-    initEmbla();
-  });
-
-  cityFilter.addEventListener('change', () => {
-    const city = cityFilter.value;
-    if (city) {
-      selectedCity = city;
-      update(city);
-      applyCityBackground(city);
-    }
-    renderEvents();
-    initEmbla();
-  });
-
-  categoryFilter.addEventListener('change', () => {
-    renderEvents();
-    initEmbla();
-  });
-
-  favoritesOnlyCheckbox.addEventListener('change', () => {
-    renderEvents();
-    initEmbla();
-  });
+  // 5.8 Favorites checkbox
+  if (favoritesOnlyCheckbox) {
+    favoritesOnlyCheckbox.addEventListener('change', () => {
+      showOnlyFavorites = favoritesOnlyCheckbox.checked;
+      renderEvents();
+      initEmbla();
+    });
+  }
 });
 
 // ─── 6. Show/Hide Add Event Form ──────────────────────────────────────────────
-addEventBtn.addEventListener('click', () => {
-  eventFormContainer.style.display = 'flex';
-});
+if (addEventBtn && eventFormContainer) {
+  addEventBtn.addEventListener('click', () => {
+    eventFormContainer.style.display = 'flex';
+  });
+}
 
-evtCancelBtn.addEventListener('click', () => {
-  eventFormContainer.style.display = 'none';
-});
+if (evtCancelBtn && eventFormContainer) {
+  evtCancelBtn.addEventListener('click', () => {
+    eventFormContainer.style.display = 'none';
+  });
+}
 
-// On city selection for Add Event — set coordinates
-evtCitySelect.addEventListener('change', () => {
-  const selected = evtCitySelect.value;
-  const coords = cityCoordsMap?.[selected];
-  if (coords) {
-    evtCitySelect.dataset.lat = coords.lat;
-    evtCitySelect.dataset.lon = coords.lon;
-  } else {
-    delete evtCitySelect.dataset.lat;
-    delete evtCitySelect.dataset.lon;
-  }
-});
+if (evtCitySelect) {
+  evtCitySelect.addEventListener('change', () => {
+    const selected = evtCitySelect.value;
+    const coords = cityCoordsMap?.[selected];
+    if (coords) {
+      evtCitySelect.dataset.lat = coords.lat;
+      evtCitySelect.dataset.lon = coords.lon;
+    } else {
+      delete evtCitySelect.dataset.lat;
+      delete evtCitySelect.dataset.lon;
+    }
+  });
+}
 
 // ─── Submit New Event Form ──────────────────────────────────────────
-eventForm.addEventListener('submit', e => {
-  e.preventDefault();
+if (eventForm) {
+  eventForm.addEventListener('submit', e => {
+    e.preventDefault();
 
-  const title   = evtTitleInput.value.trim();
-  const desc    = evtDescInput.value.trim();
-  const dateVal = evtDateInput.value;
-  const cityVal = evtCitySelect.value.trim();
-  const catVal  = evtCategoryInput.value.trim();
+    const title   = evtTitleInput.value.trim();
+    const desc    = evtDescInput.value.trim();
+    const dateVal = evtDateInput.value;
+    const cityVal = evtCitySelect.value.trim();
+    const catVal  = evtCategoryInput.value.trim();
 
-  if (!title || !desc || !dateVal || !cityVal || !catVal) {
-    alert('Please fill in all fields.');
-    return;
-  }
+    if (!title || !desc || !dateVal || !cityVal || !catVal) {
+      alert('Please fill in all fields.');
+      return;
+    }
 
-  const newId = Date.now().toString();
+    const newId = Date.now().toString();
 
-  let lat, lon;
-  const coords = cityCoordsMap?.[cityVal];
-  if (coords) {
-    lat = parseFloat(coords.lat);
-    lon = parseFloat(coords.lon);
-  }
+    let lat, lon;
+    const coords = cityCoordsMap?.[cityVal];
+    if (coords) {
+      lat = parseFloat(coords.lat);
+      lon = parseFloat(coords.lon);
+    }
 
-  if (isNaN(lat) || isNaN(lon)) {
-    console.warn(`⚠️ No coordinates found for city "${cityVal}"`);
-    lat = undefined;
-    lon = undefined;
-  }
+    if (isNaN(lat) || isNaN(lon)) {
+      console.warn(`⚠️ No coordinates found for city "${cityVal}"`);
+      lat = undefined;
+      lon = undefined;
+    }
 
-  const newEvent = {
-    id:          newId,
-    city:        cityVal,
-    title:       title,
-    description: desc,
-    date:        dateVal,
-    category:    catVal,
-    lat,
-    lon
-  };
+    const newEvent = {
+      id:          newId,
+      city:        cityVal,
+      title:       title,
+      description: desc,
+      date:        dateVal,
+      category:    catVal,
+      lat,
+      lon
+    };
 
-  events.push(newEvent);
-  populateFilters();
-  renderEvents();
-  initEmbla();
+    events.push(newEvent);
+    populateFilters();
+    renderEvents();
 
-  eventFormContainer.style.display = 'none';
+    eventFormContainer.style.display = 'none';
 
-  evtTitleInput.value    = '';
-  evtDescInput.value     = '';
-  evtDateInput.value     = '';
-  evtCitySelect.value    = '';
-  evtCategoryInput.value = '';
-});
+    evtTitleInput.value    = '';
+    evtDescInput.value     = '';
+    evtDateInput.value     = '';
+    evtCitySelect.value    = '';
+    evtCategoryInput.value = '';
+  });
+} 
 
 // ─── 7. Embla Carousel Setup ───────────────────────────────────────────────
 let embla;
 function initEmbla() {
   const viewport = document.querySelector('.embla__viewport');
-  if (!viewport) return;
+  if (!viewport) {
+    console.warn('⚠️ Embla viewport not found.');
+    return;
+  }
+
+  // Удаляем старый инстанс если он уже есть
+  if (embla && embla.destroy) {
+    embla.destroy();
+  }
 
   embla = EmblaCarousel(viewport, {
     loop: false,
@@ -728,7 +726,7 @@ function renderSavedEvents() {
   const saved = events.filter(e => savedEvents.includes(String(e.id)));
 
   if (saved.length === 0) {
-    savedEventsContainer.innerHTML = '<p style="text-align:center;">No saved events yet.</p>';
+    savedEventsContainer.innerHTML = `<p style="text-align:center;">${t('no_saved_events')}</p>`;
     return;
   }
 
@@ -738,14 +736,29 @@ function renderSavedEvents() {
     div.innerHTML = `
       <h4>${e.title}</h4>
       <p>${e.description}</p>
-      <p><small>${new Date(e.date).toLocaleString()}</small></p>
+      <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
       <p><em>${e.city} — ${e.category}</em></p>
-      <button class="remove-saved-btn">Remove</button>
+      <div class="event-actions">
+        <button class="btn details-btn">${t('view_details')}</button>
+        <button class="btn remove-saved-btn">🗑 ${t('remove_saved')}</button>
+      </div>
     `;
+
+    div.querySelector('.details-btn').addEventListener('click', () => {
+      document.getElementById('modal-title').textContent       = e.title;
+      document.getElementById('modal-description').textContent = e.description;
+      document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(e.date).toLocaleString(currentLang)}`;
+      document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${e.city}`;
+      document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${e.category}`;
+      document.getElementById('event-modal').classList.remove('hidden');
+      loadEventWeather(e.city, e.date);
+    });
+
     div.querySelector('.remove-saved-btn').addEventListener('click', () => {
       toggleSaveEvent(e.id);
       renderSavedEvents();
     });
+
     savedEventsContainer.appendChild(div);
   });
 }
@@ -753,7 +766,7 @@ function renderSavedEvents() {
 // ─── Прогноз погоды для события (View Details) ─────────────────────────────
 async function loadEventWeather(city, dateStr) {
   const weatherEl = document.getElementById('modal-weather');
-  weatherEl.textContent = 'Loading weather forecast...';
+  weatherEl.textContent = t('modal_weather_loading');
 
   try {
     const date = new Date(dateStr);
@@ -761,19 +774,21 @@ async function loadEventWeather(city, dateStr) {
     const diffDays = Math.floor((date - now) / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      weatherEl.textContent = 'Event already happened.';
+      weatherEl.textContent = t('modal_weather_event_passed');
       return;
     }
 
     if (diffDays > 4) {
-      // если слишком далеко — показываем фразу-заглушку
-      weatherEl.textContent = `Typical weather in ${city} in ${date.toLocaleString('en-US', { month: 'long' })} is often unpredictable.`;
+      const month = date.toLocaleString(currentLang, { month: 'long' });
+      weatherEl.textContent = t('modal_weather_far_future')
+        .replace('{city}', city)
+        .replace('{month}', month);
       return;
     }
 
     const coords = cityCoordsMap?.[city];
     if (!coords) {
-      weatherEl.textContent = 'No weather data (missing coordinates).';
+      weatherEl.textContent = t('modal_weather_missing_coords');
       return;
     }
 
@@ -793,12 +808,14 @@ async function loadEventWeather(city, dateStr) {
     if (forecastToUse) {
       const temp = forecastToUse.main.temp.toFixed(1);
       const desc = forecastToUse.weather[0].description;
-      weatherEl.textContent = `Forecast: ${desc}, ${temp}°C`;
+      weatherEl.textContent = t('modal_weather_forecast')
+        .replace('{desc}', desc)
+        .replace('{temp}', temp);
     } else {
-      weatherEl.textContent = `No forecast available yet.`;
+      weatherEl.textContent = t('modal_weather_unavailable');
     }
   } catch (err) {
-    weatherEl.textContent = 'Weather unavailable.';
+    weatherEl.textContent = t('modal_weather_unavailable');
     console.error('❌ Weather fetch failed:', err.message, err);
   }
 }

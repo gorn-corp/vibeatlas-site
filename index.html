@@ -52,21 +52,21 @@
     <input
       type="text"
       id="search-input"
-      placeholder="Search events…"
       class="search-input"
+      placeholder=""
+      data-i18n-placeholder="search_placeholder"
     />
     <select id="city-filter">
-      <option value="">All Cities</option>
+      <option value="" data-i18n="all_cities">All Cities</option>
     </select>
     <select id="category-filter">
-      <option value="">All Categories</option>
+      <option value="" data-i18n="all_categories">All Categories</option>
     </select>
 
-    <!-- 🎯 Только один чекбокс -->
     <label for="favorites-only" style="color: white; display: flex; align-items: center; gap: 0.3rem;">
-      <input type="checkbox" id="favorites-only" />
-      Favorites only
-    </label>
+  <input type="checkbox" id="favorites-only" />
+  <span data-i18n="favorites_only">Favorites only</span>
+</label>
   </div>
 
   <div class="carousel-wrapper">
@@ -82,49 +82,56 @@
   </div>
 </section>
 
-<!-- 1) Кнопка Add Event -->
+<!-- Add Event Section -->
 <div class="add-event-section" style="margin-top: 1rem; text-align: center;">
-  <button id="add-event-btn" class="btn">Add Event</button>
+  <button id="add-event-btn" class="btn" data-i18n="add_event">Add Event</button>
 </div>
 
-<!-- 2) Форма -->
+<!-- Add Event Form -->
 <div id="event-form-container" class="event-form-container" style="display: none;">
   <form id="event-form" class="event-form">
-    <h3>Add New Event</h3>
+    <h3 data-i18n="add_event_title">Add New Event</h3>
+
     <label>
-      Title:<br />
-      <input type="text" id="evt-title" required />
+      <span data-i18n="title_label">Title</span><br />
+      <input type="text" id="evt-title" required placeholder="" data-i18n-placeholder="title_label" />
     </label><br /><br />
+
     <label>
-      Description:<br />
-      <textarea id="evt-desc" rows="3" required></textarea>
+      <span data-i18n="desc_label">Description</span><br />
+      <textarea id="evt-desc" rows="3" required placeholder="" data-i18n-placeholder="desc_label"></textarea>
     </label><br /><br />
+
     <label>
-      Date:<br />
+      <span data-i18n="date_label">Date</span><br />
       <input type="datetime-local" id="evt-date" required />
     </label><br /><br />
+
     <label>
-      City:<br />
+      <span data-i18n="city_label">City</span><br />
       <select id="evt-city" required>
-        <option value="">Select City</option>
-        <!-- Заполняется из JS -->
+        <option value="" data-i18n="select_city">Select City</option>
       </select>
     </label><br /><br />
+
     <label>
-      Category:<br />
+      <span data-i18n="category_label">Category</span><br />
       <input
         type="text"
         id="evt-category"
         required
-        placeholder="e.g. Music, Food, Culture"
+        placeholder=""
+        data-i18n-placeholder="category_placeholder"
       />
     </label><br /><br />
-    <button type="submit" class="btn">Submit Event</button>
+
+    <button type="submit" class="btn" data-i18n="submit_event">Submit Event</button>
     <button
       type="button"
       id="evt-cancel-btn"
       class="btn"
       style="margin-left: 0.5rem; background: #999"
+      data-i18n="cancel"
     >
       Cancel
     </button>
@@ -136,28 +143,28 @@
   <h2 data-i18n="section_weather">Current Weather</h2>
   <div class="weather-card">
     <div class="weather-info">
-      <p>City: <span id="city-name">—</span></p>
-      <p>Temp: <span id="temperature">—</span>°C</p>
-      <p>Condition: <span id="weather-condition">—</span></p>
-      <p>Day/Night: <span id="day-status">—</span></p>
+      <p><span data-i18n="weather_city">City:</span> <span id="city-name">—</span></p>
+      <p><span data-i18n="weather_temp">Temp:</span> <span id="temperature">—</span>°C</p>
+      <p><span data-i18n="weather_condition">Condition:</span> <span id="weather-condition">—</span></p>
+      <p><span data-i18n="weather_daynight">Day/Night:</span> <span id="day-status">—</span></p>
     </div>
   </div>
 </section>
 
     <!-- Contact / Subscribe -->
-    <section id="contact" class="contact">
-      <h2 data-i18n="subscribe_heading">Subscribe for Early Access</h2>
-      <p>Be the first to know about new features and launches!</p>
-      <form class="subscribe-form">
-        <input type="email" placeholder="Your email" required />
-        <button type="submit" class="btn">Subscribe</button>
-      </form>
-    </section>
+<section id="contact" class="contact">
+  <h2 data-i18n="subscribe_heading">Subscribe for Early Access</h2>
+  <p data-i18n="subscribe_text">Be the first to know about new features and launches!</p>
+  <form class="subscribe-form">
+    <input type="email" data-i18n-placeholder="email_placeholder" placeholder="Your email" required />
+    <button type="submit" class="btn" data-i18n="subscribe_button">Subscribe</button>
+  </form>
+</section>
 
     <!-- About -->
 <section id="about" class="about-section" style="text-align: center;">
   <h2 data-i18n="section_about">About VibeAtlas</h2>
-  <p data-i18n="section_about_text">
+  <p data-i18n="about_text">
     VibeAtlas maps the world’s pulse in real time, connecting travelers and locals through shared experiences.
   </p>
 </section>
@@ -165,7 +172,7 @@
 <!-- 👤 User Panel -->
 <div id="user-panel" class="user-panel hidden">
   <div class="user-panel-header">
-    <h3>User Panel</h3>
+    <h3 data-i18n="user_panel">User Panel</h3>
     <button id="close-user-panel" class="btn" style="background:#999;">✖</button>
   </div>
 
@@ -182,14 +189,14 @@
 
   <!-- Настройки -->
   <div id="settings-tab" class="user-tab">
-    <label for="lang-switcher" style="color: white; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+    <label for="lang-switcher" data-i18n="language_label"
+      style="color: white; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
       🌐 Language:
     </label>
     <select id="lang-switcher" class="lang-dropdown"></select>
   </div>
 </div>
 
-<!-- Модалка и карта ВНЕ user-panel -->
 <!-- Модальное окно события -->
 <div id="event-modal" class="modal hidden">
   <div class="modal-content">
