@@ -72,5 +72,11 @@
   "weather_city": "城市：",
   "weather_temp": "气温：",
   "weather_condition": "天气状况：",
-  "weather_daynight": "白天／夜晚："
+  "weather_daynight": "白天／夜晚：",
+  "login_title": "欢迎使用 VibeAtlas",
+  "login_name": "你的名字：",
+  "login_role": "你是谁？",
+  "login_role_user": "旅行者 / 探险者",
+  "login_role_organizer": "活动组织者",
+  "login_button": "开始"
 }

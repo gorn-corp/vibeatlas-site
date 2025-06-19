@@ -72,5 +72,11 @@
   "weather_city": "City:",
   "weather_temp": "Temp:",
   "weather_condition": "Condition:",
-  "weather_daynight": "Day/Night:"  
+  "weather_daynight": "Day/Night:",
+  "login_title": "Welcome to VibeAtlas",
+  "login_name": "Your Name:",
+  "login_role": "Who are you?",
+  "login_role_user": "Traveler / Explorer",
+  "login_role_organizer": "Event Organizer",
+  "login_button": "Start"  
 }

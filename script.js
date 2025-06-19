@@ -764,6 +764,51 @@ function renderSavedEvents() {
   });
 }
 
+// 8.1 ─── User Login Logic ───────────────────────────────────────────────
+const loginModal = document.getElementById('login-modal');
+const loginBtn = document.getElementById('user-btn');
+const heroBtn = document.getElementById('enter-hero-btn');
+const loginClose = document.getElementById('login-close');
+const loginSubmit = document.getElementById('login-submit');
+
+[loginBtn, heroBtn].forEach(btn => btn?.addEventListener('click', () => {
+  loginModal.classList.remove('hidden');
+}));
+
+loginClose?.addEventListener('click', () => {
+  loginModal.classList.add('hidden');
+});
+
+loginSubmit?.addEventListener('click', () => {
+  const name = document.getElementById('login-name').value.trim();
+  const role = document.getElementById('login-role').value;
+
+  if (!name) {
+    alert('Please enter your name.');
+    return;
+  }
+
+  const user = { name, role };
+  localStorage.setItem('vibe_user', JSON.stringify(user));
+  loginModal.classList.add('hidden');
+
+  // Update button
+  loginBtn.textContent = `👤 ${name}`;
+  applyTranslations();
+});
+
+// ─── 8.2 Restore User From Storage ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const storedUser = localStorage.getItem('vibe_user');
+  if (storedUser) {
+    const user = JSON.parse(storedUser);
+    const loginBtn = document.getElementById('user-btn');
+    if (user?.name && loginBtn) {
+      loginBtn.textContent = `👤 ${user.name}`;
+    }
+  }
+});
+
 // ─── Прогноз погоды для события (View Details) ─────────────────────────────
 async function loadEventWeather(city, dateStr) {
   const weatherEl = document.getElementById('modal-weather');

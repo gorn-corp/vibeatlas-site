@@ -72,5 +72,11 @@
   "weather_city": "都市：",
   "weather_temp": "気温：",
   "weather_condition": "天気：",
-  "weather_daynight": "昼／夜："
+  "weather_daynight": "昼／夜：",
+  "login_title": "VibeAtlasへようこそ",
+  "login_name": "あなたの名前：",
+  "login_role": "あなたは誰ですか？",
+  "login_role_user": "旅行者 / 探検者",
+  "login_role_organizer": "イベント主催者",
+  "login_button": "スタート"
 }

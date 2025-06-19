@@ -72,5 +72,11 @@
   "weather_city": "المدينة:",
   "weather_temp": "درجة الحرارة:",
   "weather_condition": "الحالة:",
-  "weather_daynight": "نهار/ليل:"
+  "weather_daynight": "نهار/ليل:",
+  "login_title": "مرحبًا بك في VibeAtlas",
+  "login_name": "اسمك:",
+  "login_role": "من أنت؟",
+  "login_role_user": "مسافر / مستكشف",
+  "login_role_organizer": "منظم فعاليات",
+  "login_button": "ابدأ"
 }

@@ -10,8 +10,8 @@
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 </head>
-<body>
 
+<body>
   <!-- Splash Screen -->
   <div id="splash" class="splash-screen">
   <div class="splash-content">
@@ -22,26 +22,30 @@
 </div>
 
   <!-- Навигация -->
-  <header class="nav-header">
-    <div class="container">
-      <div class="logo" data-i18n="title">🌍 VibeAtlas</div>
-      <nav>
-        <ul class="nav-list">
-          <li><a href="#hero" data-i18n="nav_home">Home</a></li>
-          <li><a href="#about" data-i18n="nav_about">About</a></li>
-          <li><a href="#events" data-i18n="nav_events">Events</a></li>
-          <li><a href="#contact" data-i18n="nav_contact">Contact</a></li>
-          <li><button id="user-btn" class="btn" data-i18n="nav_user">👤 User</button></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
+<header class="nav-header">
+  <div class="container">
+    <div class="logo" data-i18n="title">🌍 VibeAtlas</div>
+    <nav>
+      <ul class="nav-list">
+        <li><a href="#hero" data-i18n="nav_home">Home</a></li>
+        <li><a href="#about" data-i18n="nav_about">About</a></li>
+        <li><a href="#events" data-i18n="nav_events">Events</a></li>
+        <li><a href="#contact" data-i18n="nav_contact">Contact</a></li>
+        <li>
+          <button id="user-btn" class="btn" data-i18n="nav_user">👤 User</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
 
-  <main>
+<main>
   <!-- Hero -->
   <section id="hero" class="hero">
     <h1>VibeAtlas</h1>
-    <p data-i18n="hero_tagline">Holidays, festivals and events around the world — all in one place. Live the planet's rhythm.</p>
+    <p data-i18n="hero_tagline">
+      Holidays, festivals and events around the world — all in one place. Live the planet's rhythm.
+    </p>
     <button id="enter-hero-btn" class="btn" data-i18n="get_started">Get Started</button>
   </section>
 
@@ -219,6 +223,25 @@
 
 <!-- JS -->
 <script type="module" src="./script.js"></script>
+
+<!-- Login Modal -->
+<div id="login-modal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" id="login-close">&times;</span>
+    <h2 data-i18n="login_title">Welcome to VibeAtlas</h2>
+    <label data-i18n="login_name">Your Name:</label>
+    <input type="text" id="login-name" placeholder="e.g. Alex" />
+
+    <label data-i18n="login_role">Who are you?</label>
+    <select id="login-role">
+      <option value="user" data-i18n="login_role_user">Traveler / Explorer</option>
+      <option value="organizer" data-i18n="login_role_organizer">Event Organizer</option>
+    </select>
+
+    <button id="login-submit" class="btn" data-i18n="login_button">Start</button>
+  </div>
+</div>
+
 </body>
 
 </html>
