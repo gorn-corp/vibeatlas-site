@@ -352,9 +352,10 @@ function renderEvents() {
   function renderGroup(titleKey, list) {
     if (list.length === 0) return;
     const titleEl = document.createElement('h3');
-    titleEl.textContent = t(titleKey);
-    titleEl.style.margin = '1rem 0 0.5rem';
-    eventsContainer.appendChild(titleEl);
+titleEl.textContent = t(titleKey);
+titleEl.setAttribute('data-i18n', titleKey);
+titleEl.style.margin = '1rem 0 0.5rem';
+eventsContainer.appendChild(titleEl);
 
     list.forEach(e => {
       const card = document.createElement('div');
