@@ -78,5 +78,14 @@
   "login_role": "من أنت؟",
   "login_role_user": "مسافر / مستكشف",
   "login_role_organizer": "منظم فعاليات",
-  "login_button": "ابدأ"
+  "login_button": "ابدأ",
+  "register_title": "إنشاء حسابك",
+  "reg_firstname": "الاسم الأول:",
+  "reg_lastname": "اسم العائلة:",
+  "reg_email": "البريد الإلكتروني:",
+  "reg_phone": "رقم الهاتف:",
+  "reg_country": "البلد:",
+  "reg_city": "المدينة:",
+  "reg_avatar": "اختر صورة رمزية:",
+  "register_button": "ابدأ"
 }

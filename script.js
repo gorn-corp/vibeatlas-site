@@ -764,16 +764,22 @@ function renderSavedEvents() {
   });
 }
 
-// 8.1 ─── User Login Logic ───────────────────────────────────────────────
+// ─── 8.1 User Login Logic ───────────────────────────────────────────────
 const loginModal = document.getElementById('login-modal');
 const loginBtn = document.getElementById('user-btn');
-const heroBtn = document.getElementById('enter-hero-btn');
 const loginClose = document.getElementById('login-close');
 const loginSubmit = document.getElementById('login-submit');
+const guestPanel = document.getElementById('user-panel');
 
-[loginBtn, heroBtn].forEach(btn => btn?.addEventListener('click', () => {
-  loginModal.classList.remove('hidden');
-}));
+// 👤 "User" кнопка → либо login, либо user panel
+loginBtn?.addEventListener('click', () => {
+  const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+  if (!user || !user.name) {
+    loginModal.classList.remove('hidden');
+  } else {
+    guestPanel?.classList.remove('hidden');
+  }
+});
 
 loginClose?.addEventListener('click', () => {
   loginModal.classList.add('hidden');
@@ -782,22 +788,40 @@ loginClose?.addEventListener('click', () => {
 loginSubmit?.addEventListener('click', () => {
   const name = document.getElementById('login-name').value.trim();
   const role = document.getElementById('login-role').value;
+  const avatarInput = document.getElementById('login-avatar');
+  const file = avatarInput.files[0];
 
   if (!name) {
     alert('Please enter your name.');
     return;
   }
 
-  const user = { name, role };
-  localStorage.setItem('vibe_user', JSON.stringify(user));
-  loginModal.classList.add('hidden');
+  const saveUser = (avatarBase64 = '') => {
+    const user = { name, role, avatar: avatarBase64 };
+    localStorage.setItem('vibe_user', JSON.stringify(user));
+    loginModal.classList.add('hidden');
+    loginBtn.textContent = `👤 ${name}`;
+    applyTranslations();
 
-  // Update button
-  loginBtn.textContent = `👤 ${name}`;
-  applyTranslations();
+    const avatarEl = document.getElementById('user-avatar');
+    if (avatarEl && avatarBase64) {
+      avatarEl.src = avatarBase64;
+      avatarEl.classList.remove('hidden');
+    }
+  };
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      saveUser(reader.result);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    saveUser();
+  }
 });
 
-// ─── 8.2 Restore User From Storage ─────────────────────────────────────────────
+// 8.2 ─── Restore User From Storage ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const storedUser = localStorage.getItem('vibe_user');
   if (storedUser) {
@@ -806,6 +830,79 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user?.name && loginBtn) {
       loginBtn.textContent = `👤 ${user.name}`;
     }
+
+    // Показываем аватар в User Panel (если он есть)
+    if (user?.avatar) {
+      const avatarEl = document.getElementById('user-avatar');
+      if (avatarEl) {
+        avatarEl.src = user.avatar;
+        avatarEl.classList.remove('hidden');
+      }
+    }
+  }
+});
+
+// ─── 8.3 Full Registration Logic ─────────────────────────────────────────────
+const registerModal = document.getElementById('register-modal');
+const registerBtn = document.getElementById('enter-hero-btn');
+const registerClose = document.getElementById('register-close');
+const registerSubmit = document.getElementById('register-submit');
+
+registerBtn?.addEventListener('click', () => {
+  registerModal.classList.remove('hidden');
+});
+
+registerClose?.addEventListener('click', () => {
+  registerModal.classList.add('hidden');
+});
+
+registerSubmit?.addEventListener('click', () => {
+  const firstName = document.getElementById('reg-firstname').value.trim();
+  const lastName = document.getElementById('reg-lastname').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const country = document.getElementById('reg-country').value.trim();
+  const city = document.getElementById('reg-city').value.trim();
+  const avatarInput = document.getElementById('reg-avatar');
+  const file = avatarInput.files[0];
+
+  if (!firstName) {
+    alert('Please enter your name.');
+    return;
+  }
+
+  const saveUser = (avatarBase64 = '') => {
+    const user = {
+      name: firstName,
+      lastname: lastName,
+      email,
+      phone,
+      country,
+      city,
+      avatar: avatarBase64,
+      role: 'user'
+    };
+    localStorage.setItem('vibe_user', JSON.stringify(user));
+    registerModal.classList.add('hidden');
+    document.getElementById('user-btn').textContent = `👤 ${firstName}`;
+    applyTranslations();
+
+    // Обновить аватар в панели
+    const avatarEl = document.getElementById('user-avatar');
+    if (avatarEl && avatarBase64) {
+      avatarEl.src = avatarBase64;
+      avatarEl.classList.remove('hidden');
+    }
+  };
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      saveUser(reader.result);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    saveUser();
   }
 });
 

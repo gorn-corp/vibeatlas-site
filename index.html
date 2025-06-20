@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title data-i18n="title">VibeAtlas</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="stylesheet" href="style.css" />
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -175,6 +176,7 @@
 
 <!-- 👤 User Panel -->
 <div id="user-panel" class="user-panel hidden">
+  <img id="user-avatar" class="user-avatar hidden" src="" alt="Avatar" />
   <div class="user-panel-header">
     <h3 data-i18n="user_panel">User Panel</h3>
     <button id="close-user-panel" class="btn" style="background:#999;">✖</button>
@@ -229,16 +231,51 @@
   <div class="modal-content">
     <span class="close" id="login-close">&times;</span>
     <h2 data-i18n="login_title">Welcome to VibeAtlas</h2>
-    <label data-i18n="login_name">Your Name:</label>
+
+    <label for="login-name" data-i18n="login_name">Your Name:</label>
     <input type="text" id="login-name" placeholder="e.g. Alex" />
 
-    <label data-i18n="login_role">Who are you?</label>
+    <label for="login-role" data-i18n="login_role">Who are you?</label>
     <select id="login-role">
       <option value="user" data-i18n="login_role_user">Traveler / Explorer</option>
       <option value="organizer" data-i18n="login_role_organizer">Event Organizer</option>
     </select>
 
+    <label for="login-avatar" data-i18n="login_avatar">Choose Avatar:</label>
+    <input type="file" id="login-avatar" accept="image/*" />
+
     <button id="login-submit" class="btn" data-i18n="login_button">Start</button>
+  </div>
+</div>
+
+<!-- Registration Modal -->
+<div id="register-modal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" id="register-close">&times;</span>
+    <h2 data-i18n="register_title">Create Your Account</h2>
+
+    <label for="reg-firstname" data-i18n="reg_firstname">First Name:</label>
+    <input type="text" id="reg-firstname" required placeholder="Alex" />
+
+    <label for="reg-lastname" data-i18n="reg_lastname">Last Name:</label>
+    <input type="text" id="reg-lastname" placeholder="Silvermind" />
+
+    <label for="reg-email" data-i18n="reg_email">Email:</label>
+    <input type="email" id="reg-email" placeholder="you@example.com" />
+
+    <label for="reg-phone" data-i18n="reg_phone">Phone:</label>
+    <input type="tel" id="reg-phone" placeholder="+81 90 1234 5678" />
+
+    <label for="reg-country" data-i18n="reg_country">Country:</label>
+    <input type="text" id="reg-country" placeholder="Japan" />
+
+    <label for="reg-city" data-i18n="reg_city">City:</label>
+    <input type="text" id="reg-city" placeholder="Kyoto" />
+
+    <label for="reg-avatar" data-i18n="reg_avatar">Choose Avatar:</label>
+    <input type="file" id="reg-avatar" accept="image/*" />
+
+    <button id="register-submit" class="btn" data-i18n="register_button">Start</button>
   </div>
 </div>
 

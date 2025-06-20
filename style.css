@@ -762,3 +762,60 @@ select.lang-dropdown:hover {
   cursor: pointer;
   margin-top: 0.5rem;
 }
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+  object-fit: cover;
+}
+
+/* ─── Login Modal Form Styling ───────────────────────────────────── */
+.modal-content label {
+  display: block;
+  margin: 0.5rem 0 0.2rem;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="email"],
+.modal-content input[type="tel"],
+.modal-content input[type="file"],
+.modal-content select {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.8rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.modal-content input[type="file"] {
+  background: #f9f9f9;
+}
+
+.modal-content button.btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.modal-content button.btn:hover {
+  background: #ff8787;
+}
+
+.modal-content h2 {
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  text-align: center;
+  color: #333;
+}

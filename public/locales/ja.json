@@ -78,5 +78,14 @@
   "login_role": "あなたは誰ですか？",
   "login_role_user": "旅行者 / 探検者",
   "login_role_organizer": "イベント主催者",
-  "login_button": "スタート"
+  "login_button": "スタート",
+  "register_title": "アカウントを作成",
+  "reg_firstname": "名：",
+  "reg_lastname": "姓：",
+  "reg_email": "メール：",
+  "reg_phone": "電話番号：",
+  "reg_country": "国：",
+  "reg_city": "都市：",
+  "reg_avatar": "アバターを選択：",
+  "register_button": "開始"
 }

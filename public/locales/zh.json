@@ -78,5 +78,14 @@
   "login_role": "你是谁？",
   "login_role_user": "旅行者 / 探险者",
   "login_role_organizer": "活动组织者",
-  "login_button": "开始"
+  "login_button": "开始",
+  "register_title": "创建账户",
+  "reg_firstname": "名字：",
+  "reg_lastname": "姓氏：",
+  "reg_email": "邮箱：",
+  "reg_phone": "电话：",
+  "reg_country": "国家：",
+  "reg_city": "城市：",
+  "reg_avatar": "选择头像：",
+  "register_button": "开始"
 }

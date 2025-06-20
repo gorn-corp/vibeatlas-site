@@ -78,5 +78,14 @@
   "login_role": "Chi sei?",
   "login_role_user": "Viaggiatore / Esploratore",
   "login_role_organizer": "Organizzatore di eventi",
-  "login_button": "Inizia"
+  "login_button": "Inizia",
+  "register_title": "Crea il tuo account",
+  "reg_firstname": "Nome:",
+  "reg_lastname": "Cognome:",
+  "reg_email": "Email:",
+  "reg_phone": "Telefono:",
+  "reg_country": "Paese:",
+  "reg_city": "Città:",
+  "reg_avatar": "Scegli avatar:",
+  "register_button": "Inizia"
 }
