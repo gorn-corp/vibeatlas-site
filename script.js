@@ -574,6 +574,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+document.getElementById('toggle-profile-details')?.addEventListener('click', () => {
+  const details = document.getElementById('profile-extra');
+  if (details) {
+    details.style.display = details.style.display === 'none' ? 'block' : 'none';
+  }
+});
+
 // ─── 6. Show/Hide Add Event Form ──────────────────────────────────────────────
 if (addEventBtn && eventFormContainer) {
   addEventBtn.addEventListener('click', () => {
@@ -765,25 +772,7 @@ function renderSavedEvents() {
 }
 
 // ─── 8.1 User Login Logic ───────────────────────────────────────────────
-const loginModal = document.getElementById('login-modal');
-const loginBtn = document.getElementById('user-btn');
-const loginClose = document.getElementById('login-close');
 const loginSubmit = document.getElementById('login-submit');
-const guestPanel = document.getElementById('user-panel');
-
-// 👤 "User" кнопка → либо login, либо user panel
-loginBtn?.addEventListener('click', () => {
-  const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
-  if (!user || !user.name) {
-    loginModal.classList.remove('hidden');
-  } else {
-    guestPanel?.classList.remove('hidden');
-  }
-});
-
-loginClose?.addEventListener('click', () => {
-  loginModal.classList.add('hidden');
-});
 
 loginSubmit?.addEventListener('click', () => {
   const name = document.getElementById('login-name').value.trim();
@@ -791,13 +780,24 @@ loginSubmit?.addEventListener('click', () => {
   const avatarInput = document.getElementById('login-avatar');
   const file = avatarInput.files[0];
 
+  // Новые поля
+  const surname = (document.getElementById('login-surname') || {}).value?.trim() || '';
+  const email   = (document.getElementById('login-email') || {}).value?.trim() || '';
+  const country = (document.getElementById('login-country') || {}).value?.trim() || '';
+  const city    = (document.getElementById('login-city') || {}).value?.trim() || '';
+  const phone   = (document.getElementById('login-phone') || {}).value?.trim() || '';
+
   if (!name) {
     alert('Please enter your name.');
     return;
   }
 
   const saveUser = (avatarBase64 = '') => {
-    const user = { name, role, avatar: avatarBase64 };
+    const user = {
+      name, role, avatar: avatarBase64,
+      surname, email, country, city, phone
+    };
+
     localStorage.setItem('vibe_user', JSON.stringify(user));
     loginModal.classList.add('hidden');
     loginBtn.textContent = `👤 ${name}`;
@@ -808,6 +808,23 @@ loginSubmit?.addEventListener('click', () => {
       avatarEl.src = avatarBase64;
       avatarEl.classList.remove('hidden');
     }
+
+    // 👤 Обновление имени и роли в user panel
+    const nameEl = document.getElementById('user-name-display');
+    const roleEl = document.getElementById('user-role-display');
+    if (nameEl) nameEl.textContent = name;
+    if (roleEl) roleEl.textContent = role === 'organizer' ? 'Organizer' : 'User';
+
+    // 🧾 Дополнительные поля (если блоки существуют)
+    const emailEl   = document.getElementById('profile-email');
+    const countryEl = document.getElementById('profile-country');
+    const cityEl    = document.getElementById('profile-city');
+    const phoneEl   = document.getElementById('profile-phone');
+
+    if (emailEl)   emailEl.textContent = email;
+    if (countryEl) countryEl.textContent = country;
+    if (cityEl)    cityEl.textContent = city;
+    if (phoneEl)   phoneEl.textContent = phone;
   };
 
   if (file) {
@@ -821,7 +838,7 @@ loginSubmit?.addEventListener('click', () => {
   }
 });
 
-// 8.2 ─── Restore User From Storage ─────────────────────────────────────────────
+// ─── 8.2 Restore User From Storage ────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const storedUser = localStorage.getItem('vibe_user');
   if (storedUser) {
@@ -831,7 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
       loginBtn.textContent = `👤 ${user.name}`;
     }
 
-    // Показываем аватар в User Panel (если он есть)
+    // Показываем аватар
     if (user?.avatar) {
       const avatarEl = document.getElementById('user-avatar');
       if (avatarEl) {
@@ -839,6 +856,12 @@ document.addEventListener('DOMContentLoaded', () => {
         avatarEl.classList.remove('hidden');
       }
     }
+
+    // Показываем имя и роль в user panel
+    const nameEl = document.getElementById('user-name-display');
+    const roleEl = document.getElementById('user-role-display');
+    if (user?.name && nameEl) nameEl.textContent = user.name;
+    if (user?.role && roleEl) roleEl.textContent = user.role === 'organizer' ? 'Organizer' : 'User';
   }
 });
 
@@ -858,11 +881,11 @@ registerClose?.addEventListener('click', () => {
 
 registerSubmit?.addEventListener('click', () => {
   const firstName = document.getElementById('reg-firstname').value.trim();
-  const lastName = document.getElementById('reg-lastname').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const phone = document.getElementById('reg-phone').value.trim();
-  const country = document.getElementById('reg-country').value.trim();
-  const city = document.getElementById('reg-city').value.trim();
+  const lastName  = document.getElementById('reg-lastname').value.trim();
+  const email     = document.getElementById('reg-email').value.trim();
+  const phone     = document.getElementById('reg-phone').value.trim();
+  const country   = document.getElementById('reg-country').value.trim();
+  const city      = document.getElementById('reg-city').value.trim();
   const avatarInput = document.getElementById('reg-avatar');
   const file = avatarInput.files[0];
 
@@ -887,12 +910,29 @@ registerSubmit?.addEventListener('click', () => {
     document.getElementById('user-btn').textContent = `👤 ${firstName}`;
     applyTranslations();
 
-    // Обновить аватар в панели
+    // 👤 Имя и роль в панели
+    const nameEl = document.getElementById('user-name-display');
+    const roleEl = document.getElementById('user-role-display');
+    if (nameEl) nameEl.textContent = firstName;
+    if (roleEl) roleEl.textContent = 'User';
+
+    // 🖼️ Аватар
     const avatarEl = document.getElementById('user-avatar');
     if (avatarEl && avatarBase64) {
       avatarEl.src = avatarBase64;
       avatarEl.classList.remove('hidden');
     }
+
+    // 📋 Остальные поля профиля
+    const emailEl   = document.getElementById('profile-email');
+    const countryEl = document.getElementById('profile-country');
+    const cityEl    = document.getElementById('profile-city');
+    const phoneEl   = document.getElementById('profile-phone');
+
+    if (emailEl)   emailEl.textContent = email;
+    if (countryEl) countryEl.textContent = country;
+    if (cityEl)    cityEl.textContent = city;
+    if (phoneEl)   phoneEl.textContent = phone;
   };
 
   if (file) {

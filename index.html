@@ -182,6 +182,19 @@
     <button id="close-user-panel" class="btn" style="background:#999;">✖</button>
   </div>
 
+  <div class="user-info">
+    <p id="user-name-display"></p>
+    <p id="user-role-display" style="font-size: 0.85rem; color: #ccc;"></p>
+    <button id="toggle-profile-details" class="btn" style="margin-top: 0.5rem;">📄 Profile Details</button>
+  </div>
+
+  <div id="profile-extra" style="display: none; margin-top: 0.5rem; font-size: 0.85rem; color: white;">
+    <p>Email: <span id="profile-email">—</span></p>
+    <p>Country: <span id="profile-country">—</span></p>
+    <p>City: <span id="profile-city">—</span></p>
+    <p>Phone: <span id="profile-phone">—</span></p>
+  </div>
+
   <!-- Вкладки -->
   <div class="user-panel-tabs">
     <button class="btn active" data-tab="saved-tab" data-i18n="saved_events">★ Saved</button>
