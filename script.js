@@ -946,6 +946,47 @@ registerSubmit?.addEventListener('click', () => {
   }
 });
 
+// ─── 8.4 Edit Profile Modal ─────────────────────────────────────────────
+const editModal = document.getElementById('edit-profile-modal');
+const editBtn = document.getElementById('edit-profile-btn');
+const editClose = document.getElementById('edit-profile-close');
+const editSave = document.getElementById('edit-profile-save');
+
+editBtn?.addEventListener('click', () => {
+  const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+  document.getElementById('edit-name').value = user.name || '';
+  document.getElementById('edit-email').value = user.email || '';
+  document.getElementById('edit-phone').value = user.phone || '';
+  document.getElementById('edit-country').value = user.country || '';
+  document.getElementById('edit-city').value = user.city || '';
+  editModal.classList.remove('hidden');
+});
+
+editClose?.addEventListener('click', () => {
+  editModal.classList.add('hidden');
+});
+
+editSave?.addEventListener('click', () => {
+  const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+
+  user.name = document.getElementById('edit-name').value.trim();
+  user.email = document.getElementById('edit-email').value.trim();
+  user.phone = document.getElementById('edit-phone').value.trim();
+  user.country = document.getElementById('edit-country').value.trim();
+  user.city = document.getElementById('edit-city').value.trim();
+
+  localStorage.setItem('vibe_user', JSON.stringify(user));
+  editModal.classList.add('hidden');
+
+  // Обновить на странице
+  document.getElementById('user-btn').textContent = `👤 ${user.name}`;
+  document.getElementById('user-name-display').textContent = user.name;
+  document.getElementById('profile-email').textContent = user.email;
+  document.getElementById('profile-phone').textContent = user.phone;
+  document.getElementById('profile-country').textContent = user.country;
+  document.getElementById('profile-city').textContent = user.city;
+});
+
 // ─── Прогноз погоды для события (View Details) ─────────────────────────────
 async function loadEventWeather(city, dateStr) {
   const weatherEl = document.getElementById('modal-weather');

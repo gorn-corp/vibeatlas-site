@@ -186,6 +186,7 @@
     <p id="user-name-display"></p>
     <p id="user-role-display" style="font-size: 0.85rem; color: #ccc;"></p>
     <button id="toggle-profile-details" class="btn" style="margin-top: 0.5rem;">📄 Profile Details</button>
+    <button id="edit-profile-btn" class="btn" style="margin-top: 0.5rem;">✏️ Edit Profile</button>
   </div>
 
   <div id="profile-extra" style="display: none; margin-top: 0.5rem; font-size: 0.85rem; color: white;">
@@ -213,6 +214,31 @@
       🌐 Language:
     </label>
     <select id="lang-switcher" class="lang-dropdown"></select>
+  </div>
+</div>
+
+<!-- ✏️ Edit Profile Modal -->
+<div id="edit-profile-modal" class="modal hidden">
+  <div class="modal-content">
+    <span class="close" id="edit-profile-close">&times;</span>
+    <h2 data-i18n="edit_profile_title">Edit Profile</h2>
+
+    <label for="edit-name">First Name:</label>
+    <input type="text" id="edit-name" />
+
+    <label for="edit-email">Email:</label>
+    <input type="email" id="edit-email" />
+
+    <label for="edit-phone">Phone:</label>
+    <input type="tel" id="edit-phone" />
+
+    <label for="edit-country">Country:</label>
+    <input type="text" id="edit-country" />
+
+    <label for="edit-city">City:</label>
+    <input type="text" id="edit-city" />
+
+    <button id="edit-profile-save" class="btn">💾 Save Changes</button>
   </div>
 </div>
 

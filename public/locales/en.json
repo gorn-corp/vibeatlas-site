@@ -87,5 +87,6 @@
   "reg_country": "Country:",
   "reg_city": "City:",
   "reg_avatar": "Choose Avatar:",
-  "register_button": "Start"  
+  "register_button": "Start",
+  "edit_profile_title": "Edit Profile"  
 }
