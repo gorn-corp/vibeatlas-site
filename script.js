@@ -77,6 +77,10 @@ function applyTranslations() {
   if (catInput && t('category_placeholder')) {
     catInput.setAttribute('placeholder', t('category_placeholder'));
   }
+  // Обновляем отображение профиля после смены языка
+  if (typeof populateProfile === 'function') {
+    populateProfile();
+  }
 }
 
 // ─── 2. Constants and Variables ───────────────────────────────────────────────
@@ -316,14 +320,19 @@ function renderEvents() {
   const showOnlyFavorites = favoritesOnlyCheckbox?.checked;
 
   const now = new Date();
-  // Вычисляем завтрашний день прямо здесь
   const tomorrowDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+  const currentUser = JSON.parse(localStorage.getItem('vibe_user') || '{}');
 
   const allFiltered = events
     .filter(e => e.city === selectedCity)
     .filter(e => (!cityFilter?.value || e.city === cityFilter.value))
     .filter(e => (!categoryFilter?.value || e.category === categoryFilter.value))
-    .filter(e => !showOnlyFavorites || savedEvents.includes(String(e.id)));
+    .filter(e => !showOnlyFavorites || savedEvents.includes(String(e.id)))
+    .filter(e => {
+      if (!e.private) return true; // публичные события всем
+      return e.owner === currentUser?.email; // приватные — только владельцу
+    });
 
   const query = searchInput?.value.trim().toLowerCase();
   let filtered = allFiltered;
@@ -352,90 +361,103 @@ function renderEvents() {
   function renderGroup(titleKey, list) {
     if (list.length === 0) return;
     const titleEl = document.createElement('h3');
-titleEl.textContent = t(titleKey);
-titleEl.setAttribute('data-i18n', titleKey);
-titleEl.style.margin = '1rem 0 0.5rem';
-eventsContainer.appendChild(titleEl);
+    titleEl.textContent = t(titleKey);
+    titleEl.setAttribute('data-i18n', titleKey);
+    titleEl.style.margin = '1rem 0 0.5rem';
+    eventsContainer.appendChild(titleEl);
 
     list.forEach(e => {
       const card = document.createElement('div');
       card.className = 'event-card';
       card.dataset.id = e.id;
 
-      // inline вычисление оставшегося времени вместо getTimeRemaining
       let countdownHtml = '';
       if (isSameDay(new Date(e.date), now)) {
         const diffMs = new Date(e.date) - now;
         const hours   = Math.floor(diffMs / (1000 * 60 * 60));
         const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-        if (diffMs <= 0) {
-          countdownHtml = `<p class="countdown">${t('event_started')}</p>`;
-        } else {
-          countdownHtml = `<p class="countdown">${t('starts_in')
-            .replace('{hours}', hours)
-            .replace('{minutes}', minutes)}</p>`;
-        }
+        countdownHtml = diffMs <= 0
+          ? `<p class="countdown">${t('event_started')}</p>`
+          : `<p class="countdown">${t('starts_in').replace('{hours}', hours).replace('{minutes}', minutes)}</p>`;
       }
 
       card.innerHTML = `
-  <h3>${e.title}</h3>
-  <p>${e.description}</p>
-  <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
-  <p><em>${e.city} — ${e.category}</em></p>
-  <div class="event-actions">
-    <button class="btn details-btn" data-i18n="view_details">${t('view_details')}</button>
-    <button class="btn map-btn" data-i18n="show_on_map">${t('show_on_map')}</button>
-    <button class="btn save-btn" data-i18n="${savedEvents.includes(String(e.id)) ? 'saved_event' : 'save_event'}">
-      ${savedEvents.includes(String(e.id)) ? t('saved_event') : t('save_event')}
-    </button>
-  </div>
-  ${countdownHtml}
-`;
+        <h3>${e.title}</h3>
+        <p>${e.description}</p>
+        <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
+        <p><em>${e.city} — ${e.category}</em></p>
+        <div class="event-actions">
+          <button class="btn details-btn" data-i18n="view_details">${t('view_details')}</button>
+          <button class="btn map-btn" data-i18n="show_on_map">${t('show_on_map')}</button>
+          <button class="btn save-btn" data-i18n="${savedEvents.includes(String(e.id)) ? 'saved_event' : 'save_event'}">
+            ${savedEvents.includes(String(e.id)) ? t('saved_event') : t('save_event')}
+          </button>
+        </div>
+        ${countdownHtml}
+      `;
+
       const slide = document.createElement('div');
       slide.className = 'embla__slide';
       slide.appendChild(card);
       eventsContainer.appendChild(slide);
 
-      // Event handlers
       const detailsBtn = card.querySelector('.details-btn');
-      detailsBtn.addEventListener('click', () => {
-        document.getElementById('modal-title').textContent       = e.title;
-        document.getElementById('modal-description').textContent = e.description;
-        document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(e.date).toLocaleString(currentLang)}`;
-        document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${e.city}`;
-        document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${e.category}`;
-        document.getElementById('event-modal').classList.remove('hidden');
+      // ─── 4.5.1 Render events: Modal handler patch ─────────────────────────────
+document.addEventListener('click', e => {
+  if (e.target && e.target.classList.contains('details-btn')) {
+    const card = e.target.closest('.event-card');
+    if (!card) return;
+    const eventId = card.dataset.id;
+    const ev = events.find(ev => ev.id === eventId);
+    if (!ev) return;
 
-        loadEventWeather(e.city, e.date);
+    document.getElementById('modal-title').textContent       = ev.title;
+    document.getElementById('modal-description').textContent = ev.description;
+    document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(ev.date).toLocaleString(currentLang)}`;
+    document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${ev.city}`;
+    document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${ev.category}`;
 
-        setTimeout(() => {
-          const lat = parseFloat(e.lat);
-          const lon = parseFloat(e.lon);
-          const mapEl = document.getElementById('modal-map');
+    const modalAddr = document.getElementById('modal-address');
+    if (modalAddr) modalAddr.textContent = ev.address || '—';
 
-          if (!isNaN(lat) && !isNaN(lon)) {
-            mapEl.innerHTML = '';
-            const modalMap = L.map(mapEl, {
-              attributionControl: false,
-              zoomControl: false,
-              dragging: false
-            }).setView([lat, lon], 13);
+    const privBlock = document.getElementById('modal-private');
+    if (privBlock) privBlock.classList.add('hidden');
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
-            L.marker([lat, lon]).addTo(modalMap).bindPopup(e.title).openPopup();
+    document.getElementById('event-modal').classList.remove('hidden');
+    loadEventWeather(ev.city, ev.date);
 
-            const closeBtn = document.getElementById('modal-close');
-            closeBtn.addEventListener('click', () => {
-              modalMap.remove();
-            }, { once: true });
-          } else {
-            mapEl.innerHTML = `<p style="color:gray;">${t('no_map')}</p>`;
-          }
-        }, 100);
-      });
+    setTimeout(() => {
+      const lat = parseFloat(ev.lat);
+      const lon = parseFloat(ev.lon);
+      const mapEl = document.getElementById('modal-map');
+      if (!isNaN(lat) && !isNaN(lon)) {
+        mapEl.innerHTML = '';
+        if (window._modalMap) {
+          window._modalMap.remove();
+          window._modalMap = null;
+        }
+        const modalMap = L.map(mapEl, {
+          attributionControl: false,
+          zoomControl: false,
+          dragging: false
+        }).setView([lat, lon], 13);
 
-      const mapBtn = card.querySelector('.map-btn');
-      mapBtn.addEventListener('click', () => {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
+        L.marker([lat, lon]).addTo(modalMap).bindPopup(ev.title).openPopup();
+        window._modalMap = modalMap;
+
+        document.getElementById('modal-close').addEventListener('click', () => {
+          modalMap.remove();
+          window._modalMap = null;
+        }, { once: true });
+      } else {
+        mapEl.innerHTML = `<p style="color:gray;">${t('no_map')}</p>`;
+      }
+    }, 100);
+  }
+});
+
+      card.querySelector('.map-btn')?.addEventListener('click', () => {
         const lat = parseFloat(e.lat);
         const lon = parseFloat(e.lon);
         if (!isNaN(lat) && !isNaN(lon)) {
@@ -445,8 +467,7 @@ eventsContainer.appendChild(titleEl);
         }
       });
 
-      const saveBtn = card.querySelector('.save-btn');
-      saveBtn.addEventListener('click', () => {
+      card.querySelector('.save-btn')?.addEventListener('click', () => {
         toggleSaveEvent(e.id);
       });
     });
@@ -585,6 +606,48 @@ document.getElementById('toggle-profile-details')?.addEventListener('click', () 
 if (addEventBtn && eventFormContainer) {
   addEventBtn.addEventListener('click', () => {
     eventFormContainer.style.display = 'flex';
+
+    const closeTopBtn = document.getElementById('evt-close-top');
+    if (closeTopBtn && eventFormContainer) {
+      closeTopBtn.addEventListener('click', () => {
+        eventFormContainer.style.display = 'none';
+      });
+    }
+
+    const mapContainer = document.getElementById('map-container');
+    const addressInput = document.getElementById('evt-address');
+
+    if (!window._eventMap && mapContainer) {
+      const defaultLat = 35.0116;
+      const defaultLon = 135.7681;
+
+      window._eventMap = L.map(mapContainer).setView([defaultLat, defaultLon], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window._eventMap);
+
+      window._eventMarker = L.marker([defaultLat, defaultLon], { draggable: true }).addTo(window._eventMap);
+
+      const reverseGeocode = async (lat, lon) => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+          const data = await res.json();
+          if (data && data.display_name && addressInput) {
+            addressInput.value = data.display_name;
+          }
+        } catch (err) {
+          console.warn('Failed to fetch address:', err);
+        }
+      };
+
+      window._eventMarker.on('moveend', e => {
+        const { lat, lng } = e.target.getLatLng();
+        reverseGeocode(lat, lng);
+      });
+
+      window._eventMap.on('click', e => {
+        window._eventMarker.setLatLng(e.latlng);
+        reverseGeocode(e.latlng.lat, e.latlng.lng);
+      });
+    }
   });
 }
 
@@ -598,71 +661,200 @@ if (evtCitySelect) {
   evtCitySelect.addEventListener('change', () => {
     const selected = evtCitySelect.value;
     const coords = cityCoordsMap?.[selected];
-    if (coords) {
-      evtCitySelect.dataset.lat = coords.lat;
-      evtCitySelect.dataset.lon = coords.lon;
-    } else {
-      delete evtCitySelect.dataset.lat;
-      delete evtCitySelect.dataset.lon;
+    const addressInput = document.getElementById('evt-address');
+
+    if (coords && window._eventMap && window._eventMarker) {
+      const lat = parseFloat(coords.lat);
+      const lon = parseFloat(coords.lon);
+      window._eventMap.setView([lat, lon], 13);
+      window._eventMarker.setLatLng([lat, lon]);
+
+      // обновить адрес
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
+        .then(res => res.json())
+        .then(data => {
+          if (data?.display_name && addressInput) {
+            addressInput.value = data.display_name;
+          }
+        });
     }
   });
 }
 
-// ─── Submit New Event Form ──────────────────────────────────────────
+// ─── 6.1 Submit New Event Form ──────────────────────────────────────────────
+let pickedLat = null;
+let pickedLon = null;
+
 if (eventForm) {
   eventForm.addEventListener('submit', e => {
     e.preventDefault();
 
-    const title   = evtTitleInput.value.trim();
-    const desc    = evtDescInput.value.trim();
-    const dateVal = evtDateInput.value;
-    const cityVal = evtCitySelect.value.trim();
-    const catVal  = evtCategoryInput.value.trim();
+    const title       = evtTitleInput.value.trim();
+    const desc        = evtDescInput.value.trim();
+    const dateVal     = evtDateInput.value;
+    const cityVal     = evtCitySelect.value.trim();
+    const catVal      = evtCategoryInput.value.trim();
+    const address     = document.getElementById('evt-address')?.value.trim();
+    const isPrivate   = document.getElementById('evt-private')?.checked;
 
     if (!title || !desc || !dateVal || !cityVal || !catVal) {
       alert('Please fill in all fields.');
       return;
     }
 
+    const currentUser = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+    if (isPrivate && !currentUser?.email) {
+      alert('Please log in with email to create private events.');
+      return;
+    }
+
     const newId = Date.now().toString();
 
-    let lat, lon;
-    const coords = cityCoordsMap?.[cityVal];
-    if (coords) {
-      lat = parseFloat(coords.lat);
-      lon = parseFloat(coords.lon);
-    }
-
-    if (isNaN(lat) || isNaN(lon)) {
-      console.warn(`⚠️ No coordinates found for city "${cityVal}"`);
-      lat = undefined;
-      lon = undefined;
-    }
+    let lat = pickedLat;
+    let lon = pickedLon;
 
     const newEvent = {
-      id:          newId,
-      city:        cityVal,
-      title:       title,
+      id: newId,
+      city: cityVal,
+      title,
       description: desc,
-      date:        dateVal,
-      category:    catVal,
+      date: dateVal,
+      category: catVal,
+      address: address || '',
       lat,
-      lon
+      lon,
+      private: !!isPrivate,
+      owner: isPrivate ? currentUser.email : null
     };
 
     events.push(newEvent);
     populateFilters();
     renderEvents();
 
-    eventFormContainer.style.display = 'none';
+    if (isPrivate) {
+      saveMyEvent(newEvent);
+    }
 
-    evtTitleInput.value    = '';
-    evtDescInput.value     = '';
-    evtDateInput.value     = '';
-    evtCitySelect.value    = '';
+    eventFormContainer.style.display = 'none';
+    evtTitleInput.value = '';
+    evtDescInput.value = '';
+    evtDateInput.value = '';
+    evtCitySelect.value = '';
     evtCategoryInput.value = '';
+    const addrInput = document.getElementById('evt-address');
+    if (addrInput) addrInput.value = '';
+    const coordsEl = document.getElementById('picked-coords');
+    if (coordsEl) coordsEl.textContent = '—';
+    const privateCheckbox = document.getElementById('evt-private');
+    if (privateCheckbox) privateCheckbox.checked = false;
+    pickedLat = null;
+    pickedLon = null;
+
+    if (typeof renderMyEvents === 'function') {
+      renderMyEvents();
+    }
   });
-} 
+}
+
+// ─── 6.2 Pick on Map for Location ───────────────────────────────────────────
+const pickBtn = document.getElementById('pick-location');
+const pickedCoordsDisplay = document.getElementById('picked-coords');
+const addressInput = document.getElementById('evt-address');
+const userEventsKey = 'my_events';
+
+if (pickBtn && pickedCoordsDisplay && addressInput) {
+  pickBtn.addEventListener('click', () => {
+    if (document.getElementById('map-popup')) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'map-popup';
+    modal.style.position = 'fixed';
+    modal.style.top = 0;
+    modal.style.left = 0;
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.zIndex = 9999;
+    modal.style.background = '#000000b0';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    wrapper.style.width = '80%';
+    wrapper.style.height = '80%';
+    wrapper.style.borderRadius = '8px';
+    wrapper.style.overflow = 'hidden';
+    modal.appendChild(wrapper);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.style.position = 'absolute';
+    closeBtn.style.top = '10px';
+    closeBtn.style.right = '15px';
+    closeBtn.style.zIndex = 1000;
+    closeBtn.style.fontSize = '1.5rem';
+    closeBtn.style.background = 'transparent';
+    closeBtn.style.color = 'white';
+    closeBtn.style.border = 'none';
+    closeBtn.style.cursor = 'pointer';
+    wrapper.appendChild(closeBtn);
+
+    const mapDiv = document.createElement('div');
+    mapDiv.style.width = '100%';
+    mapDiv.style.height = '100%';
+    wrapper.appendChild(mapDiv);
+
+    document.body.appendChild(modal);
+
+    const map = L.map(mapDiv).setView([35.0116, 135.7681], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    let marker = null;
+    map.on('click', e => {
+      if (marker) map.removeLayer(marker);
+      marker = L.marker(e.latlng).addTo(map);
+
+      pickedLat = e.latlng.lat;
+      pickedLon = e.latlng.lng;
+
+      pickedCoordsDisplay.textContent = `${pickedLat.toFixed(4)}, ${pickedLon.toFixed(4)}`;
+      pickedCoordsDisplay.style.color = '#aaa';
+
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pickedLat}&lon=${pickedLon}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data?.display_name) {
+            addressInput.value = data.display_name;
+          }
+        })
+        .catch(err => console.warn('Geocoding error:', err));
+    });
+
+    closeBtn.addEventListener('click', () => {
+      map.remove();
+      modal.remove();
+    });
+
+    modal.addEventListener('click', e => {
+      if (e.target === modal) {
+        map.remove();
+        modal.remove();
+      }
+    });
+  });
+}
+
+// ─── Save My Events Separately ─────────────────────────────────────────────
+function saveMyEvent(eventObj) {
+  const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+  if (!user?.email) return;
+
+  const key = `${userEventsKey}_${user.email}`;
+  const list = JSON.parse(localStorage.getItem(key) || '[]');
+  list.push(eventObj);
+  localStorage.setItem(key, JSON.stringify(list));
+}
 
 // ─── 7. Embla Carousel Setup ───────────────────────────────────────────────
 let embla;
@@ -706,6 +898,10 @@ userBtn.addEventListener('click', () => {
   tabSavedBtn.classList.add('active');
   tabSettingsBtn.classList.remove('active');
   renderSavedEvents();
+  populateProfile();
+
+  // ✅ Загружаем данные профиля сразу
+  populateProfile();
 });
 
 closeUserPanel.addEventListener('click', () => {
@@ -725,6 +921,7 @@ tabSettingsBtn.addEventListener('click', () => {
   tabSaved.classList.remove('active');
   tabSettingsBtn.classList.add('active');
   tabSavedBtn.classList.remove('active');
+  populateProfile();
 });
 
 // Render saved events in user panel
@@ -741,9 +938,18 @@ function renderSavedEvents() {
   saved.forEach(e => {
     const div = document.createElement('div');
     div.className = 'event-card';
+
+    // 🔒 Значок приватности
+    const privateTag = e.private ? `<span class="private-tag">🔒 ${t('private_event')}</span><br />` : '';
+
+    // 🏠 Адрес
+    const addressBlock = e.address ? `<p><strong>${t('address_label')}:</strong> ${e.address}</p>` : '';
+
     div.innerHTML = `
+      ${privateTag}
       <h4>${e.title}</h4>
       <p>${e.description}</p>
+      ${addressBlock}
       <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
       <p><em>${e.city} — ${e.category}</em></p>
       <div class="event-actions">
@@ -861,7 +1067,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const nameEl = document.getElementById('user-name-display');
     const roleEl = document.getElementById('user-role-display');
     if (user?.name && nameEl) nameEl.textContent = user.name;
-    if (user?.role && roleEl) roleEl.textContent = user.role === 'organizer' ? 'Organizer' : 'User';
+    if (user?.role && roleEl) {
+  const roleKey = user.role === 'organizer' ? 'login_role_organizer' : 'login_role_user';
+  roleEl.textContent = t(roleKey);
+}
   }
 });
 
@@ -886,6 +1095,7 @@ registerSubmit?.addEventListener('click', () => {
   const phone     = document.getElementById('reg-phone').value.trim();
   const country   = document.getElementById('reg-country').value.trim();
   const city      = document.getElementById('reg-city').value.trim();
+  const role      = document.getElementById('reg-role')?.value || 'user';
   const avatarInput = document.getElementById('reg-avatar');
   const file = avatarInput.files[0];
 
@@ -903,7 +1113,7 @@ registerSubmit?.addEventListener('click', () => {
       country,
       city,
       avatar: avatarBase64,
-      role: 'user'
+      role
     };
     localStorage.setItem('vibe_user', JSON.stringify(user));
     registerModal.classList.add('hidden');
@@ -914,7 +1124,10 @@ registerSubmit?.addEventListener('click', () => {
     const nameEl = document.getElementById('user-name-display');
     const roleEl = document.getElementById('user-role-display');
     if (nameEl) nameEl.textContent = firstName;
-    if (roleEl) roleEl.textContent = 'User';
+    if (roleEl) {
+      const roleLabel = role === 'organizer' ? t('login_role_organizer') : t('login_role_user');
+      roleEl.textContent = roleLabel;
+    }
 
     // 🖼️ Аватар
     const avatarEl = document.getElementById('user-avatar');
@@ -985,6 +1198,105 @@ editSave?.addEventListener('click', () => {
   document.getElementById('profile-phone').textContent = user.phone;
   document.getElementById('profile-country').textContent = user.country;
   document.getElementById('profile-city').textContent = user.city;
+});
+
+// ─── 8.5 Render My Events in User Panel ─────────────────────────────────────
+function renderMyEvents() {
+  const myEventsContainer = document.getElementById('my-events-container');
+  if (!myEventsContainer) return;
+  myEventsContainer.innerHTML = '';
+
+  const currentUser = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+  const my = events.filter(e => e.private && e.owner === currentUser.email);
+
+  if (my.length === 0) {
+    myEventsContainer.innerHTML = `<p style="text-align:center;">${t('no_events_found')}</p>`;
+    return;
+  }
+
+  my.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'event-card';
+    div.innerHTML = `
+      <h4>${e.title}</h4>
+      <p>${e.description}</p>
+      <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
+      <p><em>${e.city} — ${e.category}</em></p>
+      <p><strong>${t('address_label')}:</strong> ${e.address || '—'}</p>
+      <div class="event-actions">
+        <button class="btn details-btn">${t('view_details')}</button>
+        <button class="btn edit-my-btn">✏️ ${t('edit')}</button>
+        <button class="btn delete-my-btn">🗑️ ${t('delete')}</button>
+      </div>
+    `;
+
+    div.querySelector('.details-btn').addEventListener('click', () => {
+      document.getElementById('modal-title').textContent       = e.title;
+      document.getElementById('modal-description').textContent = e.description;
+      document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(e.date).toLocaleString(currentLang)}`;
+      document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${e.city}`;
+      document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${e.category}`;
+      document.getElementById('modal-address').textContent     = e.address || '—';
+      document.getElementById('event-modal').classList.remove('hidden');
+      loadEventWeather(e.city, e.date);
+    });
+
+    div.querySelector('.delete-my-btn').addEventListener('click', () => {
+      const index = events.findIndex(ev => ev.id === e.id);
+      if (index !== -1) {
+        events.splice(index, 1);
+        renderMyEvents();
+        renderEvents();
+      }
+    });
+
+    myEventsContainer.appendChild(div);
+  });
+}
+
+// ─── 🧾 Populate User Profile Fields in User Panel ─────────────────────────
+function populateProfile() {
+  const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+  if (!user) return;
+
+  const nameEl = document.getElementById('user-name-display');
+  const roleEl = document.getElementById('user-role-display');
+  const emailEl = document.getElementById('profile-email');
+  const countryEl = document.getElementById('profile-country');
+  const cityEl = document.getElementById('profile-city');
+  const phoneEl = document.getElementById('profile-phone');
+
+  if (nameEl) nameEl.textContent = user.name || '';
+
+  // 🧠 Используем i18n-перевод
+  if (roleEl) {
+    const key = user.role === 'organizer' ? 'login_role_organizer' : 'login_role_user';
+    roleEl.textContent = t(key);
+  }
+
+  if (emailEl) emailEl.textContent = user.email || '—';
+  if (countryEl) countryEl.textContent = user.country || '—';
+  if (cityEl) cityEl.textContent = user.city || '—';
+  if (phoneEl) phoneEl.textContent = user.phone || '—';
+}
+
+// ─── 8.6 Tabs Logic ─────────────────────────────────────
+document.querySelectorAll('.user-panel-tabs .btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.user-panel-tabs .btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const target = btn.dataset.tab;
+    document.querySelectorAll('.user-tab').forEach(tab => tab.classList.add('hidden'));
+    document.getElementById(target)?.classList.remove('hidden');
+
+    if (target === 'my-tab') {
+      renderMyEvents();
+    } else if (target === 'saved-tab') {
+      renderSavedEvents();
+    } else if (target === 'settings-tab') {
+      populateProfile();
+    }
+  });
 });
 
 // ─── Прогноз погоды для события (View Details) ─────────────────────────────

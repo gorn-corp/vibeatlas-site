@@ -87,6 +87,26 @@
   "reg_country": "Pays :",
   "reg_city": "Ville :",
   "reg_avatar": "Choisir un avatar :",
-  "register_button": "Commencer"
+  "register_button": "Commencer",
+  "edit_profile_title": "Modifier le profil",
+  "private_event": "Événement privé",
+  "address_label": "Adresse",
+  "address_placeholder": "Rue, bâtiment, appartement...",
+  "set_on_map": "Définir l'emplacement sur la carte",
+  "map_hint": "Optionnel : Cliquez sur la carte pour définir un emplacement plus précis.",
+  "pick_on_map": "📍 Choisir sur la carte",
+  "modal_address": "Adresse :",
+  "modal_private": "🔒 Événement privé",
+  "user": "Utilisateur",
+  "organizer": "Organisateur",
+  "profile_details": "Détails du profil",
+  "edit_profile": "Modifier le profil",
+  "email": "E-mail",
+  "country": "Pays",
+  "city": "Ville",
+  "phone": "Téléphone",
+  "my_events": "Mes événements",
+  "edit": "Modifier",
+  "delete": "Supprimer",
+  "save_changes": "Enregistrer les modifications"
 }
-

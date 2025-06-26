@@ -94,8 +94,12 @@
 
 <!-- Add Event Form -->
 <div id="event-form-container" class="event-form-container" style="display: none;">
-  <form id="event-form" class="event-form">
-    <h3 data-i18n="add_event_title">Add New Event</h3>
+  <form id="event-form" class="event-form" style="max-height: 85vh; overflow-y: auto; position: relative; padding-right: 1rem;">
+    
+    <!-- ✖ Close -->
+    <button type="button" id="evt-close-top" class="btn" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #999;">✖</button>
+
+    <h3 data-i18n="add_event_title" style="padding-top: 2rem;">Add New Event</h3>
 
     <label>
       <span data-i18n="title_label">Title</span><br />
@@ -121,25 +125,26 @@
 
     <label>
       <span data-i18n="category_label">Category</span><br />
-      <input
-        type="text"
-        id="evt-category"
-        required
-        placeholder=""
-        data-i18n-placeholder="category_placeholder"
-      />
+      <input type="text" id="evt-category" required placeholder="" data-i18n-placeholder="category_placeholder" />
+    </label><br /><br />
+    
+    <!-- 📍 Address -->
+    <label>
+      <span data-i18n="address_label">Address</span><br />
+      <input type="text" id="evt-address" placeholder="e.g. 123 Main St" data-i18n-placeholder="address_placeholder" />
+    </label><br /><br />
+    <!-- 📍 Кнопка выбора точки на карте -->
+<button type="button" id="pick-location" class="btn" data-i18n="pick_on_map">📍 Pick on Map</button>
+<small id="picked-coords" style="display: block; margin-top: 0.25rem; color: #ccc;">—</small>
+
+    <!-- 🔒 Private Event checkbox -->
+    <label style="display: flex; align-items: center; gap: 0.5rem;">
+      <input type="checkbox" id="evt-private" />
+      <span data-i18n="private_event">🔒 Private Event</span>
     </label><br /><br />
 
     <button type="submit" class="btn" data-i18n="submit_event">Submit Event</button>
-    <button
-      type="button"
-      id="evt-cancel-btn"
-      class="btn"
-      style="margin-left: 0.5rem; background: #999"
-      data-i18n="cancel"
-    >
-      Cancel
-    </button>
+    <button type="button" id="evt-cancel-btn" class="btn" style="margin-left: 0.5rem; background: #999" data-i18n="cancel">Cancel</button>
   </form>
 </div>
 
@@ -185,27 +190,33 @@
   <div class="user-info">
     <p id="user-name-display"></p>
     <p id="user-role-display" style="font-size: 0.85rem; color: #ccc;"></p>
-    <button id="toggle-profile-details" class="btn" style="margin-top: 0.5rem;">📄 Profile Details</button>
-    <button id="edit-profile-btn" class="btn" style="margin-top: 0.5rem;">✏️ Edit Profile</button>
+    <button id="toggle-profile-details" class="btn" style="margin-top: 0.5rem;" data-i18n="profile_details">📄 Profile Details</button>
+    <button id="edit-profile-btn" class="btn" style="margin-top: 0.5rem;" data-i18n="edit_profile">✏️ Edit Profile</button>
   </div>
 
   <div id="profile-extra" style="display: none; margin-top: 0.5rem; font-size: 0.85rem; color: white;">
-    <p>Email: <span id="profile-email">—</span></p>
-    <p>Country: <span id="profile-country">—</span></p>
-    <p>City: <span id="profile-city">—</span></p>
-    <p>Phone: <span id="profile-phone">—</span></p>
+    <p><strong data-i18n="email">Email:</strong> <span id="profile-email">—</span></p>
+    <p><strong data-i18n="country">Country:</strong> <span id="profile-country">—</span></p>
+    <p><strong data-i18n="city">City:</strong> <span id="profile-city">—</span></p>
+    <p><strong data-i18n="phone">Phone:</strong> <span id="profile-phone">—</span></p>
   </div>
 
   <!-- Вкладки -->
-  <div class="user-panel-tabs">
-    <button class="btn active" data-tab="saved-tab" data-i18n="saved_events">★ Saved</button>
-    <button class="btn" data-tab="settings-tab" data-i18n="settings">⚙️ Settings</button>
-  </div>
+<div class="user-panel-tabs">
+  <button class="btn active" data-tab="saved-tab" data-i18n="saved_events">★ Saved</button>
+  <button class="btn" data-tab="my-tab" data-i18n="my_events">🧍 My Events</button>
+  <button class="btn" data-tab="settings-tab" data-i18n="settings">⚙️ Settings</button>
+</div>
 
-  <!-- Сохранённые события -->
-  <div id="saved-tab" class="user-tab active">
-    <div id="saved-events-container"></div>
-  </div>
+<!-- Сохранённые события -->
+<div id="saved-tab" class="user-tab active">
+  <div id="saved-events-container"></div>
+</div>
+
+<!-- Мои события -->
+<div id="my-tab" class="user-tab hidden">
+  <div id="my-events-container"></div>
+</div>
 
   <!-- Настройки -->
   <div id="settings-tab" class="user-tab">
@@ -223,22 +234,22 @@
     <span class="close" id="edit-profile-close">&times;</span>
     <h2 data-i18n="edit_profile_title">Edit Profile</h2>
 
-    <label for="edit-name">First Name:</label>
-    <input type="text" id="edit-name" />
+    <label for="edit-name" data-i18n="reg_firstname">First Name:</label>
+    <input type="text" id="edit-name" data-i18n-placeholder="reg_firstname" placeholder="First Name:" />
 
-    <label for="edit-email">Email:</label>
-    <input type="email" id="edit-email" />
+    <label for="edit-email" data-i18n="reg_email">Email:</label>
+    <input type="email" id="edit-email" data-i18n-placeholder="reg_email" placeholder="you@example.com" />
 
-    <label for="edit-phone">Phone:</label>
-    <input type="tel" id="edit-phone" />
+    <label for="edit-phone" data-i18n="reg_phone">Phone:</label>
+    <input type="tel" id="edit-phone" data-i18n-placeholder="reg_phone" placeholder="+81 90 1234 5678" />
 
-    <label for="edit-country">Country:</label>
-    <input type="text" id="edit-country" />
+    <label for="edit-country" data-i18n="reg_country">Country:</label>
+    <input type="text" id="edit-country" data-i18n-placeholder="reg_country" placeholder="Japan" />
 
-    <label for="edit-city">City:</label>
-    <input type="text" id="edit-city" />
+    <label for="edit-city" data-i18n="reg_city">City:</label>
+    <input type="text" id="edit-city" data-i18n-placeholder="reg_city" placeholder="Kyoto" />
 
-    <button id="edit-profile-save" class="btn">💾 Save Changes</button>
+    <button id="edit-profile-save" class="btn" data-i18n="save_changes">💾 Save Changes</button>
   </div>
 </div>
 
@@ -251,6 +262,7 @@
     <p><strong data-i18n="modal_date">Date:</strong> <span id="modal-date"></span></p>
     <p><strong data-i18n="modal_city">City:</strong> <span id="modal-city"></span></p>
     <p><strong data-i18n="modal_category">Category:</strong> <span id="modal-category"></span></p>
+    <p><strong data-i18n="modal_address">Address:</strong> <span id="modal-address">—</span></p>
     <p id="modal-weather" style="font-style: italic; color: #999;"></p>
     <div id="modal-map" style="height: 200px; margin-top: 1rem;"></div>
   </div>
@@ -310,6 +322,13 @@
 
     <label for="reg-city" data-i18n="reg_city">City:</label>
     <input type="text" id="reg-city" placeholder="Kyoto" />
+
+    <!-- ✅ Добавлено: выбор роли -->
+    <label for="reg-role" data-i18n="login_role">Who are you?</label>
+    <select id="reg-role">
+      <option value="user" data-i18n="login_role_user">Traveler / Explorer</option>
+      <option value="organizer" data-i18n="login_role_organizer">Event Organizer</option>
+    </select>
 
     <label for="reg-avatar" data-i18n="reg_avatar">Choose Avatar:</label>
     <input type="file" id="reg-avatar" accept="image/*" />
