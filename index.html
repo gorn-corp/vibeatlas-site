@@ -202,26 +202,19 @@
   </div>
 
   <!-- Вкладки -->
-<div class="user-panel-tabs">
-  <button class="btn active" data-tab="saved-tab" data-i18n="saved_events">★ Saved</button>
-  <button class="btn" data-tab="my-tab" data-i18n="my_events">🧍 My Events</button>
-  <button class="btn" data-tab="settings-tab" data-i18n="settings">⚙️ Settings</button>
-</div>
+  <div class="user-panel-tabs">
+    <button class="btn active" data-tab="my-tab" data-i18n="my_events">🧍 My Events</button>
+    <button class="btn" data-tab="settings-tab" data-i18n="settings">⚙️ Settings</button>
+  </div>
 
-<!-- Сохранённые события -->
-<div id="saved-tab" class="user-tab active">
-  <div id="saved-events-container"></div>
-</div>
-
-<!-- Мои события -->
-<div id="my-tab" class="user-tab hidden">
-  <div id="my-events-container"></div>
-</div>
+  <!-- Объединённая вкладка Мои события + Сохранённые -->
+  <div id="my-tab" class="user-tab active">
+    <div id="my-events-container"></div>
+  </div>
 
   <!-- Настройки -->
-  <div id="settings-tab" class="user-tab">
-    <label for="lang-switcher" data-i18n="language_label"
-      style="color: white; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+  <div id="settings-tab" class="user-tab hidden">
+    <label for="lang-switcher" data-i18n="language_label" style="color: white; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
       🌐 Language:
     </label>
     <select id="lang-switcher" class="lang-dropdown"></select>

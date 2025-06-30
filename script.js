@@ -117,11 +117,11 @@ const cityFilter        = document.getElementById('city-filter');
 const categoryFilter    = document.getElementById('category-filter');
 const eventsContainer   = document.getElementById('events-container');
 const favoritesOnlyCheckbox = document.getElementById('favorites-only');
-const tabSaved          = document.getElementById('saved-tab');
+const tabMyBtn          = document.querySelector('[data-tab="my-tab"]');
+const tabMy             = document.getElementById('my-tab');
 const tabSettings       = document.getElementById('settings-tab');
-const tabSavedBtn       = document.querySelector('[data-tab="saved-tab"]');
 const tabSettingsBtn    = document.querySelector('[data-tab="settings-tab"]');
-const langSwitcher = document.getElementById('lang-switcher');
+const langSwitcher      = document.getElementById('lang-switcher');
 
 // ─── 4. Core Functions ──────────────────────────────────────────────────────────
 
@@ -330,8 +330,8 @@ function renderEvents() {
     .filter(e => (!categoryFilter?.value || e.category === categoryFilter.value))
     .filter(e => !showOnlyFavorites || savedEvents.includes(String(e.id)))
     .filter(e => {
-      if (!e.private) return true; // публичные события всем
-      return e.owner === currentUser?.email; // приватные — только владельцу
+      if (!e.private) return true;
+      return e.owner === currentUser?.email;
     });
 
   const query = searchInput?.value.trim().toLowerCase();
@@ -371,6 +371,8 @@ function renderEvents() {
       card.className = 'event-card';
       card.dataset.id = e.id;
 
+      const privateTag = e.private ? `<span class="private-tag">🔒 ${t('private_event')}</span><br />` : '';
+
       let countdownHtml = '';
       if (isSameDay(new Date(e.date), now)) {
         const diffMs = new Date(e.date) - now;
@@ -381,7 +383,12 @@ function renderEvents() {
           : `<p class="countdown">${t('starts_in').replace('{hours}', hours).replace('{minutes}', minutes)}</p>`;
       }
 
+      const isSaved = savedEvents.includes(String(e.id));
+      const isMine = e.owner === currentUser.email;
+      const showSaveButton = !(isMine && e.private);
+
       card.innerHTML = `
+        ${privateTag}
         <h3>${e.title}</h3>
         <p>${e.description}</p>
         <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
@@ -389,9 +396,7 @@ function renderEvents() {
         <div class="event-actions">
           <button class="btn details-btn" data-i18n="view_details">${t('view_details')}</button>
           <button class="btn map-btn" data-i18n="show_on_map">${t('show_on_map')}</button>
-          <button class="btn save-btn" data-i18n="${savedEvents.includes(String(e.id)) ? 'saved_event' : 'save_event'}">
-            ${savedEvents.includes(String(e.id)) ? t('saved_event') : t('save_event')}
-          </button>
+          ${showSaveButton ? `<button class="btn save-btn" data-i18n="${isSaved ? 'saved_event' : 'save_event'}">${t(isSaved ? 'saved_event' : 'save_event')}</button>` : ''}
         </div>
         ${countdownHtml}
       `;
@@ -401,61 +406,53 @@ function renderEvents() {
       slide.appendChild(card);
       eventsContainer.appendChild(slide);
 
-      const detailsBtn = card.querySelector('.details-btn');
-      // ─── 4.5.1 Render events: Modal handler patch ─────────────────────────────
-document.addEventListener('click', e => {
-  if (e.target && e.target.classList.contains('details-btn')) {
-    const card = e.target.closest('.event-card');
-    if (!card) return;
-    const eventId = card.dataset.id;
-    const ev = events.find(ev => ev.id === eventId);
-    if (!ev) return;
+      card.querySelector('.details-btn')?.addEventListener('click', () => {
+        const ev = e;
+        document.getElementById('modal-title').textContent       = ev.title;
+        document.getElementById('modal-description').textContent = ev.description;
+        document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(ev.date).toLocaleString(currentLang)}`;
+        document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${ev.city}`;
+        document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${ev.category}`;
 
-    document.getElementById('modal-title').textContent       = ev.title;
-    document.getElementById('modal-description').textContent = ev.description;
-    document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(ev.date).toLocaleString(currentLang)}`;
-    document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${ev.city}`;
-    document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${ev.category}`;
+        const modalAddr = document.getElementById('modal-address');
+        if (modalAddr) modalAddr.textContent = ev.address || '—';
 
-    const modalAddr = document.getElementById('modal-address');
-    if (modalAddr) modalAddr.textContent = ev.address || '—';
+        const privBlock = document.getElementById('modal-private');
+        if (privBlock) privBlock.classList.add('hidden');
 
-    const privBlock = document.getElementById('modal-private');
-    if (privBlock) privBlock.classList.add('hidden');
+        document.getElementById('event-modal').classList.remove('hidden');
+        loadEventWeather(ev.city, ev.date);
 
-    document.getElementById('event-modal').classList.remove('hidden');
-    loadEventWeather(ev.city, ev.date);
+        setTimeout(() => {
+          const lat = parseFloat(ev.lat);
+          const lon = parseFloat(ev.lon);
+          const mapEl = document.getElementById('modal-map');
+          if (!isNaN(lat) && !isNaN(lon)) {
+            while (mapEl.firstChild) mapEl.removeChild(mapEl.firstChild);
+            if (mapEl._leaflet_id) mapEl._leaflet_id = null;
+            if (window._modalMap) {
+              window._modalMap.remove();
+              window._modalMap = null;
+            }
+            const modalMap = L.map(mapEl, {
+              attributionControl: false,
+              zoomControl: false,
+              dragging: false
+            }).setView([lat, lon], 13);
 
-    setTimeout(() => {
-      const lat = parseFloat(ev.lat);
-      const lon = parseFloat(ev.lon);
-      const mapEl = document.getElementById('modal-map');
-      if (!isNaN(lat) && !isNaN(lon)) {
-        mapEl.innerHTML = '';
-        if (window._modalMap) {
-          window._modalMap.remove();
-          window._modalMap = null;
-        }
-        const modalMap = L.map(mapEl, {
-          attributionControl: false,
-          zoomControl: false,
-          dragging: false
-        }).setView([lat, lon], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
+            L.marker([lat, lon]).addTo(modalMap).bindPopup(ev.title).openPopup();
+            window._modalMap = modalMap;
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
-        L.marker([lat, lon]).addTo(modalMap).bindPopup(ev.title).openPopup();
-        window._modalMap = modalMap;
-
-        document.getElementById('modal-close').addEventListener('click', () => {
-          modalMap.remove();
-          window._modalMap = null;
-        }, { once: true });
-      } else {
-        mapEl.innerHTML = `<p style="color:gray;">${t('no_map')}</p>`;
-      }
-    }, 100);
-  }
-});
+            document.getElementById('modal-close').addEventListener('click', () => {
+              modalMap.remove();
+              window._modalMap = null;
+            }, { once: true });
+          } else {
+            mapEl.innerHTML = `<p style="color:gray;">${t('no_map')}</p>`;
+          }
+        }, 100);
+      });
 
       card.querySelector('.map-btn')?.addEventListener('click', () => {
         const lat = parseFloat(e.lat);
@@ -681,9 +678,10 @@ if (evtCitySelect) {
   });
 }
 
-// ─── 6.1 Submit New Event Form ──────────────────────────────────────────────
+/** 6.1 Submit New Event Form */
 let pickedLat = null;
 let pickedLon = null;
+let editEventId = null;
 
 if (eventForm) {
   eventForm.addEventListener('submit', e => {
@@ -703,15 +701,12 @@ if (eventForm) {
     }
 
     const currentUser = JSON.parse(localStorage.getItem('vibe_user') || '{}');
-    if (isPrivate && !currentUser?.email) {
-      alert('Please log in with email to create private events.');
+    if (!currentUser?.email) {
+      alert('Please log in with email to create events.');
       return;
     }
 
-    const newId = Date.now().toString();
-
-    let lat = pickedLat;
-    let lon = pickedLon;
+    const newId = editEventId || Date.now().toString();
 
     const newEvent = {
       id: newId,
@@ -721,20 +716,33 @@ if (eventForm) {
       date: dateVal,
       category: catVal,
       address: address || '',
-      lat,
-      lon,
+      lat: pickedLat,
+      lon: pickedLon,
       private: !!isPrivate,
-      owner: isPrivate ? currentUser.email : null
+      owner: currentUser.email
     };
 
-    events.push(newEvent);
+    if (editEventId) {
+      const index = events.findIndex(ev => ev.id === editEventId);
+      if (index !== -1) events[index] = newEvent;
+      editEventId = null;
+    } else {
+      events.push(newEvent);
+
+      const key = `my_events_${currentUser.email}`;
+      const myEvents = JSON.parse(localStorage.getItem(key) || '[]');
+      myEvents.push(newEvent);
+      localStorage.setItem(key, JSON.stringify(myEvents));
+    }
+
+    // Обновляем фильтры и рендерим
     populateFilters();
     renderEvents();
 
-    if (isPrivate) {
-      saveMyEvent(newEvent);
-    }
+    // Обновляем сразу My Events
+    if (typeof renderMyEvents === 'function') renderMyEvents();
 
+    // Закрываем форму и очищаем поля
     eventFormContainer.style.display = 'none';
     evtTitleInput.value = '';
     evtDescInput.value = '';
@@ -749,10 +757,6 @@ if (eventForm) {
     if (privateCheckbox) privateCheckbox.checked = false;
     pickedLat = null;
     pickedLon = null;
-
-    if (typeof renderMyEvents === 'function') {
-      renderMyEvents();
-    }
   });
 }
 
@@ -845,7 +849,7 @@ if (pickBtn && pickedCoordsDisplay && addressInput) {
   });
 }
 
-// ─── Save My Events Separately ─────────────────────────────────────────────
+// ─── 6.3 Save My Events Separately ─────────────────────────────────────────────
 function saveMyEvent(eventObj) {
   const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
   if (!user?.email) return;
@@ -893,14 +897,11 @@ document.getElementById('modal-close').addEventListener('click', () => {
 // ─── 8. User Panel: Open/Close and Tabs ──────────────────────────────────
 userBtn.addEventListener('click', () => {
   userPanel.classList.add('open');
-  tabSaved.classList.add('active');
+  tabMy.classList.add('active');
   tabSettings.classList.remove('active');
-  tabSavedBtn.classList.add('active');
+  tabMyBtn.classList.add('active');
   tabSettingsBtn.classList.remove('active');
-  renderSavedEvents();
-  populateProfile();
-
-  // ✅ Загружаем данные профиля сразу
+  renderMyEvents();
   populateProfile();
 });
 
@@ -908,74 +909,21 @@ closeUserPanel.addEventListener('click', () => {
   userPanel.classList.remove('open');
 });
 
-tabSavedBtn.addEventListener('click', () => {
-  tabSaved.classList.add('active');
+tabMyBtn.addEventListener('click', () => {
+  tabMy.classList.add('active');
   tabSettings.classList.remove('active');
-  tabSavedBtn.classList.add('active');
+  tabMyBtn.classList.add('active');
   tabSettingsBtn.classList.remove('active');
-  renderSavedEvents();
+  renderMyEvents();
 });
 
 tabSettingsBtn.addEventListener('click', () => {
   tabSettings.classList.add('active');
-  tabSaved.classList.remove('active');
+  tabMy.classList.remove('active');
   tabSettingsBtn.classList.add('active');
-  tabSavedBtn.classList.remove('active');
+  tabMyBtn.classList.remove('active');
   populateProfile();
 });
-
-// Render saved events in user panel
-function renderSavedEvents() {
-  savedEventsContainer.innerHTML = '';
-
-  const saved = events.filter(e => savedEvents.includes(String(e.id)));
-
-  if (saved.length === 0) {
-    savedEventsContainer.innerHTML = `<p style="text-align:center;">${t('no_saved_events')}</p>`;
-    return;
-  }
-
-  saved.forEach(e => {
-    const div = document.createElement('div');
-    div.className = 'event-card';
-
-    // 🔒 Значок приватности
-    const privateTag = e.private ? `<span class="private-tag">🔒 ${t('private_event')}</span><br />` : '';
-
-    // 🏠 Адрес
-    const addressBlock = e.address ? `<p><strong>${t('address_label')}:</strong> ${e.address}</p>` : '';
-
-    div.innerHTML = `
-      ${privateTag}
-      <h4>${e.title}</h4>
-      <p>${e.description}</p>
-      ${addressBlock}
-      <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
-      <p><em>${e.city} — ${e.category}</em></p>
-      <div class="event-actions">
-        <button class="btn details-btn">${t('view_details')}</button>
-        <button class="btn remove-saved-btn">🗑 ${t('remove_saved')}</button>
-      </div>
-    `;
-
-    div.querySelector('.details-btn').addEventListener('click', () => {
-      document.getElementById('modal-title').textContent       = e.title;
-      document.getElementById('modal-description').textContent = e.description;
-      document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(e.date).toLocaleString(currentLang)}`;
-      document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${e.city}`;
-      document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${e.category}`;
-      document.getElementById('event-modal').classList.remove('hidden');
-      loadEventWeather(e.city, e.date);
-    });
-
-    div.querySelector('.remove-saved-btn').addEventListener('click', () => {
-      toggleSaveEvent(e.id);
-      renderSavedEvents();
-    });
-
-    savedEventsContainer.appendChild(div);
-  });
-}
 
 // ─── 8.1 User Login Logic ───────────────────────────────────────────────
 const loginSubmit = document.getElementById('login-submit');
@@ -1046,9 +994,28 @@ loginSubmit?.addEventListener('click', () => {
 
 // ─── 8.2 Restore User From Storage ────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  const storedUser = localStorage.getItem('vibe_user');
+  let rawUser = localStorage.getItem('vibe_user');
+  let storedUser = {};
+
+  try {
+    storedUser = typeof rawUser === 'string' ? JSON.parse(rawUser) : {};
+  } catch (e) {
+    console.warn('Invalid vibe_user in localStorage:', e);
+  }
+
+  const key = storedUser?.email ? `my_events_${storedUser.email}` : null;
+  const storedMyEvents = key ? JSON.parse(localStorage.getItem(key) || '[]') : [];
+
+  if (Array.isArray(storedMyEvents)) {
+    for (const e of storedMyEvents) {
+      if (!events.some(ev => ev.id === e.id)) {
+        events.push(e);
+      }
+    }
+  }
+
   if (storedUser) {
-    const user = JSON.parse(storedUser);
+    const user = storedUser;
     const loginBtn = document.getElementById('user-btn');
     if (user?.name && loginBtn) {
       loginBtn.textContent = `👤 ${user.name}`;
@@ -1068,9 +1035,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const roleEl = document.getElementById('user-role-display');
     if (user?.name && nameEl) nameEl.textContent = user.name;
     if (user?.role && roleEl) {
-  const roleKey = user.role === 'organizer' ? 'login_role_organizer' : 'login_role_user';
-  roleEl.textContent = t(roleKey);
-}
+      const key = user.role === 'organizer' ? 'login_role_organizer' : 'login_role_user';
+      roleEl.textContent = t(key);
+    }
   }
 });
 
@@ -1200,33 +1167,41 @@ editSave?.addEventListener('click', () => {
   document.getElementById('profile-city').textContent = user.city;
 });
 
-// ─── 8.5 Render My Events in User Panel ─────────────────────────────────────
+// 8.5 Render My Events in User Panel (saved + private combined)
 function renderMyEvents() {
-  const myEventsContainer = document.getElementById('my-events-container');
-  if (!myEventsContainer) return;
-  myEventsContainer.innerHTML = '';
+  const container = document.getElementById('my-events-container');
+  if (!container) return;
+  container.innerHTML = '';
 
   const currentUser = JSON.parse(localStorage.getItem('vibe_user') || '{}');
-  const my = events.filter(e => e.private && e.owner === currentUser.email);
 
-  if (my.length === 0) {
-    myEventsContainer.innerHTML = `<p style="text-align:center;">${t('no_events_found')}</p>`;
+  const saved = events.filter(e => savedEvents.includes(String(e.id)));
+  const mine  = events.filter(e => e.private && e.owner === currentUser.email);
+  const all   = [...saved, ...mine];
+
+  if (all.length === 0) {
+    container.innerHTML = `<p style="text-align:center;">${t('no_events_found')}</p>`;
     return;
   }
 
-  my.forEach(e => {
+  all.forEach(e => {
     const div = document.createElement('div');
     div.className = 'event-card';
+
+    const privateTag = e.private ? `<span class="private-tag">🔒 ${t('private_event')}</span><br />` : '';
+    const addressBlock = e.address ? `<p><strong>${t('address_label')}:</strong> ${e.address}</p>` : '';
+
     div.innerHTML = `
+      ${privateTag}
       <h4>${e.title}</h4>
       <p>${e.description}</p>
+      ${addressBlock}
       <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
       <p><em>${e.city} — ${e.category}</em></p>
-      <p><strong>${t('address_label')}:</strong> ${e.address || '—'}</p>
       <div class="event-actions">
         <button class="btn details-btn">${t('view_details')}</button>
-        <button class="btn edit-my-btn">✏️ ${t('edit')}</button>
-        <button class="btn delete-my-btn">🗑️ ${t('delete')}</button>
+        ${e.private && e.owner === currentUser.email ? `<button class="btn edit-my-btn">✏️ ${t('edit')}</button>
+        <button class="btn delete-my-btn">🗑️ ${t('delete')}</button>` : `<button class="btn remove-saved-btn">🗑 ${t('remove_saved')}</button>`}
       </div>
     `;
 
@@ -1239,18 +1214,71 @@ function renderMyEvents() {
       document.getElementById('modal-address').textContent     = e.address || '—';
       document.getElementById('event-modal').classList.remove('hidden');
       loadEventWeather(e.city, e.date);
+
+      setTimeout(() => {
+        const lat = parseFloat(e.lat);
+        const lon = parseFloat(e.lon);
+        const mapEl = document.getElementById('modal-map');
+        if (!isNaN(lat) && !isNaN(lon)) {
+          while (mapEl.firstChild) mapEl.removeChild(mapEl.firstChild);
+          if (mapEl._leaflet_id) mapEl._leaflet_id = null;
+
+          const modalMap = L.map(mapEl, {
+            attributionControl: false,
+            zoomControl: false,
+            dragging: false
+          }).setView([lat, lon], 13);
+
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
+          L.marker([lat, lon]).addTo(modalMap).bindPopup(e.title).openPopup();
+          window._modalMap = modalMap;
+
+          document.getElementById('modal-close').addEventListener('click', () => {
+            modalMap.remove();
+            window._modalMap = null;
+          }, { once: true });
+        } else {
+          mapEl.innerHTML = `<p style="color:gray;">${t('no_map')}</p>`;
+        }
+      }, 100);
     });
 
-    div.querySelector('.delete-my-btn').addEventListener('click', () => {
-      const index = events.findIndex(ev => ev.id === e.id);
-      if (index !== -1) {
-        events.splice(index, 1);
+    if (e.private && e.owner === currentUser.email) {
+      div.querySelector('.edit-my-btn').addEventListener('click', () => {
+        document.getElementById('evt-title').value = e.title;
+        document.getElementById('evt-desc').value = e.description;
+        document.getElementById('evt-date').value = e.date;
+        document.getElementById('evt-city').value = e.city;
+        document.getElementById('evt-category').value = e.category;
+        document.getElementById('evt-address').value = e.address || '';
+        document.getElementById('evt-private').checked = !!e.private;
+        const coordsEl = document.getElementById('picked-coords');
+        if (coordsEl && e.lat && e.lon) {
+          coordsEl.textContent = `${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`;
+          coordsEl.style.color = '#aaa';
+        }
+        pickedLat = e.lat;
+        pickedLon = e.lon;
+        editEventId = e.id;
+        eventFormContainer.style.display = 'block';
+      });
+
+      div.querySelector('.delete-my-btn').addEventListener('click', () => {
+        const index = events.findIndex(ev => ev.id === e.id);
+        if (index !== -1) {
+          events.splice(index, 1);
+          renderMyEvents();
+          renderEvents();
+        }
+      });
+    } else {
+      div.querySelector('.remove-saved-btn').addEventListener('click', () => {
+        toggleSaveEvent(e.id);
         renderMyEvents();
-        renderEvents();
-      }
-    });
+      });
+    }
 
-    myEventsContainer.appendChild(div);
+    container.appendChild(div);
   });
 }
 
