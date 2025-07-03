@@ -94,57 +94,61 @@
 
 <!-- Add Event Form -->
 <div id="event-form-container" class="event-form-container" style="display: none;">
-  <form id="event-form" class="event-form" style="max-height: 85vh; overflow-y: auto; position: relative; padding-right: 1rem;">
-    
-    <!-- ✖ Close -->
-    <button type="button" id="evt-close-top" class="btn" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #999;">✖</button>
+  <form id="event-form" class="event-form">
 
-    <h3 data-i18n="add_event_title" style="padding-top: 2rem;">Add New Event</h3>
+    <h3 data-i18n="add_event_title">Add New Event</h3>
 
     <label>
-      <span data-i18n="title_label">Title</span><br />
+      <span data-i18n="title_label">Title</span>
       <input type="text" id="evt-title" required placeholder="" data-i18n-placeholder="title_label" />
-    </label><br /><br />
+    </label>
 
     <label>
-      <span data-i18n="desc_label">Description</span><br />
+      <span data-i18n="desc_label">Description</span>
       <textarea id="evt-desc" rows="3" required placeholder="" data-i18n-placeholder="desc_label"></textarea>
-    </label><br /><br />
+    </label>
 
     <label>
-      <span data-i18n="date_label">Date</span><br />
+      <span data-i18n="date_label">Date</span>
       <input type="datetime-local" id="evt-date" required />
-    </label><br /><br />
+    </label>
 
     <label>
-      <span data-i18n="city_label">City</span><br />
+      <span data-i18n="city_label">City</span>
       <select id="evt-city" required>
         <option value="" data-i18n="select_city">Select City</option>
       </select>
-    </label><br /><br />
+    </label>
 
     <label>
-      <span data-i18n="category_label">Category</span><br />
+      <span data-i18n="category_label">Category</span>
       <input type="text" id="evt-category" required placeholder="" data-i18n-placeholder="category_placeholder" />
-    </label><br /><br />
-    
+    </label>
+
     <!-- 📍 Address -->
     <label>
-      <span data-i18n="address_label">Address</span><br />
+      <span data-i18n="address_label">Address</span>
       <input type="text" id="evt-address" placeholder="e.g. 123 Main St" data-i18n-placeholder="address_placeholder" />
-    </label><br /><br />
-    <!-- 📍 Кнопка выбора точки на карте -->
-<button type="button" id="pick-location" class="btn" data-i18n="pick_on_map">📍 Pick on Map</button>
-<small id="picked-coords" style="display: block; margin-top: 0.25rem; color: #ccc;">—</small>
+    </label>
 
-    <!-- 🔒 Private Event checkbox -->
-    <label style="display: flex; align-items: center; gap: 0.5rem;">
+    <!-- 📍 Pick on Map -->
+    <div style="text-align: center; margin-top: 0.75rem;">
+      <button type="button" id="pick-location" class="btn" style="width: 100%;" data-i18n="pick_on_map">📍 Pick on Map</button>
+      <small id="picked-coords" style="display: block; margin-top: 0.25rem; color: #ccc;">—</small>
+    </div>
+
+    <!-- 🔒 Private Event -->
+    <label for="evt-private" class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
       <input type="checkbox" id="evt-private" />
       <span data-i18n="private_event">🔒 Private Event</span>
-    </label><br /><br />
+    </label>
 
-    <button type="submit" class="btn" data-i18n="submit_event">Submit Event</button>
-    <button type="button" id="evt-cancel-btn" class="btn" style="margin-left: 0.5rem; background: #999" data-i18n="cancel">Cancel</button>
+    <!-- Submit & Cancel -->
+    <div style="display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.25rem; width: 100%; transform: translateX(+1mm);">
+      <button type="submit" class="btn" style="flex: 1;" data-i18n="submit_event">Submit Event</button>
+      <button type="button" id="evt-cancel-btn" class="btn" style="flex: 1; background: #999;" data-i18n="cancel">Cancel</button>
+    </div>
+
   </form>
 </div>
 

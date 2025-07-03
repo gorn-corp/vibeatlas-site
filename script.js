@@ -84,7 +84,7 @@ function applyTranslations() {
 }
 
 // ─── 2. Constants and Variables ───────────────────────────────────────────────
-const defaultCity   = 'Seoul';
+const defaultCity   = 'Kyoto';
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwhCOoNnWCX5qUX_8KuIVoBHkohSlP_N4Rwedjr7z8lrhLWx064VnBRFicyoUXOxkQSpvDC92PwRJY/pub?output=csv';
 const CITIES_JSON   = '/cities.json';
 
@@ -770,6 +770,18 @@ if (pickBtn && pickedCoordsDisplay && addressInput) {
   pickBtn.addEventListener('click', () => {
     if (document.getElementById('map-popup')) return;
 
+    // Определяем координаты выбранного города из выпадашки
+    let startLat = 35.0116;
+    let startLon = 135.7681;
+    const selectedCity = document.getElementById('city-filter')?.value;
+    if (selectedCity && Array.isArray(citiesList)) {
+      const cityObj = citiesList.find(c => c.name === selectedCity);
+      if (cityObj) {
+        startLat = cityObj.lat;
+        startLon = cityObj.lon;
+      }
+    }
+
     const modal = document.createElement('div');
     modal.id = 'map-popup';
     modal.style.position = 'fixed';
@@ -811,7 +823,7 @@ if (pickBtn && pickedCoordsDisplay && addressInput) {
 
     document.body.appendChild(modal);
 
-    const map = L.map(mapDiv).setView([35.0116, 135.7681], 13);
+    const map = L.map(mapDiv).setView([startLat, startLon], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     let marker = null;
@@ -1327,7 +1339,7 @@ document.querySelectorAll('.user-panel-tabs .btn').forEach(btn => {
   });
 });
 
-// ─── Прогноз погоды для события (View Details) ─────────────────────────────
+// ─── 8.7 Прогноз погоды для события (View Details) ─────────────────────────────
 async function loadEventWeather(city, dateStr) {
   const weatherEl = document.getElementById('modal-weather');
   weatherEl.textContent = t('modal_weather_loading');
@@ -1393,7 +1405,25 @@ mapCloseBtn.addEventListener('click', () => {
   mapContainer.classList.add('hidden');
 });
 
-function showMap(lat = 35.0116, lon = 135.7681, label = "Kyoto") {
+function showMap(lat, lon, label) {
+  // Если координаты не переданы — берём из #city-filter
+  if (typeof lat === 'undefined' || typeof lon === 'undefined') {
+    const selectedCity = document.getElementById('city-filter')?.value;
+    if (selectedCity && Array.isArray(cities)) {
+      const cityObj = cities.find(c => c.name === selectedCity);
+      if (cityObj) {
+        lat = cityObj.lat;
+        lon = cityObj.lon;
+        label = cityObj.name;
+      }
+    }
+  }
+
+  // Если всё ещё нет координат — дефолт на Kyoto
+  lat = lat || 35.0116;
+  lon = lon || 135.7681;
+  label = label || "Kyoto";
+
   mapContainer.classList.remove('hidden');
 
   if (!mapInstance) {
@@ -1408,5 +1438,4 @@ function showMap(lat = 35.0116, lon = 135.7681, label = "Kyoto") {
   L.marker([lat, lon]).addTo(mapInstance)
     .bindPopup(label)
     .openPopup();
-    
-}
+} 
