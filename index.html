@@ -194,8 +194,11 @@
   <div class="user-info">
     <p id="user-name-display"></p>
     <p id="user-role-display" style="font-size: 0.85rem; color: #ccc;"></p>
-    <button id="toggle-profile-details" class="btn" style="margin-top: 0.5rem;" data-i18n="profile_details">📄 Profile Details</button>
-    <button id="edit-profile-btn" class="btn" style="margin-top: 0.5rem;" data-i18n="edit_profile">✏️ Edit Profile</button>
+
+    <div class="user-action-buttons">
+      <button id="toggle-profile-details" class="btn" data-i18n="profile_details">📄 Profile Details</button>
+      <button id="edit-profile-btn" class="btn" data-i18n="edit_profile">✏️ Edit Profile</button>
+    </div>
   </div>
 
   <div id="profile-extra" style="display: none; margin-top: 0.5rem; font-size: 0.85rem; color: white;">
@@ -303,7 +306,7 @@
     <h2 data-i18n="register_title">Create Your Account</h2>
 
     <label for="reg-firstname" data-i18n="reg_firstname">First Name:</label>
-    <input type="text" id="reg-firstname" required placeholder="Alex" />
+    <input type="text" id="reg-firstname" required placeholder="Nova" />
 
     <label for="reg-lastname" data-i18n="reg_lastname">Last Name:</label>
     <input type="text" id="reg-lastname" placeholder="Silvermind" />

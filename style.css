@@ -560,6 +560,36 @@ body {
   cursor: pointer;
 }
 
+/* ─── 3.1 Modal Close Button ───────────────────────────── */
+.close {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  font-size: 2rem;
+  color: #999;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #555;
+}
+
+/* ─── 3.2 Modal Input Spacing Fix ─────────────────────── */
+.modal-content input,
+.modal-content select,
+.modal-content textarea,
+.modal-content label {
+  margin-bottom: 0.7rem;
+}
+
+.modal-content label {
+  display: block;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
   #map-container {
     position: fixed;
     top: 0; left: 0;
@@ -822,6 +852,20 @@ select.lang-dropdown:hover {
   background: #ff6b6b;
 }
 
+/* 🔧 Исправлено: выравнивание кнопок профиля */
+.user-action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.55rem;               /* Внутренний отступ между двумя кнопками  */
+  margin-bottom: 0.55rem;     /* Вертикальный отступ перед вкладками  */
+}
+
+.user-action-buttons .btn {
+  flex: 1;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
 .user-panel .tab-content {
   display: none;
 }
@@ -858,6 +902,11 @@ select.lang-dropdown:hover {
   margin-top: 0.5rem;
 }
 
+.user-info .btn {
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+}
+
 .user-avatar {
   width: 80px;
   height: 80px;
@@ -881,7 +930,7 @@ select.lang-dropdown:hover {
 .modal-content select {
   width: 100%;
   padding: 0.5rem;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.4rem;  /* было 0.8rem, стало меньше на ~30% */
   border-radius: 4px;
   border: 1px solid #ccc;
   font-size: 1rem;
