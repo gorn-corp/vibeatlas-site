@@ -317,16 +317,32 @@ body {
 
 /* Кнопки перелистывания */
 .carousel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 2rem;
   background: rgba(0,0,0,0.5);
   color: #fff;
   border: none;
-  font-size: 2rem;
-  width: 2.5rem;
-  height: 2.5rem;
   border-radius: 50%;
   cursor: pointer;
   z-index: 1;
+  line-height: 1;
+  padding: 0;
 }
+
+/* Строгое центрирование стрелки */
+.carousel-btn span {
+  display: block;
+  line-height: 1;
+  font-size: 2rem;
+  margin-top: -6px;
+  pointer-events: none;
+}
+
+/* Отступы по бокам */
 .prev-btn  { margin-right: 0.5rem; }
 .next-btn  { margin-left: 0.5rem; }
 

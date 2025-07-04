@@ -75,7 +75,7 @@
   </div>
 
   <div class="carousel-wrapper">
-    <button class="carousel-btn prev-btn">‹</button>
+    <button class="carousel-btn prev-btn"><span>‹</span></button>
     <div class="embla">
       <div class="embla__viewport">
         <div class="embla__container" id="events-container">
@@ -83,7 +83,7 @@
         </div>
       </div>
     </div>
-    <button class="carousel-btn next-btn">›</button>
+    <button class="carousel-btn next-btn"><span>›</span></button>
   </div>
 </section>
 
@@ -221,10 +221,11 @@
 
   <!-- Настройки -->
   <div id="settings-tab" class="user-tab hidden">
-    <label for="lang-switcher" data-i18n="language_label" style="color: white; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+    <label for="lang-switcher" data-i18n="language_label"
+      style="color: white; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
       🌐 Language:
     </label>
-    <select id="lang-switcher" class="lang-dropdown"></select>
+    <select id="lang-switcher" class="lang-dropdown" style="margin-left: 1mm;"></select>
   </div>
 </div>
 
@@ -253,7 +254,7 @@
   </div>
 </div>
 
-<!-- Модальное окно события -->
+<!-- 🧾 Event Modal -->
 <div id="event-modal" class="modal hidden">
   <div class="modal-content">
     <span id="modal-close" class="modal-close">&times;</span>
@@ -268,14 +269,11 @@
   </div>
 </div>
 
-<!-- Контейнер карты -->
+<!-- 🗺️ Fullscreen Map Container -->
 <div id="map-container" class="hidden">
   <button id="map-close">×</button>
   <div id="map"></div>
 </div>
-
-<!-- JS -->
-<script type="module" src="./script.js"></script>
 
 <!-- Login Modal -->
 <div id="login-modal" class="modal hidden">
@@ -323,7 +321,6 @@
     <label for="reg-city" data-i18n="reg_city">City:</label>
     <input type="text" id="reg-city" placeholder="Kyoto" />
 
-    <!-- ✅ Добавлено: выбор роли -->
     <label for="reg-role" data-i18n="login_role">Who are you?</label>
     <select id="reg-role">
       <option value="user" data-i18n="login_role_user">Traveler / Explorer</option>
@@ -337,6 +334,8 @@
   </div>
 </div>
 
+<!-- JS -->
+<script type="module" src="./script.js"></script>
 </body>
-
 </html>
+
