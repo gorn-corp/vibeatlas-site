@@ -192,14 +192,17 @@
   </div>
 
   <div class="user-info">
-    <p id="user-name-display"></p>
-    <p id="user-role-display" style="font-size: 0.85rem; color: #ccc;"></p>
+  <p id="user-name-display">
+    <span id="display-first"></span>
+    <span id="display-last" style="margin-left: 0.4rem;"></span>
+  </p>
+  <p id="user-role-display" style="font-size: 0.85rem; color: #ccc;"></p>
 
-    <div class="user-action-buttons">
-      <button id="toggle-profile-details" class="btn" data-i18n="profile_details">📄 Profile Details</button>
-      <button id="edit-profile-btn" class="btn" data-i18n="edit_profile">✏️ Edit Profile</button>
-    </div>
+  <div class="user-action-buttons">
+    <button id="toggle-profile-details" class="btn" data-i18n="profile_details">📄 Profile Details</button>
+    <button id="edit-profile-btn" class="btn" data-i18n="edit_profile">✏️ Edit Profile</button>
   </div>
+</div>
 
   <div id="profile-extra" style="display: none; margin-top: 0.5rem; font-size: 0.85rem; color: white;">
     <p><strong data-i18n="email">Email:</strong> <span id="profile-email">—</span></p>
@@ -236,7 +239,10 @@
     <h2 data-i18n="edit_profile_title">Edit Profile</h2>
 
     <label for="edit-name" data-i18n="reg_firstname">First Name:</label>
-    <input type="text" id="edit-name" data-i18n-placeholder="reg_firstname" placeholder="First Name:" />
+    <input type="text" id="edit-name" data-i18n-placeholder="reg_firstname" placeholder="Nova" />
+
+    <label for="edit-lastname" data-i18n="reg_lastname">Last Name:</label>
+    <input type="text" id="edit-lastname" data-i18n-placeholder="reg_lastname" placeholder="Silvermind" />
 
     <label for="edit-email" data-i18n="reg_email">Email:</label>
     <input type="email" id="edit-email" data-i18n-placeholder="reg_email" placeholder="you@example.com" />
@@ -249,6 +255,15 @@
 
     <label for="edit-city" data-i18n="reg_city">City:</label>
     <input type="text" id="edit-city" data-i18n-placeholder="reg_city" placeholder="Kyoto" />
+
+    <label for="edit-role" data-i18n="login_role">Who are you?</label>
+    <select id="edit-role">
+      <option value="user" data-i18n="login_role_user">Traveler / Explorer</option>
+      <option value="organizer" data-i18n="login_role_organizer">Event Organizer</option>
+    </select>
+
+    <label for="edit-avatar" data-i18n="reg_avatar">Choose Avatar:</label>
+    <input type="file" id="edit-avatar" accept="image/*" />
 
     <button id="edit-profile-save" class="btn" data-i18n="save_changes">💾 Save Changes</button>
   </div>

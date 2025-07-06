@@ -6,7 +6,7 @@ import { fetchWeather, getTimeOfDay } from './weather.js';
 const API_KEY = '4fa7ffeee5d231eb59154b86e43cdbbe';
 
 // ─── 1.0.1. Language Detection and i18n ──────────────────────────────────────────
-const supportedLanguages = ['ar', 'de', 'en', 'fr', 'es', 'it', 'pt', 'ja', 'zh'];
+const supportedLanguages = ['ar', 'de', 'en', 'fr', 'es', 'it', 'pt', 'ua', 'ja', 'zh'];
 let currentLang = navigator.language.slice(0, 2);
 if (!supportedLanguages.includes(currentLang)) currentLang = 'en';
 
@@ -515,34 +515,66 @@ window.addEventListener('DOMContentLoaded', async () => {
   await loadCities();
   await loadEvents();
 
-  // 5.3 Splash input and button
-  const splashInput = document.getElementById('splash-city-input');
-  const splashBtn   = document.getElementById('enter-btn');
+  // ─── 5.3 Splash input and button ─────────────────────────────────────────────
+const splashInput = document.getElementById('splash-city-input');
+const splashBtn   = document.getElementById('enter-btn');
+const GEODB_API_KEY = '4fa7ffeee5d231eb59154b86e43cdbbe';
 
-  if (splashInput && splashBtn) {
-    splashInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        splashBtn.click();
+if (splashInput && splashBtn) {
+  splashInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      splashBtn.click();
+    }
+  });
+
+  splashBtn.addEventListener('click', async () => {
+    const city = splashInput.value.trim() || defaultCity;
+    selectedCity = city;
+    splash.style.display = 'none';
+
+    // Проверяем, есть ли уже координаты для этого города
+    if (!cityCoordsMap[city]) {
+      try {
+        const response = await fetch(`https://geodb-free-service.wirefreethought.com/v1/geo/cities?limit=1&namePrefix=${encodeURIComponent(city)}`, {
+          headers: { 'X-RapidAPI-Key': GEODB_API_KEY }
+        });
+
+        const data = await response.json();
+        const result = data?.data?.[0];
+
+        if (result && result.latitude && result.longitude) {
+          cityCoordsMap[city] = { lat: result.latitude, lon: result.longitude };
+
+          // Временно добавляем город в citiesList
+          citiesList.push({
+            name: city,
+            lat: result.latitude,
+            lon: result.longitude,
+            background: '' // Пусто, если нет картинки
+          });
+        } else {
+          alert(`⚠️ City "${city}" not found.`);
+          return;
+        }
+      } catch (err) {
+        console.error('City fetch error:', err);
+        alert('❌ Failed to fetch city data.');
+        return;
       }
-    });
+    }
 
-    splashBtn.addEventListener('click', () => {
-      const city = splashInput.value.trim() || defaultCity;
-      selectedCity = city;
-      splash.style.display = 'none';
-
-      update(city);
-      applyTimeTheme();
-      applyCityBackground(city);
-      populateFilters();
-      cityFilter.value = selectedCity;
-      renderEvents();
-      initEmbla();
-    });
-  } else {
-    console.warn("❌ splashInput or splashBtn not found in DOM");
-  }
+    update(city);
+    applyTimeTheme();
+    applyCityBackground(city);
+    populateFilters();
+    cityFilter.value = selectedCity;
+    renderEvents();
+    initEmbla();
+  });
+} else {
+  console.warn("❌ splashInput or splashBtn not found in DOM");
+}
 
   // 5.4 Hero enter button
   const heroEnterBtn = document.getElementById('enter-hero-btn');
@@ -960,9 +992,15 @@ loginSubmit?.addEventListener('click', () => {
 
   const saveUser = (avatarBase64 = '') => {
     const user = {
-      name, role, avatar: avatarBase64,
-      surname, email, country, city, phone
-    };
+  name,
+  lastName: surname,
+  role,
+  avatar: avatarBase64,
+  email,
+  country,
+  city,
+  phone
+};
 
     localStorage.setItem('vibe_user', JSON.stringify(user));
     loginModal.classList.add('hidden');
@@ -1042,14 +1080,29 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // Показываем имя и роль в user panel
-    const nameEl = document.getElementById('user-name-display');
+    // Показываем роль в user panel
     const roleEl = document.getElementById('user-role-display');
-    if (user?.name && nameEl) nameEl.textContent = user.name;
     if (user?.role && roleEl) {
       const key = user.role === 'organizer' ? 'login_role_organizer' : 'login_role_user';
       roleEl.textContent = t(key);
     }
+
+    // 🛠️ Подставляем first/last name в отдельные спаны
+    const firstSpan = document.getElementById('display-first');
+    const lastSpan  = document.getElementById('display-last');
+    if (firstSpan) firstSpan.textContent = user.name || '';
+    if (lastSpan)  lastSpan.textContent  = user.lastName || '';
+
+    // ✅ Восстанавливаем доп. данные профиля
+    const emailEl   = document.getElementById('profile-email');
+    const cityEl    = document.getElementById('profile-city');
+    const countryEl = document.getElementById('profile-country');
+    const phoneEl   = document.getElementById('profile-phone');
+
+    if (emailEl)   emailEl.textContent   = user.email   || '—';
+    if (cityEl)    cityEl.textContent    = user.city    || '—';
+    if (countryEl) countryEl.textContent = user.country || '—';
+    if (phoneEl)   phoneEl.textContent   = user.phone   || '—';
   }
 });
 
@@ -1086,7 +1139,7 @@ registerSubmit?.addEventListener('click', () => {
   const saveUser = (avatarBase64 = '') => {
     const user = {
       name: firstName,
-      lastname: lastName,
+      lastName: lastName,
       email,
       phone,
       country,
@@ -1147,10 +1200,13 @@ const editSave = document.getElementById('edit-profile-save');
 editBtn?.addEventListener('click', () => {
   const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
   document.getElementById('edit-name').value = user.name || '';
+  document.getElementById('edit-lastname').value = user.lastName || '';
   document.getElementById('edit-email').value = user.email || '';
   document.getElementById('edit-phone').value = user.phone || '';
   document.getElementById('edit-country').value = user.country || '';
   document.getElementById('edit-city').value = user.city || '';
+  document.getElementById('edit-role').value = user.role || 'user';
+  document.getElementById('edit-avatar').value = '';
   editModal.classList.remove('hidden');
 });
 
@@ -1161,23 +1217,66 @@ editClose?.addEventListener('click', () => {
 editSave?.addEventListener('click', () => {
   const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
 
-  user.name = document.getElementById('edit-name').value.trim();
-  user.email = document.getElementById('edit-email').value.trim();
-  user.phone = document.getElementById('edit-phone').value.trim();
-  user.country = document.getElementById('edit-country').value.trim();
-  user.city = document.getElementById('edit-city').value.trim();
+  user.name     = document.getElementById('edit-name').value.trim();
+  user.lastName = document.getElementById('edit-lastname').value.trim();
+  user.email    = document.getElementById('edit-email').value.trim();
+  user.phone    = document.getElementById('edit-phone').value.trim();
+  user.country  = document.getElementById('edit-country').value.trim();
+  user.city     = document.getElementById('edit-city').value.trim();
+  user.role     = document.getElementById('edit-role').value;
 
-  localStorage.setItem('vibe_user', JSON.stringify(user));
-  editModal.classList.add('hidden');
+  const avatarInput = document.getElementById('edit-avatar');
+  const file = avatarInput?.files?.[0];
 
-  // Обновить на странице
-  document.getElementById('user-btn').textContent = `👤 ${user.name}`;
-  document.getElementById('user-name-display').textContent = user.name;
-  document.getElementById('profile-email').textContent = user.email;
-  document.getElementById('profile-phone').textContent = user.phone;
-  document.getElementById('profile-country').textContent = user.country;
-  document.getElementById('profile-city').textContent = user.city;
+  const finish = () => {
+    localStorage.setItem('vibe_user', JSON.stringify(user));
+    updateUserPanel(user);
+    editModal.classList.add('hidden');
+  };
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      user.avatar = reader.result;
+      finish();
+    };
+    reader.readAsDataURL(file);
+  } else {
+    finish();
+  }
 });
+
+// 🔄 Обновление UI
+function updateUserPanel(user) {
+  const userBtn = document.getElementById('user-btn');
+  if (userBtn) userBtn.textContent = `👤 ${user.name}`;
+
+  const firstEl = document.getElementById('display-first');
+  const lastEl  = document.getElementById('display-last');
+
+  if (firstEl) firstEl.textContent = user.name || '';
+  if (lastEl)  lastEl.textContent  = user.lastName || '';
+
+  const emailEl   = document.getElementById('profile-email');
+  const cityEl    = document.getElementById('profile-city');
+  const countryEl = document.getElementById('profile-country');
+  const phoneEl   = document.getElementById('profile-phone');
+
+  if (emailEl)   emailEl.textContent   = user.email   || '—';
+  if (cityEl)    cityEl.textContent    = user.city    || '—';
+  if (countryEl) countryEl.textContent = user.country || '—';
+  if (phoneEl)   phoneEl.textContent   = user.phone   || '—';
+
+  const roleEl = document.getElementById('user-role-display');
+  const roleKey = user.role === 'organizer' ? 'login_role_organizer' : 'login_role_user';
+  if (roleEl) roleEl.textContent = t(roleKey);
+
+  const avatarEl = document.getElementById('user-avatar');
+  if (avatarEl && user.avatar) {
+    avatarEl.src = user.avatar;
+    avatarEl.classList.remove('hidden');
+  }
+}
 
 // 8.5 Render My Events in User Panel (saved + private combined)
 function renderMyEvents() {
