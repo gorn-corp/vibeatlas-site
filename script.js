@@ -1094,15 +1094,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lastSpan)  lastSpan.textContent  = user.lastName || '';
 
     // ✅ Восстанавливаем доп. данные профиля
-    const emailEl   = document.getElementById('profile-email');
-    const cityEl    = document.getElementById('profile-city');
-    const countryEl = document.getElementById('profile-country');
-    const phoneEl   = document.getElementById('profile-phone');
+    const emailEl     = document.getElementById('profile-email');
+    const cityEl      = document.getElementById('profile-city');
+    const countryEl   = document.getElementById('profile-country');
+    const phoneEl     = document.getElementById('profile-phone');
+    const lastNameEl  = document.getElementById('profile-lastname'); 
 
-    if (emailEl)   emailEl.textContent   = user.email   || '—';
-    if (cityEl)    cityEl.textContent    = user.city    || '—';
-    if (countryEl) countryEl.textContent = user.country || '—';
-    if (phoneEl)   phoneEl.textContent   = user.phone   || '—';
+    if (emailEl)     emailEl.textContent     = user.email     || '—';
+    if (cityEl)      cityEl.textContent      = user.city      || '—';
+    if (countryEl)   countryEl.textContent   = user.country   || '—';
+    if (phoneEl)     phoneEl.textContent     = user.phone     || '—';
+    if (lastNameEl)  lastNameEl.textContent  = user.lastName  || '—'; 
   }
 });
 
