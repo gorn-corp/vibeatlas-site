@@ -938,36 +938,82 @@ document.getElementById('modal-close').addEventListener('click', () => {
   document.getElementById('event-modal').classList.add('hidden');
 });
 
-// ─── 8. User Panel: Open/Close and Tabs ──────────────────────────────────
+// ─── 8. User Panel: Open/Close and Custom Buttons ──────────────────────
 userBtn.addEventListener('click', () => {
   userPanel.classList.add('open');
-  tabMy.classList.add('active');
-  tabSettings.classList.remove('active');
-  tabMyBtn.classList.add('active');
-  tabSettingsBtn.classList.remove('active');
-  renderMyEvents();
-  populateProfile();
+  showTab('my-tab');
 });
 
 closeUserPanel.addEventListener('click', () => {
   userPanel.classList.remove('open');
 });
 
-tabMyBtn.addEventListener('click', () => {
-  tabMy.classList.add('active');
-  tabSettings.classList.remove('active');
-  tabMyBtn.classList.add('active');
-  tabSettingsBtn.classList.remove('active');
-  renderMyEvents();
+// 🔘 Profile Details
+document.getElementById('toggle-profile-details')?.addEventListener('click', () => {
+  const extra = document.getElementById('profile-extra');
+  if (extra) {
+    const isHidden = extra.style.display === 'none' || extra.style.display === '';
+    extra.style.display = isHidden ? 'block' : 'none';
+  }
 });
 
-tabSettingsBtn.addEventListener('click', () => {
-  tabSettings.classList.add('active');
-  tabMy.classList.remove('active');
-  tabSettingsBtn.classList.add('active');
-  tabMyBtn.classList.remove('active');
-  populateProfile();
+// 🔘 Settings toggle
+document.getElementById('toggle-settings-btn')?.addEventListener('click', () => {
+  const isVisible = !document.getElementById('settings-tab').classList.contains('hidden');
+  if (isVisible) {
+    document.getElementById('settings-tab').classList.add('hidden');
+    document.getElementById('toggle-settings-btn').classList.remove('active');
+  } else {
+    showTab('settings-tab');
+    populateProfile();
+  }
 });
+
+// 🔘 Events toggle
+document.getElementById('toggle-events-tab')?.addEventListener('click', () => {
+  const isVisible = !document.getElementById('my-tab').classList.contains('hidden');
+  if (isVisible) {
+    document.getElementById('my-tab').classList.add('hidden');
+    document.getElementById('toggle-events-tab').classList.remove('active');
+  } else {
+    showTab('my-tab');
+    renderMyEvents();
+  }
+});
+
+// 🔘 Memory Mode toggle
+document.getElementById('toggle-memory-mode')?.addEventListener('click', () => {
+  const memoryOptions = document.getElementById('memory-mode-options');
+  if (memoryOptions) {
+    memoryOptions.classList.toggle('hidden');
+  }
+
+  // Обновим подпись кнопки, если нет i18n
+  const mmBtn = document.getElementById('toggle-memory-mode');
+  if (mmBtn && !mmBtn.dataset.i18n) {
+    mmBtn.textContent = '🧠 Memory Mode';
+  }
+});
+
+// 🧠 Общая функция переключения вкладок
+function showTab(id) {
+  ['my-tab', 'settings-tab'].forEach(tabId => {
+    const tab = document.getElementById(tabId);
+    if (tab) tab.classList.add('hidden');
+  });
+
+  const target = document.getElementById(id);
+  if (target) target.classList.remove('hidden');
+
+  // Обновить активную кнопку
+  ['toggle-events-tab', 'toggle-settings-btn'].forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    if (btn) btn.classList.remove('active');
+  });
+
+  const activeBtn = id === 'my-tab' ? 'toggle-events-tab' : 'toggle-settings-btn';
+  document.getElementById(activeBtn)?.classList.add('active');
+}
 
 // ─── 8.1 User Login Logic ───────────────────────────────────────────────
 const loginSubmit = document.getElementById('login-submit');
@@ -1194,28 +1240,70 @@ registerSubmit?.addEventListener('click', () => {
 });
 
 // ─── 8.4 Edit Profile Modal ─────────────────────────────────────────────
-const editModal = document.getElementById('edit-profile-modal');
-const editBtn = document.getElementById('edit-profile-btn');
-const editClose = document.getElementById('edit-profile-close');
-const editSave = document.getElementById('edit-profile-save');
+const editModal          = document.getElementById('edit-profile-modal');
+const editBtn            = document.getElementById('edit-profile-btn');
+const editClose          = document.getElementById('edit-profile-close');
+const editSave           = document.getElementById('edit-profile-save');
+const profileDetailsBtn  = document.getElementById('toggle-profile-details');
+const profileExtra       = document.getElementById('profile-extra');
+const settingsBtn        = document.getElementById('toggle-settings-btn');
+const settingsExtra      = document.getElementById('settings-tab'); 
+const eventsBtn     = document.getElementById('toggle-events-tab');
+const eventsExtra   = document.getElementById('events-extra');
+const memoryModeBtn = document.getElementById('toggle-memory-mode');
+const memoryOptions = document.getElementById('memory-mode-options');
 
+// 🟢 Profile Details toggle
+profileDetailsBtn?.addEventListener('click', () => {
+  if (profileExtra) {
+    profileExtra.style.display = profileExtra.style.display === 'none' ? 'block' : 'none';
+  }
+});
+
+// ⚙️ Settings toggle (как Profile Details)
+settingsBtn?.addEventListener('click', () => {
+  if (settingsExtra) {
+    settingsExtra.style.display = settingsExtra.style.display === 'none' ? 'block' : 'none';
+  }
+});
+
+// 🧠 Memory Mode toggle
+memoryModeBtn?.addEventListener('click', () => {
+  if (memoryOptions) {
+    const isHidden = memoryOptions.style.display === 'none' || memoryOptions.style.display === '';
+    memoryOptions.style.display = isHidden ? 'flex' : 'none';
+  }
+});
+
+// 🧍 My Events toggle
+eventsBtn?.addEventListener('click', () => {
+  if (eventsExtra) {
+    const isHidden = eventsExtra.style.display === 'none' || eventsExtra.style.display === '';
+    eventsExtra.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) renderMyEvents();
+  }
+});
+
+// ✏️ Edit profile open
 editBtn?.addEventListener('click', () => {
   const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
-  document.getElementById('edit-name').value = user.name || '';
-  document.getElementById('edit-lastname').value = user.lastName || '';
-  document.getElementById('edit-email').value = user.email || '';
-  document.getElementById('edit-phone').value = user.phone || '';
-  document.getElementById('edit-country').value = user.country || '';
-  document.getElementById('edit-city').value = user.city || '';
-  document.getElementById('edit-role').value = user.role || 'user';
-  document.getElementById('edit-avatar').value = '';
+  document.getElementById('edit-name').value      = user.name || '';
+  document.getElementById('edit-lastname').value  = user.lastName || '';
+  document.getElementById('edit-email').value     = user.email || '';
+  document.getElementById('edit-phone').value     = user.phone || '';
+  document.getElementById('edit-country').value   = user.country || '';
+  document.getElementById('edit-city').value      = user.city || '';
+  document.getElementById('edit-role').value      = user.role || 'user';
+  document.getElementById('edit-avatar').value    = '';
   editModal.classList.remove('hidden');
 });
 
+// ✏️ Edit profile close
 editClose?.addEventListener('click', () => {
   editModal.classList.add('hidden');
 });
 
+// 💾 Save profile changes
 editSave?.addEventListener('click', () => {
   const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
 

@@ -882,6 +882,31 @@ select.lang-dropdown:hover {
   font-size: 0.95rem;
 }
 
+.memory-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.memory-btn {
+  width: 75%;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.95rem;
+  text-align: left;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.memory-btn:hover {
+  background-color: #666;
+}
+
 .user-panel .tab-content {
   display: none;
 }

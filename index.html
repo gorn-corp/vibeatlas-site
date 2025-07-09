@@ -192,39 +192,45 @@
   </div>
 
   <div class="user-info">
-  <p id="user-name-display">
-    <span id="display-first"></span>
-    <span id="display-last" style="margin-left: 0.4rem;"></span>
-  </p>
-  <p id="user-role-display" style="font-size: 0.85rem; color: #ccc;"></p>
+    <p id="user-name-display">
+      <span id="display-first"></span>
+      <span id="display-last" style="margin-left: 0.4rem;"></span>
+    </p>
+    <p id="user-role-display" style="font-size: 0.85rem; color: #ccc;"></p>
 
-  <div class="user-action-buttons">
-    <button id="toggle-profile-details" class="btn" data-i18n="profile_details">📄 Profile Details</button>
-    <button id="edit-profile-btn" class="btn" data-i18n="edit_profile">✏️ Edit Profile</button>
+    <div class="user-action-buttons" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 1rem;">
+      <button id="toggle-profile-details" class="btn full" data-i18n="profile_details">📄 Profile Details</button>
+      <div id="profile-extra" style="display: none; font-size: 0.85rem; color: white;">
+        <p><strong data-i18n="reg_lastname">Last Name:</strong> <span id="profile-lastname">—</span></p>
+        <p><strong data-i18n="phone">Phone:</strong> <span id="profile-phone">—</span></p>
+        <p><strong data-i18n="email">Email:</strong> <span id="profile-email">—</span></p>
+        <p><strong data-i18n="country">Country:</strong> <span id="profile-country">—</span></p>
+        <p><strong data-i18n="city">City:</strong> <span id="profile-city">—</span></p>
+      </div>
+
+      <button id="edit-profile-btn" class="btn full" data-i18n="edit_profile">✏️ Edit Profile</button>
+      <button id="toggle-settings-btn" class="btn full" data-i18n="settings">⚙️ Settings</button>
+      <button id="toggle-memory-mode" class="btn full" data-i18n="memory_mode">🧠 MM</button>
+
+      <div id="memory-mode-options" class="memory-options" style="display: none;">
+        <button id="memory-photo-btn" class="btn memory-btn" data-i18n="memory_photo">📷 Photo</button>
+        <button id="memory-video-btn" class="btn memory-btn" data-i18n="memory_video">🎬 Video</button>
+        <button id="memory-notes-btn" class="btn memory-btn" data-i18n="memory_notes">🧾 Notes</button>
+      </div>
+
+      <button id="toggle-events-tab" class="btn full active" data-i18n="my_events">🧍 My Events</button>
+    </div>
   </div>
-</div>
 
-  <div id="profile-extra" style="display: none; margin-top: 0.5rem; font-size: 0.85rem; color: white;">
-    <p><strong data-i18n="reg_lastname">Last Name:</strong> <span id="profile-lastname">—</span></p>
-    <p><strong data-i18n="phone">Phone:</strong> <span id="profile-phone">—</span></p>
-    <p><strong data-i18n="email">Email:</strong> <span id="profile-email">—</span></p>
-    <p><strong data-i18n="country">Country:</strong> <span id="profile-country">—</span></p>
-    <p><strong data-i18n="city">City:</strong> <span id="profile-city">—</span></p>
-  </div>
-
-  <!-- Вкладки -->
-  <div class="user-panel-tabs">
-    <button class="btn active" data-tab="my-tab" data-i18n="my_events">🧍 My Events</button>
-    <button class="btn" data-tab="settings-tab" data-i18n="settings">⚙️ Settings</button>
-  </div>
-
-  <!-- Объединённая вкладка Мои события + Сохранённые -->
-  <div id="my-tab" class="user-tab active">
-    <div id="my-events-container"></div>
+  <!-- Вкладка событий -->
+  <div id="events-extra" style="display: none; margin-top: 0.5rem;">
+    <div id="my-tab" class="user-tab active">
+      <div id="my-events-container"></div>
+    </div>
   </div>
 
   <!-- Настройки -->
-  <div id="settings-tab" class="user-tab hidden">
+  <div id="settings-tab" style="display: none; margin-top: 0.5rem; font-size: 0.85rem; color: white;">
     <label for="lang-switcher" data-i18n="language_label"
       style="color: white; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
       🌐 Language:

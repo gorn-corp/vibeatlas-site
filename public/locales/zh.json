@@ -108,5 +108,9 @@
   "my_events": "我的活动",
   "edit": "编辑",
   "delete": "删除",
-  "save_changes": "保存更改"
+  "save_changes": "保存更改",
+  "memory_mode": "记忆模式",
+  "memory_photo": "📷 照片",
+  "memory_video": "🎬 视频",
+  "memory_notes": "🧾 备注"
 }

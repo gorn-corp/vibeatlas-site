@@ -108,5 +108,9 @@
   "my_events": "Mes événements",
   "edit": "Modifier",
   "delete": "Supprimer",
-  "save_changes": "Enregistrer les modifications"
+  "save_changes": "Enregistrer les modifications",
+  "memory_mode": "Mode Mémoire",
+  "memory_photo": "📷 Photo",
+  "memory_video": "🎬 Vidéo",
+  "memory_notes": "🧾 Notes"
 }

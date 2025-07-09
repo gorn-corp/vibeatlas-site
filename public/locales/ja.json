@@ -108,5 +108,9 @@
   "my_events": "自分のイベント",
   "edit": "編集",
   "delete": "削除",
-  "save_changes": "保存変更"
+  "save_changes": "保存変更",
+  "memory_mode": "メモリーモード",
+  "memory_photo": "📷 写真",
+  "memory_video": "🎬 ビデオ",
+  "memory_notes": "🧾 ノート"
 }
