@@ -221,6 +221,16 @@
       <button id="toggle-events-tab" class="btn full active" data-i18n="my_events">🧍 My Events</button>
     </div>
   </div>
+  
+  <!-- Галерея фотографий -->
+  <div id="memory-photo-area" style="display: none; margin-top: 0.5rem;">
+    <div id="photo-grid" class="photo-grid">
+      <!-- Фото появятся здесь -->
+    </div>
+
+    <!-- Скрытый input для загрузки -->
+    <input type="file" id="photo-upload" accept="image/*" style="display: none;" />
+  </div>
 
   <!-- Вкладка событий -->
   <div id="events-extra" style="display: none; margin-top: 0.5rem;">
@@ -358,6 +368,24 @@
 
 <!-- JS -->
 <script type="module" src="./script.js"></script>
+
+<!-- 🖼️ Memory Modal -->
+<div id="memory-modal" class="memory-modal hidden">
+  <div class="memory-modal-content">
+    <span id="memory-modal-close" class="memory-modal-close">✖</span>
+    <img id="memory-modal-image" src="" alt="Memory Full" />
+    <p id="memory-caption-text" class="memory-caption"></p>
+
+    <button id="memory-caption-btn" class="btn full">✏️ Add/Edit Caption</button>
+    <button id="memory-delete-btn" class="btn danger full" data-i18n="delete">🗑 Delete</button>
+  </div>
+</div>
+
+<div id="memory-photo-area" style="display:none;">
+  <div id="photo-grid" class="photo-grid"></div>
+  <input type="file" id="photo-upload" accept="image/*" style="display:none;">
+</div>
+
 </body>
 </html>
 

@@ -1042,3 +1042,87 @@ input[type="checkbox"],
 input[type="radio"] {
   accent-color: #3399ff;
 }
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.photo-grid img,
+.photo-grid .add-photo-btn {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 6px;
+  background-color: #333;
+  cursor: pointer;
+}
+
+.add-photo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #888;
+  border: 2px dashed #555;
+  transition: all 0.2s ease;
+}
+
+.add-photo-btn:hover {
+  color: white;
+  border-color: #888;
+}
+
+.memory-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.memory-modal.hidden {
+  display: none;
+}
+
+.memory-modal-content {
+  background-color: #222;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 90%;
+  max-height: 90%;
+  box-shadow: 0 0 20px #000;
+  position: relative;
+}
+
+.memory-modal img {
+  max-width: 100%;
+  max-height: 60vh;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+}
+
+.memory-modal-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.8rem;
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+}
+
+.memory-caption {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #ccc;
+  text-align: center;
+  min-height: 1.2em;
+}

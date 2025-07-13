@@ -1336,6 +1336,117 @@ editSave?.addEventListener('click', () => {
   }
 });
 
+// ─── 8.4.1 Memory Photo Gallery Logic ─────────────────────────────────────────
+
+const memoryPhotoBtn     = document.getElementById('memory-photo-btn');
+const memoryPhotoArea    = document.getElementById('memory-photo-area');
+const photoGrid          = document.getElementById('photo-grid');
+const photoUpload        = document.getElementById('photo-upload');
+
+const memoryModal        = document.getElementById('memory-modal');
+const memoryModalImage   = document.getElementById('memory-modal-image');
+const memoryModalClose   = document.getElementById('memory-modal-close');
+const memoryDeleteBtn    = document.getElementById('memory-delete-btn');
+
+const MAX_PHOTOS = 20;
+let currentPhotoIndex = null;
+
+// 📸 Показ / скрытие галереи
+memoryPhotoBtn?.addEventListener('click', () => {
+  if (memoryPhotoArea) {
+    memoryPhotoArea.style.display = memoryPhotoArea.style.display === 'none' ? 'block' : 'none';
+    renderPhotoGrid();
+  }
+});
+
+// 🖼️ Отрисовка сетки с фото и кнопкой добавления
+function renderPhotoGrid() {
+  if (!photoGrid) return;
+
+  const photos = JSON.parse(localStorage.getItem('memory_photos') || '[]');
+  photoGrid.innerHTML = '';
+
+  photos.slice(0, MAX_PHOTOS).forEach((src, index) => {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = `Photo ${index + 1}`;
+    img.dataset.index = index;
+    photoGrid.appendChild(img);
+  });
+
+  if (photos.length < MAX_PHOTOS) {
+    const addBtn = document.createElement('div');
+    addBtn.className = 'add-photo-btn';
+    addBtn.innerHTML = '+';
+    addBtn.addEventListener('click', () => photoUpload?.click());
+    photoGrid.appendChild(addBtn);
+  }
+}
+
+// 📂 Загрузка нового фото
+photoUpload?.addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const src = e.target.result;
+    const photos = JSON.parse(localStorage.getItem('memory_photos') || '[]');
+    if (photos.length >= MAX_PHOTOS) return;
+    photos.push(src);
+    localStorage.setItem('memory_photos', JSON.stringify(photos));
+    renderPhotoGrid();
+  };
+  reader.readAsDataURL(file);
+});
+
+// 🔍 Открытие модалки
+photoGrid?.addEventListener('click', (e) => {
+  const target = e.target;
+  if (target.tagName === 'IMG') {
+    currentPhotoIndex = parseInt(target.dataset.index, 10);
+    memoryModalImage.src = target.src;
+    const captions = JSON.parse(localStorage.getItem('memory_captions') || '[]');
+    memoryCaptionText.textContent = captions[currentPhotoIndex] || '';
+    memoryModal.classList.remove('hidden');
+  }
+});
+
+// ❌ Закрытие модалки
+memoryModalClose?.addEventListener('click', () => {
+  memoryModal.classList.add('hidden');
+  memoryModalImage.src = '';
+  currentPhotoIndex = null;
+});
+
+// 🗑 Удаление фото
+memoryDeleteBtn?.addEventListener('click', () => {
+  if (currentPhotoIndex !== null) {
+    let photos = JSON.parse(localStorage.getItem('memory_photos') || '[]');
+    photos.splice(currentPhotoIndex, 1);
+    localStorage.setItem('memory_photos', JSON.stringify(photos));
+    renderPhotoGrid();
+    memoryModal.classList.add('hidden');
+    memoryModalImage.src = '';
+    currentPhotoIndex = null;
+  }
+});
+
+const memoryCaptionBtn = document.getElementById('memory-caption-btn');
+const memoryCaptionText = document.getElementById('memory-caption-text');
+
+memoryCaptionBtn?.addEventListener('click', () => {
+  let captions = JSON.parse(localStorage.getItem('memory_captions') || '[]');
+  const currentCaption = captions[currentPhotoIndex] || '';
+  const input = prompt('Enter caption (max 100 chars):', currentCaption);
+
+  if (input !== null) {
+    captions[currentPhotoIndex] = input.substring(0, 100);
+    localStorage.setItem('memory_captions', JSON.stringify(captions));
+    memoryCaptionText.textContent = captions[currentPhotoIndex];
+  }
+});
+
 // 🔄 Обновление UI
 function updateUserPanel(user) {
   const userBtn = document.getElementById('user-btn');
