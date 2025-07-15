@@ -112,5 +112,7 @@
   "memory_mode": "メモリーモード",
   "memory_photo": "📷 写真",
   "memory_video": "🎬 ビデオ",
-  "memory_notes": "🧾 ノート"
+  "memory_notes": "🧾 ノート",
+  "memory_videos": "🎬 ビデオ集",
+  "memory_video_desc": "保存されたビデオの思い出です。"
 }

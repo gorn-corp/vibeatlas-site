@@ -112,5 +112,7 @@
   "memory_mode": "Erinnerungsmodus",
   "memory_photo": "📷 Foto",
   "memory_video": "🎬 Video",
-  "memory_notes": "🧾 Notizen"
+  "memory_notes": "🧾 Notizen",
+  "memory_videos": "🎬 Videos",
+  "memory_video_desc": "Deine gespeicherten Videomomente."
 }

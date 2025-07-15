@@ -214,22 +214,22 @@
 
       <div id="memory-mode-options" class="memory-options" style="display: none;">
         <button id="memory-photo-btn" class="btn memory-btn" data-i18n="memory_photo">📷 Photo</button>
+        <div id="memory-photo-area" style="display: none; margin-top: 0.5rem;">
+          <div id="photo-grid" class="photo-grid"><!-- Фото появятся здесь --></div>
+          <input type="file" id="photo-upload" accept="image/*" style="display: none;" />
+        </div>
+
         <button id="memory-video-btn" class="btn memory-btn" data-i18n="memory_video">🎬 Video</button>
+        <div id="memory-video-area" style="display: none; margin-top: 0.5rem;">
+          <div id="video-grid" class="video-grid"></div>
+          <input type="file" id="video-upload" accept="video/*" style="display: none;" />
+        </div>
+
         <button id="memory-notes-btn" class="btn memory-btn" data-i18n="memory_notes">🧾 Notes</button>
       </div>
 
       <button id="toggle-events-tab" class="btn full active" data-i18n="my_events">🧍 My Events</button>
     </div>
-  </div>
-  
-  <!-- Галерея фотографий -->
-  <div id="memory-photo-area" style="display: none; margin-top: 0.5rem;">
-    <div id="photo-grid" class="photo-grid">
-      <!-- Фото появятся здесь -->
-    </div>
-
-    <!-- Скрытый input для загрузки -->
-    <input type="file" id="photo-upload" accept="image/*" style="display: none;" />
   </div>
 
   <!-- Вкладка событий -->
@@ -384,6 +384,15 @@
 <div id="memory-photo-area" style="display:none;">
   <div id="photo-grid" class="photo-grid"></div>
   <input type="file" id="photo-upload" accept="image/*" style="display:none;">
+</div>
+
+<!-- 🎬 Memory Video Modal -->
+<div id="video-modal" class="memory-modal hidden">
+  <div class="memory-modal-content">
+    <span id="video-modal-close" class="memory-modal-close">✖</span>
+    <video id="video-modal-player" controls></video>
+    <button id="video-delete-btn" class="btn danger full" data-i18n="delete">🗑 Delete</button>
+  </div>
 </div>
 
 </body>

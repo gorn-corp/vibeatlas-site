@@ -1447,7 +1447,103 @@ memoryCaptionBtn?.addEventListener('click', () => {
   }
 });
 
-// 🔄 Обновление UI
+// ─── 8.4.2 Memory Video Gallery Logic ─────────────────────────────────────────
+const memoryVideoBtn   = document.getElementById('memory-video-btn');
+const memoryVideoArea  = document.getElementById('memory-video-area');
+const videoGrid        = document.getElementById('video-grid');
+const videoUpload      = document.getElementById('video-upload');
+
+const MAX_VIDEOS = 5;
+
+// Показ / скрытие галереи
+memoryVideoBtn?.addEventListener('click', () => {
+  if (memoryVideoArea) {
+    memoryVideoArea.style.display = memoryVideoArea.style.display === 'none' ? 'block' : 'none';
+    renderVideoGrid();
+  }
+});
+
+// Рендер сетки
+function renderVideoGrid() {
+  if (!videoGrid) return;
+
+  const videos = JSON.parse(localStorage.getItem('memory_videos') || '[]');
+  videoGrid.innerHTML = '';
+
+  videos.slice(0, MAX_VIDEOS).forEach((src, index) => {
+    const video = document.createElement('video');
+    video.src = src;
+    video.controls = true;
+    video.className = 'video-thumb';
+    videoGrid.appendChild(video);
+  });
+
+  if (videos.length < MAX_VIDEOS) {
+    const addBtn = document.createElement('div');
+    addBtn.className = 'add-video-btn';
+    addBtn.innerHTML = '+';
+    addBtn.addEventListener('click', () => videoUpload?.click());
+    videoGrid.appendChild(addBtn);
+  }
+}
+
+// Загрузка нового видео
+videoUpload?.addEventListener('change', (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const src = e.target.result;
+    const videos = JSON.parse(localStorage.getItem('memory_videos') || '[]');
+    if (videos.length >= MAX_VIDEOS) return;
+    videos.push(src);
+    localStorage.setItem('memory_videos', JSON.stringify(videos));
+    renderVideoGrid();
+  };
+  reader.readAsDataURL(file);
+});
+
+// Memory Video Modal ──────────────────────────────────────────────
+const videoModal         = document.getElementById('video-modal');
+const videoModalPlayer   = document.getElementById('video-modal-player');
+const videoModalClose    = document.getElementById('video-modal-close');
+const videoDeleteBtn     = document.getElementById('video-delete-btn');
+const videoGallery       = document.getElementById('video-grid');
+
+let currentVideoIndex = null;
+
+// Открытие модалки
+videoGallery?.addEventListener('click', (e) => {
+  const target = e.target;
+  if (target.tagName === 'VIDEO') {
+    currentVideoIndex = [...videoGallery.querySelectorAll('video')].indexOf(target);
+    videoModalPlayer.src = target.src;
+    videoModal.classList.remove('hidden');
+  }
+});
+
+// Закрытие
+videoModalClose?.addEventListener('click', () => {
+  videoModal.classList.add('hidden');
+  videoModalPlayer.pause();
+  videoModalPlayer.src = '';
+});
+
+// Удаление
+videoDeleteBtn?.addEventListener('click', () => {
+  if (currentVideoIndex !== null) {
+    let memoryVideos = JSON.parse(localStorage.getItem('memory_videos') || '[]');
+    memoryVideos.splice(currentVideoIndex, 1);
+    localStorage.setItem('memory_videos', JSON.stringify(memoryVideos));
+    videoModal.classList.add('hidden');
+    videoModalPlayer.pause();
+    videoModalPlayer.src = '';
+    renderVideoGrid();
+  }
+});
+
+// 🔄 8.8.8 Обновление UI
 function updateUserPanel(user) {
   const userBtn = document.getElementById('user-btn');
   if (userBtn) userBtn.textContent = `👤 ${user.name}`;

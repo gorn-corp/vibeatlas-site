@@ -112,5 +112,7 @@
   "memory_mode": "记忆模式",
   "memory_photo": "📷 照片",
   "memory_video": "🎬 视频",
-  "memory_notes": "🧾 备注"
+  "memory_notes": "🧾 备注",
+  "memory_videos": "🎬 视频集",
+  "memory_video_desc": "您保存的视频回忆。"
 }
