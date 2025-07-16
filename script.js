@@ -1543,6 +1543,37 @@ videoDeleteBtn?.addEventListener('click', () => {
   }
 });
 
+// ─── 8.4.3 Memory Notes Logic ──────────────────────────────────────────────
+const memoryNotesBtn   = document.getElementById('memory-notes-btn');
+const memoryNotesArea  = document.getElementById('memory-notes-area');
+const memoryNoteInput  = document.getElementById('memory-note-input');
+const memoryNoteFeedback = document.getElementById('memory-note-feedback');
+
+memoryNotesBtn?.addEventListener('click', () => {
+  if (memoryNotesArea) {
+    const isVisible = memoryNotesArea.style.display === 'block';
+    memoryNotesArea.style.display = isVisible ? 'none' : 'block';
+    if (!isVisible) loadNote();
+  }
+});
+
+memoryNoteInput?.addEventListener('input', () => {
+  const note = memoryNoteInput.value.trim();
+  localStorage.setItem('memory_note', note);
+  updateFeedback();
+});
+
+function loadNote() {
+  const savedNote = localStorage.getItem('memory_note') || '';
+  memoryNoteInput.value = savedNote;
+  updateFeedback();
+}
+
+function updateFeedback() {
+  const currentLength = memoryNoteInput.value.length;
+  memoryNoteFeedback.textContent = `${currentLength}/500 characters used`;
+}
+
 // 🔄 8.8.8 Обновление UI
 function updateUserPanel(user) {
   const userBtn = document.getElementById('user-btn');

@@ -225,7 +225,13 @@
           <input type="file" id="video-upload" accept="video/*" style="display: none;" />
         </div>
 
+        <!-- Кнопка Notes -->
         <button id="memory-notes-btn" class="btn memory-btn" data-i18n="memory_notes">🧾 Notes</button>
+        <!-- Блок Notes -->
+        <div id="memory-notes-area" style="display: none; margin-top: 0.5rem;">
+          <textarea id="memory-note-input" maxlength="500" placeholder="Enter your memory note..." style="width: 280px; height: 100px; resize: none; padding: 0.5rem; border-radius: 6px;"></textarea>
+          <div id="memory-note-feedback" style="font-size: 0.75rem; color: #ccc; margin-top: 0.25rem;"></div>
+        </div>
       </div>
 
       <button id="toggle-events-tab" class="btn full active" data-i18n="my_events">🧍 My Events</button>
