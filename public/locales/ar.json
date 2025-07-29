@@ -114,5 +114,6 @@
   "memory_video": "🎬 فيديو",
   "memory_notes": "🧾 ملاحظات",
   "memory_videos": "🎬 مقاطع فيديو",
-  "memory_video_desc": "ذكريات الفيديو المحفوظة لديك."
+  "memory_video_desc": "ذكريات الفيديو المحفوظة لديك.",
+  "logout": "تسجيل الخروج"
 }

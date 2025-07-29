@@ -1,11 +1,11 @@
-// ─── 1. Imports and Helpers ────────────────────────────────────────────────────
+// ─── 1. Imports and Helpers ─────────
 import Papa from 'papaparse';
 import EmblaCarousel from 'embla-carousel';
 import { fetchWeather, getTimeOfDay } from './weather.js';
 
 const API_KEY = '4fa7ffeee5d231eb59154b86e43cdbbe';
 
-// ─── 1.0.1. Language Detection and i18n ──────────────────────────────────────────
+// 1.0.1. Language Detection and i18n //
 const supportedLanguages = ['ar', 'de', 'en', 'fr', 'es', 'it', 'pt', 'ua', 'ja', 'zh'];
 let currentLang = navigator.language.slice(0, 2);
 if (!supportedLanguages.includes(currentLang)) currentLang = 'en';
@@ -33,7 +33,7 @@ function isSameDay(date1, date2) {
     && date1.getDate() === date2.getDate();
 }
 
-// ─── 1.0.2 Apply Translations ───────────────────────────────────────────
+// 1.0.2 Apply Translations //
 function applyTranslations() {
   // Обновляем заголовок вкладки
   document.title = t('title');
@@ -83,7 +83,7 @@ function applyTranslations() {
   }
 }
 
-// ─── 2. Constants and Variables ───────────────────────────────────────────────
+// ─── 2. Constants and Variables ─────────
 const defaultCity   = 'Kyoto';
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwhCOoNnWCX5qUX_8KuIVoBHkohSlP_N4Rwedjr7z8lrhLWx064VnBRFicyoUXOxkQSpvDC92PwRJY/pub?output=csv';
 const CITIES_JSON   = '/cities.json';
@@ -94,7 +94,7 @@ let selectedCity   = defaultCity;
 let cityCoordsMap  = {};
 let savedEvents    = JSON.parse(localStorage.getItem('savedEvents') || '[]');
 
-// ─── 3. DOM Elements ───────────────────────────────────────────────────────────
+// ─── 3. DOM Elements ─────────
 const splash            = document.getElementById('splash');
 const enterBtn          = document.getElementById('enter-btn');
 const heroEnterBtn      = document.getElementById('enter-hero-btn');
@@ -123,9 +123,9 @@ const tabSettings       = document.getElementById('settings-tab');
 const tabSettingsBtn    = document.querySelector('[data-tab="settings-tab"]');
 const langSwitcher      = document.getElementById('lang-switcher');
 
-// ─── 4. Core Functions ──────────────────────────────────────────────────────────
+// ─── 4. Core Functions ─────────
 
-/** 4.0.0 Load cities list from public/cities.json */
+// 4.0.0 Load cities list from public/cities.json //
 async function loadCities() {
   try {
     const res = await fetch(CITIES_JSON);
@@ -149,7 +149,7 @@ async function loadCities() {
   }
 }
 
-/** 4.0 Load events from Google Sheets CSV */
+// 4.0 Load events from Google Sheets CSV //
 async function loadEvents() {
   try {
     const res    = await fetch(SHEET_CSV_URL);
@@ -230,7 +230,7 @@ async function loadEvents() {
   }
 }
 
-/** 4.1 Fetch and display weather */
+// 4.1 Fetch and display weather //
 async function update(city) {
   try {
     await fetchWeather(city);
@@ -240,13 +240,13 @@ async function update(city) {
   }
 }
 
-/** 4.2 Time-of-day theme */
+// 4.2 Time-of-day theme //
 function applyTimeTheme() {
   const phase = getTimeOfDay(); // 'morning'|'day'|'evening'|'night'
   document.body.classList.add(`theme-${phase}`);
 }
 
-/** 4.3 City background */
+// 4.3 City background //
 function applyCityBackground(city) {
   const cfg = citiesList.find(c => c.name === city);
   if (!cfg) return;
@@ -258,7 +258,7 @@ function applyCityBackground(city) {
   });
 }
 
-/** 4.4 Populate filters */
+// 4.4 Populate filters //
 function populateFilters() {
   if (!cityFilter || !categoryFilter) {
     console.warn('❌ Filters (city/category) not found.');
@@ -314,7 +314,7 @@ function populateFilters() {
   });
 }
 
-/** 4.5 Render events */
+// 4.5 Render events //
 function renderEvents() {
   eventsContainer.innerHTML = '';
   const showOnlyFavorites = favoritesOnlyCheckbox?.checked;
@@ -476,7 +476,7 @@ function renderEvents() {
   applyTranslations();
 }
 
-/** Toggle save/unsave event */
+// Toggle save/unsave event //
 function toggleSaveEvent(id) {
   const idStr = String(id);
   const idx = savedEvents.indexOf(idStr);
@@ -489,7 +489,7 @@ function toggleSaveEvent(id) {
   renderEvents();
 }
 
-// ─── 5. Initialization and Event Listeners ──────────────────────────────────
+// ─── 5. Initialization and Event Listeners ─────────
 window.addEventListener('DOMContentLoaded', async () => {
   // 5.0 Load Translations
   await loadTranslations(currentLang);
@@ -515,7 +515,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   await loadCities();
   await loadEvents();
 
-  // ─── 5.3 Splash input and button ─────────────────────────────────────────────
+  // 5.3 Splash input and button
 const splashInput = document.getElementById('splash-city-input');
 const splashBtn   = document.getElementById('enter-btn');
 const GEODB_API_KEY = '4fa7ffeee5d231eb59154b86e43cdbbe';
@@ -631,7 +631,7 @@ document.getElementById('toggle-profile-details')?.addEventListener('click', () 
   }
 });
 
-// ─── 6. Show/Hide Add Event Form ──────────────────────────────────────────────
+// ─── 6. Show/Hide Add Event Form ─────────
 if (addEventBtn && eventFormContainer) {
   addEventBtn.addEventListener('click', () => {
     eventFormContainer.style.display = 'flex';
@@ -710,7 +710,7 @@ if (evtCitySelect) {
   });
 }
 
-/** 6.1 Submit New Event Form */
+// 6.1 Submit New Event Form //
 let pickedLat = null;
 let pickedLon = null;
 let editEventId = null;
@@ -792,7 +792,7 @@ if (eventForm) {
   });
 }
 
-// ─── 6.2 Pick on Map for Location ───────────────────────────────────────────
+// 6.2 Pick on Map for Location //
 const pickBtn = document.getElementById('pick-location');
 const pickedCoordsDisplay = document.getElementById('picked-coords');
 const addressInput = document.getElementById('evt-address');
@@ -893,7 +893,7 @@ if (pickBtn && pickedCoordsDisplay && addressInput) {
   });
 }
 
-// ─── 6.3 Save My Events Separately ─────────────────────────────────────────────
+// 6.3 Save My Events Separately //
 function saveMyEvent(eventObj) {
   const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
   if (!user?.email) return;
@@ -904,7 +904,7 @@ function saveMyEvent(eventObj) {
   localStorage.setItem(key, JSON.stringify(list));
 }
 
-// ─── 7. Embla Carousel Setup ───────────────────────────────────────────────
+// ─── 7. Embla Carousel Setup ─────────
 let embla;
 function initEmbla() {
   const viewport = document.querySelector('.embla__viewport');
@@ -933,12 +933,12 @@ function initEmbla() {
   }
 }
 
-// ─── Close modal window ────────────────────────────────────────────────
+// Close modal window
 document.getElementById('modal-close').addEventListener('click', () => {
   document.getElementById('event-modal').classList.add('hidden');
 });
 
-// ─── 8. User Panel: Open/Close and Custom Buttons ──────────────────────
+// ─── 8. User Panel: Open/Close and Custom Buttons ─────────
 userBtn.addEventListener('click', () => {
   userPanel.classList.add('open');
   showTab('my-tab');
@@ -1015,7 +1015,7 @@ function showTab(id) {
   document.getElementById(activeBtn)?.classList.add('active');
 }
 
-// ─── 8.1 User Login Logic ───────────────────────────────────────────────
+// 8.1 User Login Logic //
 const loginSubmit = document.getElementById('login-submit');
 
 loginSubmit?.addEventListener('click', () => {
@@ -1088,7 +1088,7 @@ loginSubmit?.addEventListener('click', () => {
   }
 });
 
-// ─── 8.2 Restore User From Storage ────────────────────────────────────────
+// 8.2 Restore User From Storage //
 document.addEventListener('DOMContentLoaded', () => {
   let rawUser = localStorage.getItem('vibe_user');
   let storedUser = {};
@@ -1154,7 +1154,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// ─── 8.3 Full Registration Logic ─────────────────────────────────────────────
+// 8.3 Full Registration Logic //
 const registerModal = document.getElementById('register-modal');
 const registerBtn = document.getElementById('enter-hero-btn');
 const registerClose = document.getElementById('register-close');
@@ -1238,8 +1238,14 @@ registerSubmit?.addEventListener('click', () => {
     saveUser();
   }
 });
+// ProfileExit //
+const logoutBtn = document.getElementById('logout-btn');
+logoutBtn?.addEventListener('click', () => {
+  localStorage.removeItem('vibe_user');
+  location.reload();
+});
 
-// ─── 8.4 Edit Profile Modal ─────────────────────────────────────────────
+// 8.4 Edit Profile Modal //
 const editModal          = document.getElementById('edit-profile-modal');
 const editBtn            = document.getElementById('edit-profile-btn');
 const editClose          = document.getElementById('edit-profile-close');
@@ -1336,7 +1342,7 @@ editSave?.addEventListener('click', () => {
   }
 });
 
-// ─── 8.4.1 Memory Photo Gallery Logic ─────────────────────────────────────────
+// 8.4.1 Memory Photo Gallery Logic //
 
 const memoryPhotoBtn     = document.getElementById('memory-photo-btn');
 const memoryPhotoArea    = document.getElementById('memory-photo-area');
@@ -1447,7 +1453,7 @@ memoryCaptionBtn?.addEventListener('click', () => {
   }
 });
 
-// ─── 8.4.2 Memory Video Gallery Logic ─────────────────────────────────────────
+// 8.4.2 Memory Video Gallery Logic //
 const memoryVideoBtn   = document.getElementById('memory-video-btn');
 const memoryVideoArea  = document.getElementById('memory-video-area');
 const videoGrid        = document.getElementById('video-grid');
@@ -1504,7 +1510,7 @@ videoUpload?.addEventListener('change', (event) => {
   reader.readAsDataURL(file);
 });
 
-// Memory Video Modal ──────────────────────────────────────────────
+// Memory Video Modal 
 const videoModal         = document.getElementById('video-modal');
 const videoModalPlayer   = document.getElementById('video-modal-player');
 const videoModalClose    = document.getElementById('video-modal-close');
@@ -1543,7 +1549,7 @@ videoDeleteBtn?.addEventListener('click', () => {
   }
 });
 
-// ─── 8.4.3 Memory Notes Logic ──────────────────────────────────────────────
+// 8.4.3 Memory Notes Logic //
 const memoryNotesBtn   = document.getElementById('memory-notes-btn');
 const memoryNotesArea  = document.getElementById('memory-notes-area');
 const memoryNoteInput  = document.getElementById('memory-note-input');
@@ -1574,7 +1580,7 @@ function updateFeedback() {
   memoryNoteFeedback.textContent = `${currentLength}/500 characters used`;
 }
 
-// 🔄 8.8.8 Обновление UI
+// 🔄 8.8.8 Обновление UI //
 function updateUserPanel(user) {
   const userBtn = document.getElementById('user-btn');
   if (userBtn) userBtn.textContent = `👤 ${user.name}`;
@@ -1606,7 +1612,7 @@ function updateUserPanel(user) {
   }
 }
 
-// 8.5 Render My Events in User Panel (saved + private combined)
+// 8.5 Render My Events in User Panel (saved + private combined) //
 function renderMyEvents() {
   const container = document.getElementById('my-events-container');
   if (!container) return;
@@ -1721,7 +1727,7 @@ function renderMyEvents() {
   });
 }
 
-// ─── 🧾 Populate User Profile Fields in User Panel ─────────────────────────
+// 🧾 Populate User Profile Fields in User Panel //
 function populateProfile() {
   const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
   if (!user) return;
@@ -1747,7 +1753,7 @@ function populateProfile() {
   if (phoneEl) phoneEl.textContent = user.phone || '—';
 }
 
-// ─── 8.6 Tabs Logic ─────────────────────────────────────
+// 8.6 Tabs Logic //
 document.querySelectorAll('.user-panel-tabs .btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.user-panel-tabs .btn').forEach(b => b.classList.remove('active'));
@@ -1766,7 +1772,7 @@ document.querySelectorAll('.user-panel-tabs .btn').forEach(btn => {
   });
 });
 
-// ─── 8.7 Прогноз погоды для события (View Details) ─────────────────────────────
+// 8.7 Прогноз погоды для события (View Details) //
 async function loadEventWeather(city, dateStr) {
   const weatherEl = document.getElementById('modal-weather');
   weatherEl.textContent = t('modal_weather_loading');
@@ -1823,7 +1829,7 @@ async function loadEventWeather(city, dateStr) {
   }
 }
 
-// ─── 9. Map Logic ──────────────────────────────────────────────────────
+// ─── 9. Map Logic ─────────
 const mapContainer = document.getElementById('map-container');
 const mapCloseBtn = document.getElementById('map-close');
 let mapInstance;

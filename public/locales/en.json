@@ -114,5 +114,6 @@
   "memory_video": "🎬 Video",
   "memory_notes": "🧾 Notes",
   "memory_videos": "🎬 Videos",
-  "memory_video_desc": "Your saved video memories."
+  "memory_video_desc": "Your saved video memories.",
+  "logout": "Logout"
 }
