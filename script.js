@@ -491,10 +491,10 @@ function toggleSaveEvent(id) {
 
 // ─── 5. Initialization and Event Listeners ─────────
 window.addEventListener('DOMContentLoaded', async () => {
-  // 5.0 Load Translations
+  // 5.0 Load Translations //
   await loadTranslations(currentLang);
 
-  // 5.1 Language Switcher
+  // 5.1 Language Switcher //
   if (langSwitcher) {
     supportedLanguages.forEach(lang => {
       const opt = document.createElement('option');
@@ -511,11 +511,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 5.2 Load core data
+  // 5.2 Load core data //
   await loadCities();
   await loadEvents();
 
-  // 5.3 Splash input and button
+  // 5.3 Splash input and button //
 const splashInput = document.getElementById('splash-city-input');
 const splashBtn   = document.getElementById('enter-btn');
 const GEODB_API_KEY = '4fa7ffeee5d231eb59154b86e43cdbbe';
@@ -576,7 +576,7 @@ if (splashInput && splashBtn) {
   console.warn("❌ splashInput or splashBtn not found in DOM");
 }
 
-  // 5.4 Hero enter button
+  // 5.4 Hero enter button //
   const heroEnterBtn = document.getElementById('enter-hero-btn');
   if (heroEnterBtn && splashBtn) {
     heroEnterBtn.addEventListener('click', () => splashBtn.click());
@@ -584,7 +584,7 @@ if (splashInput && splashBtn) {
     console.warn('⚠️ heroEnterBtn or splashBtn not found in DOM');
   }
 
-  // 5.5 Live search
+  // 5.5 Live search //
   if (searchInput) {
     searchInput.addEventListener('input', () => {
       renderEvents();
@@ -592,7 +592,7 @@ if (splashInput && splashBtn) {
     });
   }
 
-  // 5.6 City filter
+  // 5.6 City filter //
   if (cityFilter) {
     cityFilter.addEventListener('change', () => {
       const city = cityFilter.value;
@@ -606,7 +606,7 @@ if (splashInput && splashBtn) {
     });
   }
 
-  // 5.7 Category filter
+  // 5.7 Category filter //
   if (categoryFilter) {
     categoryFilter.addEventListener('change', () => {
       renderEvents();
@@ -614,7 +614,7 @@ if (splashInput && splashBtn) {
     });
   }
 
-  // 5.8 Favorites checkbox
+  // 5.8 Favorites checkbox //
   if (favoritesOnlyCheckbox) {
     favoritesOnlyCheckbox.addEventListener('change', () => {
       showOnlyFavorites = favoritesOnlyCheckbox.checked;
