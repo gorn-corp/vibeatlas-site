@@ -46,6 +46,8 @@ Early build — fully functional prototype without back-end.
 
 > [https://vibeatlas-site.vercel.app](https://vibeatlas-site.vercel.app)  
 > *(May take a few seconds to load. No tracker scripts. Just clean code.)*
+> [VibeAtlas screenshot](public/preview.png)
+*A lightweight UI for discovering, saving and remembering global events.*
 
 ---
 
