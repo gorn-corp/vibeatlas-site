@@ -1342,6 +1342,13 @@ editSave?.addEventListener('click', () => {
   }
 });
 
+// 🧯 Logout from Edit Profile
+const editLogoutBtn = document.getElementById('logout-btn');
+editLogoutBtn?.addEventListener('click', () => {
+  localStorage.removeItem('vibe_user');
+  location.reload();
+});
+
 // 8.4.1 Memory Photo Gallery Logic //
 
 const memoryPhotoBtn     = document.getElementById('memory-photo-btn');

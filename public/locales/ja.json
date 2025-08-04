@@ -115,5 +115,6 @@
   "memory_notes": "🧾 ノート",
   "memory_videos": "🎬 ビデオ集",
   "memory_video_desc": "保存されたビデオの思い出です。",
-  "logout": "ログアウト"
+  "logout": "ログアウト",
+  "logout_button": "ログアウト"
 }

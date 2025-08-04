@@ -115,5 +115,6 @@
   "memory_notes": "🧾 Notas",
   "memory_videos": "🎬 Vídeos",
   "memory_video_desc": "Suas memórias em vídeo salvas.",
-  "logout": "Sair"
+  "logout": "Sair",
+  "logout_button": "Sair"
 }

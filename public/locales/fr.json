@@ -115,5 +115,6 @@
   "memory_notes": "🧾 Notes",
   "memory_videos": "🎬 Vidéos",
   "memory_video_desc": "Vos souvenirs vidéo enregistrés.",
-  "logout": "Se déconnecter"
+  "logout": "Se déconnecter",
+  "logout_button": "Se déconnecter"
 }

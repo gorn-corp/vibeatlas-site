@@ -115,5 +115,6 @@
   "memory_notes": "🧾 Notas",
   "memory_videos": "🎬 Vídeos",
   "memory_video_desc": "Tus recuerdos en vídeo guardados.",
-  "logout": "Cerrar sesión"
+  "logout": "Cerrar sesión",
+  "logout_button": "Cerrar sesión"
 }

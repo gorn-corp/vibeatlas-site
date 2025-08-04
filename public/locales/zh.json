@@ -115,5 +115,6 @@
   "memory_notes": "🧾 备注",
   "memory_videos": "🎬 视频集",
   "memory_video_desc": "您保存的视频回忆。",
-  "logout": "登出"
+  "logout": "登出",
+  "logout_button": "退出登录"
 }
