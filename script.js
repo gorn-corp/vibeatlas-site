@@ -515,66 +515,80 @@ window.addEventListener('DOMContentLoaded', async () => {
   await loadCities();
   await loadEvents();
 
+  // 🧼 Set min/max for evt-date input (±100 years)
+  const evtDateInput = document.getElementById('evt-date');
+  if (evtDateInput) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const pad = n => n.toString().padStart(2, '0');
+
+    const minDate = `${currentYear - 100}-01-01T00:00`;
+    const maxDate = `${currentYear + 100}-12-31T23:59`;
+
+    evtDateInput.min = minDate;
+    evtDateInput.max = maxDate;
+  }
+
   // 5.3 Splash input and button //
-const splashInput = document.getElementById('splash-city-input');
-const splashBtn   = document.getElementById('enter-btn');
-const GEODB_API_KEY = '4fa7ffeee5d231eb59154b86e43cdbbe';
+  const splashInput = document.getElementById('splash-city-input');
+  const splashBtn   = document.getElementById('enter-btn');
+  const GEODB_API_KEY = '4fa7ffeee5d231eb59154b86e43cdbbe';
 
-if (splashInput && splashBtn) {
-  splashInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      splashBtn.click();
-    }
-  });
+  if (splashInput && splashBtn) {
+    splashInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        splashBtn.click();
+      }
+    });
 
-  splashBtn.addEventListener('click', async () => {
-    const city = splashInput.value.trim() || defaultCity;
-    selectedCity = city;
-    splash.style.display = 'none';
+    splashBtn.addEventListener('click', async () => {
+      const city = splashInput.value.trim() || defaultCity;
+      selectedCity = city;
+      splash.style.display = 'none';
 
-    // Проверяем, есть ли уже координаты для этого города
-    if (!cityCoordsMap[city]) {
-      try {
-        const response = await fetch(`https://geodb-free-service.wirefreethought.com/v1/geo/cities?limit=1&namePrefix=${encodeURIComponent(city)}`, {
-          headers: { 'X-RapidAPI-Key': GEODB_API_KEY }
-        });
-
-        const data = await response.json();
-        const result = data?.data?.[0];
-
-        if (result && result.latitude && result.longitude) {
-          cityCoordsMap[city] = { lat: result.latitude, lon: result.longitude };
-
-          // Временно добавляем город в citiesList
-          citiesList.push({
-            name: city,
-            lat: result.latitude,
-            lon: result.longitude,
-            background: '' // Пусто, если нет картинки
+      // Проверяем, есть ли уже координаты для этого города
+      if (!cityCoordsMap[city]) {
+        try {
+          const response = await fetch(`https://geodb-free-service.wirefreethought.com/v1/geo/cities?limit=1&namePrefix=${encodeURIComponent(city)}`, {
+            headers: { 'X-RapidAPI-Key': GEODB_API_KEY }
           });
-        } else {
-          alert(`⚠️ City "${city}" not found.`);
+
+          const data = await response.json();
+          const result = data?.data?.[0];
+
+          if (result && result.latitude && result.longitude) {
+            cityCoordsMap[city] = { lat: result.latitude, lon: result.longitude };
+
+            // Временно добавляем город в citiesList
+            citiesList.push({
+              name: city,
+              lat: result.latitude,
+              lon: result.longitude,
+              background: '' // Пусто, если нет картинки
+            });
+          } else {
+            alert(`⚠️ City "${city}" not found.`);
+            return;
+          }
+        } catch (err) {
+          console.error('City fetch error:', err);
+          alert('❌ Failed to fetch city data.');
           return;
         }
-      } catch (err) {
-        console.error('City fetch error:', err);
-        alert('❌ Failed to fetch city data.');
-        return;
       }
-    }
 
-    update(city);
-    applyTimeTheme();
-    applyCityBackground(city);
-    populateFilters();
-    cityFilter.value = selectedCity;
-    renderEvents();
-    initEmbla();
-  });
-} else {
-  console.warn("❌ splashInput or splashBtn not found in DOM");
-}
+      update(city);
+      applyTimeTheme();
+      applyCityBackground(city);
+      populateFilters();
+      cityFilter.value = selectedCity;
+      renderEvents();
+      initEmbla();
+    });
+  } else {
+    console.warn("❌ splashInput or splashBtn not found in DOM");
+  }
 
   // 5.4 Hero enter button //
   const heroEnterBtn = document.getElementById('enter-hero-btn');
@@ -719,16 +733,28 @@ if (eventForm) {
   eventForm.addEventListener('submit', e => {
     e.preventDefault();
 
-    const title       = evtTitleInput.value.trim();
-    const desc        = evtDescInput.value.trim();
-    const dateVal     = evtDateInput.value;
-    const cityVal     = evtCitySelect.value.trim();
-    const catVal      = evtCategoryInput.value.trim();
-    const address     = document.getElementById('evt-address')?.value.trim();
-    const isPrivate   = document.getElementById('evt-private')?.checked;
+    const title     = evtTitleInput.value.trim();
+    const desc      = evtDescInput.value.trim();
+    const dateVal   = evtDateInput.value;
+    const cityVal   = evtCitySelect.value.trim();
+    const catVal    = evtCategoryInput.value.trim();
+    const address   = document.getElementById('evt-address')?.value.trim();
+    const isPrivate = document.getElementById('evt-private')?.checked;
 
     if (!title || !desc || !dateVal || !cityVal || !catVal) {
       alert('Please fill in all fields.');
+      return;
+    }
+
+    // 🧼 Validate date (±100 years from current year)
+    const dateObj = new Date(dateVal);
+    const year = dateObj.getFullYear();
+    const currentYear = new Date().getFullYear();
+    const minYear = currentYear - 100;
+    const maxYear = currentYear + 100;
+
+    if (isNaN(dateObj.getTime()) || year < minYear || year > maxYear) {
+      alert(`⚠️ Please enter a valid date between ${minYear} and ${maxYear}.`);
       return;
     }
 
@@ -1628,7 +1654,7 @@ function renderMyEvents() {
   const currentUser = JSON.parse(localStorage.getItem('vibe_user') || '{}');
 
   const saved = events.filter(e => savedEvents.includes(String(e.id)));
-  const mine  = events.filter(e => e.private && e.owner === currentUser.email);
+  const mine  = events.filter(e => e.owner === currentUser.email);
   const all   = [...saved, ...mine];
 
   if (all.length === 0) {
@@ -1643,6 +1669,8 @@ function renderMyEvents() {
     const privateTag = e.private ? `<span class="private-tag">🔒 ${t('private_event')}</span><br />` : '';
     const addressBlock = e.address ? `<p><strong>${t('address_label')}:</strong> ${e.address}</p>` : '';
 
+    const isMine = e.owner === currentUser.email;
+
     div.innerHTML = `
       ${privateTag}
       <h4>${e.title}</h4>
@@ -1652,8 +1680,12 @@ function renderMyEvents() {
       <p><em>${e.city} — ${e.category}</em></p>
       <div class="event-actions">
         <button class="btn details-btn">${t('view_details')}</button>
-        ${e.private && e.owner === currentUser.email ? `<button class="btn edit-my-btn">✏️ ${t('edit')}</button>
-        <button class="btn delete-my-btn">🗑️ ${t('delete')}</button>` : `<button class="btn remove-saved-btn">🗑 ${t('remove_saved')}</button>`}
+        ${isMine ? `
+          <button class="btn edit-my-btn">✏️ ${t('edit')}</button>
+          <button class="btn delete-my-btn">🗑️ ${t('delete')}</button>
+        ` : `
+          <button class="btn remove-saved-btn">🗑 ${t('remove_saved')}</button>
+        `}
       </div>
     `;
 
@@ -1695,7 +1727,7 @@ function renderMyEvents() {
       }, 100);
     });
 
-    if (e.private && e.owner === currentUser.email) {
+    if (isMine) {
       div.querySelector('.edit-my-btn').addEventListener('click', () => {
         document.getElementById('evt-title').value = e.title;
         document.getElementById('evt-desc').value = e.description;
