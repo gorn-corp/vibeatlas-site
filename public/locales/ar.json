@@ -116,5 +116,7 @@
   "memory_videos": "🎬 مقاطع فيديو",
   "memory_video_desc": "ذكريات الفيديو المحفوظة لديك.",
   "logout": "تسجيل الخروج",
-  "logout_button": "تسجيل الخروج"
+  "logout_button": "تسجيل الخروج",
+  "edit_event_title": "تعديل الحدث",
+  "update_event": "تحديث الحدث"
 }

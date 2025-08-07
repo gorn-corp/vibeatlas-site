@@ -116,5 +116,7 @@
   "memory_videos": "🎬 Videos",
   "memory_video_desc": "Deine gespeicherten Videomomente.",
   "logout": "Abmelden",
-  "logout_button": "Abmelden"
+  "logout_button": "Abmelden",
+  "edit_event_title": "Veranstaltung bearbeiten",
+  "update_event": "Veranstaltung aktualisieren"
 }

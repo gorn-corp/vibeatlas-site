@@ -489,6 +489,22 @@ body {
   text-align: center;
 }
 
+.edit-my-btn {
+  background: #4CAF50 !important;
+  color: white !important;
+}
+.edit-my-btn:hover {
+  background: #66bb6a !important;
+}
+
+.delete-my-btn {
+  background: #f44336 !important;
+  color: white !important;
+}
+.delete-my-btn:hover {
+  background: #e57373 !important;
+}
+
 /* ─── Стилизация галочки Private Event ─────────────────────────────── */
 .checkbox-label {
   display: flex;

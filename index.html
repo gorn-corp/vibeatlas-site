@@ -95,7 +95,6 @@
 <!-- Add Event Form -->
 <div id="event-form-container" class="event-form-container" style="display: none;">
   <form id="event-form" class="event-form">
-
     <h3 data-i18n="add_event_title">Add New Event</h3>
 
     <label>
@@ -125,30 +124,79 @@
       <input type="text" id="evt-category" required placeholder="" data-i18n-placeholder="category_placeholder" />
     </label>
 
-    <!-- 📍 Address -->
     <label>
       <span data-i18n="address_label">Address</span>
       <input type="text" id="evt-address" placeholder="e.g. 123 Main St" data-i18n-placeholder="address_placeholder" />
     </label>
 
-    <!-- 📍 Pick on Map -->
     <div style="text-align: center; margin-top: 0.75rem;">
       <button type="button" id="pick-location" class="btn" style="width: 100%;" data-i18n="pick_on_map">📍 Pick on Map</button>
       <small id="picked-coords" style="display: block; margin-top: 0.25rem; color: #ccc;">—</small>
     </div>
 
-    <!-- 🔒 Private Event -->
     <label for="evt-private" class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
       <input type="checkbox" id="evt-private" />
       <span data-i18n="private_event">🔒 Private Event</span>
     </label>
 
-    <!-- Submit & Cancel -->
-    <div style="display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.25rem; width: 100%; transform: translateX(+1mm);">
+    <div style="display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.25rem; width: 100%;">
       <button type="submit" class="btn" style="flex: 1;" data-i18n="submit_event">Submit Event</button>
       <button type="button" id="evt-cancel-btn" class="btn" style="flex: 1; background: #999;" data-i18n="cancel">Cancel</button>
     </div>
+  </form>
+</div>
 
+<!-- Edit Event Form -->
+<div id="edit-event-form-container" class="event-form-container" style="display: none;">
+  <form id="edit-event-form" class="event-form">
+    <h3 data-i18n="edit_event_title">Edit Event</h3>
+
+    <label>
+      <span data-i18n="title_label">Title</span>
+      <input type="text" id="edit-evt-title" required placeholder="" data-i18n-placeholder="title_label" />
+    </label>
+
+    <label>
+      <span data-i18n="desc_label">Description</span>
+      <textarea id="edit-evt-desc" rows="3" required placeholder="" data-i18n-placeholder="desc_label"></textarea>
+    </label>
+
+    <label>
+      <span data-i18n="date_label">Date</span>
+      <input type="datetime-local" id="edit-evt-date" required />
+    </label>
+
+    <label>
+      <span data-i18n="city_label">City</span>
+      <select id="edit-evt-city" required>
+        <option value="" data-i18n="select_city">Select City</option>
+      </select>
+    </label>
+
+    <label>
+      <span data-i18n="category_label">Category</span>
+      <input type="text" id="edit-evt-category" required placeholder="" data-i18n-placeholder="category_placeholder" />
+    </label>
+
+    <label>
+      <span data-i18n="address_label">Address</span>
+      <input type="text" id="edit-evt-address" placeholder="e.g. 123 Main St" data-i18n-placeholder="address_placeholder" />
+    </label>
+
+    <div style="text-align: center; margin-top: 0.75rem;">
+      <button type="button" id="edit-pick-location" class="btn" style="width: 100%;" data-i18n="pick_on_map">📍 Pick on Map</button>
+      <small id="edit-picked-coords" style="display: block; margin-top: 0.25rem; color: #ccc;">—</small>
+    </div>
+
+    <label for="edit-evt-private" class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+      <input type="checkbox" id="edit-evt-private" />
+      <span data-i18n="private_event">🔒 Private Event</span>
+    </label>
+
+    <div style="display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.25rem; width: 100%;">
+      <button type="submit" class="btn" style="flex: 1;" data-i18n="update_event">Update Event</button>
+      <button type="button" id="edit-evt-cancel-btn" class="btn" style="flex: 1; background: #999;" data-i18n="cancel">Cancel</button>
+    </div>
   </form>
 </div>
 

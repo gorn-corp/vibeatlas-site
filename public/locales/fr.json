@@ -116,5 +116,7 @@
   "memory_videos": "🎬 Vidéos",
   "memory_video_desc": "Vos souvenirs vidéo enregistrés.",
   "logout": "Se déconnecter",
-  "logout_button": "Se déconnecter"
+  "logout_button": "Se déconnecter",
+  "edit_event_title": "Modifier l'événement",
+  "update_event": "Mettre à jour l'événement"
 }

@@ -93,6 +93,9 @@ let citiesList     = [];
 let selectedCity   = defaultCity;
 let cityCoordsMap  = {};
 let savedEvents    = JSON.parse(localStorage.getItem('savedEvents') || '[]');
+let pickedLat = null;
+let pickedLon = null;
+let editEventId = null;
 
 // ─── 3. DOM Elements ─────────
 const splash            = document.getElementById('splash');
@@ -280,15 +283,27 @@ function populateFilters() {
   });
 
   // For Add Event form
-  if (evtCitySelect) {
-    evtCitySelect.innerHTML = `<option value="" data-i18n="select_city">${t('select_city')}</option>`;
-    allCities.forEach(name => {
-      const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
-      evtCitySelect.appendChild(opt);
-    });
-  }
+if (evtCitySelect) {
+  evtCitySelect.innerHTML = `<option value="" data-i18n="select_city">${t('select_city')}</option>`;
+  allCities.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    evtCitySelect.appendChild(opt);
+  });
+}
+
+// For Edit Event form
+const editCitySelect = document.getElementById('edit-evt-city');
+if (editCitySelect) {
+  editCitySelect.innerHTML = `<option value="" data-i18n="select_city">${t('select_city')}</option>`;
+  allCities.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    editCitySelect.appendChild(opt);
+  });
+}
 
   // Categories filter
   const catList = [...new Set(events.map(e => e.category).filter(Boolean))].sort();
@@ -648,7 +663,27 @@ document.getElementById('toggle-profile-details')?.addEventListener('click', () 
 // ─── 6. Show/Hide Add Event Form ─────────
 if (addEventBtn && eventFormContainer) {
   addEventBtn.addEventListener('click', () => {
+    editEventId = null; // сбрасываем режим редактирования
     eventFormContainer.style.display = 'flex';
+
+    const titleEl = eventFormContainer.querySelector('h3');
+    const submitBtn = eventFormContainer.querySelector('button[type="submit"]');
+    if (titleEl) titleEl.textContent = t('add_event_title'); // стандартный заголовок
+    if (submitBtn) submitBtn.textContent = t('submit_event');
+
+    if (evtTitleInput) evtTitleInput.value = '';
+    if (evtDescInput) evtDescInput.value = '';
+    if (evtDateInput) evtDateInput.value = '';
+    if (evtCitySelect) evtCitySelect.value = '';
+    if (evtCategoryInput) evtCategoryInput.value = '';
+    const addrInput = document.getElementById('evt-address');
+    if (addrInput) addrInput.value = '';
+    const coordsEl = document.getElementById('picked-coords');
+    if (coordsEl) coordsEl.textContent = '—';
+    const privateCheckbox = document.getElementById('evt-private');
+    if (privateCheckbox) privateCheckbox.checked = false;
+    pickedLat = null;
+    pickedLon = null;
 
     const closeTopBtn = document.getElementById('evt-close-top');
     if (closeTopBtn && eventFormContainer) {
@@ -694,12 +729,15 @@ if (addEventBtn && eventFormContainer) {
   });
 }
 
+// ─── 6.1 Cancel Button ─────────
 if (evtCancelBtn && eventFormContainer) {
   evtCancelBtn.addEventListener('click', () => {
     eventFormContainer.style.display = 'none';
+    editEventId = null; // сбросить флаг редактирования
   });
 }
 
+// ─── 6.2 City → Координаты ─────────
 if (evtCitySelect) {
   evtCitySelect.addEventListener('change', () => {
     const selected = evtCitySelect.value;
@@ -712,7 +750,6 @@ if (evtCitySelect) {
       window._eventMap.setView([lat, lon], 13);
       window._eventMarker.setLatLng([lat, lon]);
 
-      // обновить адрес
       fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
         .then(res => res.json())
         .then(data => {
@@ -724,15 +761,12 @@ if (evtCitySelect) {
   });
 }
 
-// 6.1 Submit New Event Form //
-let pickedLat = null;
-let pickedLon = null;
-let editEventId = null;
-
+// ─── 6.3 Submit Event (Create or Edit) ─────────
 if (eventForm) {
   eventForm.addEventListener('submit', e => {
     e.preventDefault();
 
+    const mode = eventForm.getAttribute('data-mode') || 'add';
     const title     = evtTitleInput.value.trim();
     const desc      = evtDescInput.value.trim();
     const dateVal   = evtDateInput.value;
@@ -746,7 +780,6 @@ if (eventForm) {
       return;
     }
 
-    // 🧼 Validate date (±100 years from current year)
     const dateObj = new Date(dateVal);
     const year = dateObj.getFullYear();
     const currentYear = new Date().getFullYear();
@@ -764,7 +797,7 @@ if (eventForm) {
       return;
     }
 
-    const newId = editEventId || Date.now().toString();
+    const newId = (mode === 'edit' && editEventId) ? editEventId : Date.now().toString();
 
     const newEvent = {
       id: newId,
@@ -780,7 +813,7 @@ if (eventForm) {
       owner: currentUser.email
     };
 
-    if (editEventId) {
+    if (mode === 'edit' && editEventId) {
       const index = events.findIndex(ev => ev.id === editEventId);
       if (index !== -1) events[index] = newEvent;
       editEventId = null;
@@ -793,15 +826,14 @@ if (eventForm) {
       localStorage.setItem(key, JSON.stringify(myEvents));
     }
 
-    // Обновляем фильтры и рендерим
     populateFilters();
     renderEvents();
-
-    // Обновляем сразу My Events
     if (typeof renderMyEvents === 'function') renderMyEvents();
 
-    // Закрываем форму и очищаем поля
+    // Сброс и закрытие формы
     eventFormContainer.style.display = 'none';
+    eventForm.setAttribute('data-mode', 'add');
+
     evtTitleInput.value = '';
     evtDescInput.value = '';
     evtDateInput.value = '';
@@ -818,7 +850,84 @@ if (eventForm) {
   });
 }
 
-// 6.2 Pick on Map for Location //
+// ─── 6.3.1 Submit Edited Event ───────────────
+const editForm = document.getElementById('edit-event-form');
+
+if (editForm) {
+  editForm.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const title     = document.getElementById('edit-evt-title').value.trim();
+    const desc      = document.getElementById('edit-evt-desc').value.trim();
+    const dateVal   = document.getElementById('edit-evt-date').value;
+    const cityVal   = document.getElementById('edit-evt-city').value.trim();
+    const catVal    = document.getElementById('edit-evt-category').value.trim();
+    const address   = document.getElementById('edit-evt-address')?.value.trim();
+    const isPrivate = document.getElementById('edit-evt-private')?.checked;
+
+    if (!title || !desc || !dateVal || !cityVal || !catVal) {
+      alert('Please fill in all fields.');
+      return;
+    }
+
+    const dateObj = new Date(dateVal);
+    const year = dateObj.getFullYear();
+    const currentYear = new Date().getFullYear();
+    const minYear = currentYear - 100;
+    const maxYear = currentYear + 100;
+
+    if (isNaN(dateObj.getTime()) || year < minYear || year > maxYear) {
+      alert(`⚠️ Please enter a valid date between ${minYear} and ${maxYear}.`);
+      return;
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+    if (!currentUser?.email) {
+      alert('Please log in with email to edit events.');
+      return;
+    }
+
+    const index = events.findIndex(ev => ev.id === editEventId);
+    if (index === -1) {
+      alert('Event not found.');
+      return;
+    }
+
+    events[index] = {
+      id: editEventId,
+      city: cityVal,
+      title,
+      description: desc,
+      date: dateVal,
+      category: catVal,
+      address: address || '',
+      lat: pickedLat,
+      lon: pickedLon,
+      private: !!isPrivate,
+      owner: currentUser.email
+    };
+
+    editEventId = null;
+    populateFilters();
+    renderEvents();
+    if (typeof renderMyEvents === 'function') renderMyEvents();
+
+    document.getElementById('edit-event-form-container').style.display = 'none';
+  });
+}
+
+// ─── 6.3.2 Cancel Edit Event ───────────────
+const editCancelBtn = document.getElementById('edit-evt-cancel-btn');
+if (editCancelBtn) {
+  editCancelBtn.addEventListener('click', () => {
+    document.getElementById('edit-event-form-container').style.display = 'none';
+    editEventId = null;
+    pickedLat = null;
+    pickedLon = null;
+  });
+}
+
+// 6.4 Pick on Map for Location //
 const pickBtn = document.getElementById('pick-location');
 const pickedCoordsDisplay = document.getElementById('picked-coords');
 const addressInput = document.getElementById('evt-address');
@@ -919,7 +1028,106 @@ if (pickBtn && pickedCoordsDisplay && addressInput) {
   });
 }
 
-// 6.3 Save My Events Separately //
+// 6.4b Pick on Map for Editing Event //
+const editPickBtn = document.getElementById('edit-pick-location');
+const editCoordsDisplay = document.getElementById('edit-picked-coords');
+const editAddressInput = document.getElementById('edit-evt-address');
+
+if (editPickBtn && editCoordsDisplay && editAddressInput) {
+  editPickBtn.addEventListener('click', () => {
+    if (document.getElementById('map-popup')) return;
+
+    let startLat = 35.0116;
+    let startLon = 135.7681;
+    const selectedCity = document.getElementById('edit-evt-city')?.value;
+    if (selectedCity && Array.isArray(citiesList)) {
+      const cityObj = citiesList.find(c => c.name === selectedCity);
+      if (cityObj) {
+        startLat = cityObj.lat;
+        startLon = cityObj.lon;
+      }
+    }
+
+    const modal = document.createElement('div');
+    modal.id = 'map-popup';
+    modal.style.position = 'fixed';
+    modal.style.top = 0;
+    modal.style.left = 0;
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.zIndex = 9999;
+    modal.style.background = '#000000b0';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    wrapper.style.width = '80%';
+    wrapper.style.height = '80%';
+    wrapper.style.borderRadius = '8px';
+    wrapper.style.overflow = 'hidden';
+    modal.appendChild(wrapper);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.style.position = 'absolute';
+    closeBtn.style.top = '10px';
+    closeBtn.style.right = '15px';
+    closeBtn.style.zIndex = 1000;
+    closeBtn.style.fontSize = '1.5rem';
+    closeBtn.style.background = 'transparent';
+    closeBtn.style.color = 'white';
+    closeBtn.style.border = 'none';
+    closeBtn.style.cursor = 'pointer';
+    wrapper.appendChild(closeBtn);
+
+    const mapDiv = document.createElement('div');
+    mapDiv.style.width = '100%';
+    mapDiv.style.height = '100%';
+    wrapper.appendChild(mapDiv);
+
+    document.body.appendChild(modal);
+
+    const map = L.map(mapDiv).setView([startLat, startLon], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    let marker = null;
+    map.on('click', e => {
+      if (marker) map.removeLayer(marker);
+      marker = L.marker(e.latlng).addTo(map);
+
+      pickedLat = e.latlng.lat;
+      pickedLon = e.latlng.lng;
+
+      editCoordsDisplay.textContent = `${pickedLat.toFixed(4)}, ${pickedLon.toFixed(4)}`;
+      editCoordsDisplay.style.color = '#aaa';
+
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pickedLat}&lon=${pickedLon}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data?.display_name) {
+            editAddressInput.value = data.display_name;
+          }
+        })
+        .catch(err => console.warn('Geocoding error:', err));
+    });
+
+    closeBtn.addEventListener('click', () => {
+      map.remove();
+      modal.remove();
+    });
+
+    modal.addEventListener('click', e => {
+      if (e.target === modal) {
+        map.remove();
+        modal.remove();
+      }
+    });
+  });
+}
+
+// 6.5 Save My Events Separately //
 function saveMyEvent(eventObj) {
   const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
   if (!user?.email) return;
@@ -1678,7 +1886,7 @@ function renderMyEvents() {
       ${addressBlock}
       <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
       <p><em>${e.city} — ${e.category}</em></p>
-      <div class="event-actions">
+      <div class="event-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
         <button class="btn details-btn">${t('view_details')}</button>
         ${isMine ? `
           <button class="btn edit-my-btn">✏️ ${t('edit')}</button>
@@ -1689,6 +1897,7 @@ function renderMyEvents() {
       </div>
     `;
 
+    // ─── View Details ─────────
     div.querySelector('.details-btn').addEventListener('click', () => {
       document.getElementById('modal-title').textContent       = e.title;
       document.getElementById('modal-description').textContent = e.description;
@@ -1727,24 +1936,28 @@ function renderMyEvents() {
       }, 100);
     });
 
+    // ─── If Owner ─────────────
     if (isMine) {
       div.querySelector('.edit-my-btn').addEventListener('click', () => {
-        document.getElementById('evt-title').value = e.title;
-        document.getElementById('evt-desc').value = e.description;
-        document.getElementById('evt-date').value = e.date;
-        document.getElementById('evt-city').value = e.city;
-        document.getElementById('evt-category').value = e.category;
-        document.getElementById('evt-address').value = e.address || '';
-        document.getElementById('evt-private').checked = !!e.private;
-        const coordsEl = document.getElementById('picked-coords');
+        document.getElementById('edit-evt-title').value     = e.title;
+        document.getElementById('edit-evt-desc').value      = e.description;
+        document.getElementById('edit-evt-date').value      = e.date;
+        document.getElementById('edit-evt-city').value      = e.city;
+        document.getElementById('edit-evt-category').value  = e.category;
+        document.getElementById('edit-evt-address').value   = e.address || '';
+        document.getElementById('edit-evt-private').checked = !!e.private;
+
+        const coordsEl = document.getElementById('edit-picked-coords');
         if (coordsEl && e.lat && e.lon) {
           coordsEl.textContent = `${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`;
           coordsEl.style.color = '#aaa';
         }
+
         pickedLat = e.lat;
         pickedLon = e.lon;
         editEventId = e.id;
-        eventFormContainer.style.display = 'block';
+
+        document.getElementById('edit-event-form-container').style.display = 'flex';
       });
 
       div.querySelector('.delete-my-btn').addEventListener('click', () => {

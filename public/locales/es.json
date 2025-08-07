@@ -116,5 +116,7 @@
   "memory_videos": "🎬 Vídeos",
   "memory_video_desc": "Tus recuerdos en vídeo guardados.",
   "logout": "Cerrar sesión",
-  "logout_button": "Cerrar sesión"
+  "logout_button": "Cerrar sesión",
+  "edit_event_title": "Editar evento",
+  "update_event": "Actualizar evento"
 }

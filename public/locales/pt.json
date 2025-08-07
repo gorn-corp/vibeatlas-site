@@ -116,5 +116,7 @@
   "memory_videos": "🎬 Vídeos",
   "memory_video_desc": "Suas memórias em vídeo salvas.",
   "logout": "Sair",
-  "logout_button": "Sair"
+  "logout_button": "Sair",
+  "edit_event_title": "Editar evento",
+  "update_event": "Atualizar evento"
 }
