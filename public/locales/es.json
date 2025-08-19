@@ -118,5 +118,7 @@
   "logout": "Cerrar sesión",
   "logout_button": "Cerrar sesión",
   "edit_event_title": "Editar evento",
-  "update_event": "Actualizar evento"
+  "update_event": "Actualizar evento",
+  "clear_saved": "🗑️ Borrar guardados",
+  "confirm_clear_saved": "¿Seguro que quieres borrar todos los elementos guardados?"
 }

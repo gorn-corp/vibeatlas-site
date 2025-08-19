@@ -822,6 +822,26 @@ select.lang-dropdown:hover {
 #saved-events-container .event-card h4 {
   margin: 0 0 0.5rem;
 }
+
+.clear-favorites-btn {
+  width: 75%;
+  padding: 0.35rem 0.5rem; /* почти как memory-btn */
+  font-size: 0.88rem;
+  text-align: center;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: block;
+  margin: 1rem auto 0 auto; /* центрирование */
+}
+
+.clear-favorites-btn:hover {
+  background-color: #666;
+}
+
 #lang-switcher {
   background: rgba(255, 255, 255, 0.1);
   border: none;

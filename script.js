@@ -1867,117 +1867,142 @@ function renderMyEvents() {
 
   if (all.length === 0) {
     container.innerHTML = `<p style="text-align:center;">${t('no_events_found')}</p>`;
-    return;
-  }
+  } else {
+    all.forEach(e => {
+      const div = document.createElement('div');
+      div.className = 'event-card';
 
-  all.forEach(e => {
-    const div = document.createElement('div');
-    div.className = 'event-card';
+      const privateTag = e.private ? `<span class="private-tag">🔒 ${t('private_event')}</span><br />` : '';
+      const addressBlock = e.address ? `<p><strong>${t('address_label')}:</strong> ${e.address}</p>` : '';
 
-    const privateTag = e.private ? `<span class="private-tag">🔒 ${t('private_event')}</span><br />` : '';
-    const addressBlock = e.address ? `<p><strong>${t('address_label')}:</strong> ${e.address}</p>` : '';
+      const isMine = e.owner === currentUser.email;
 
-    const isMine = e.owner === currentUser.email;
+      div.innerHTML = `
+        ${privateTag}
+        <h4>${e.title}</h4>
+        <p>${e.description}</p>
+        ${addressBlock}
+        <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
+        <p><em>${e.city} — ${e.category}</em></p>
+        <div class="event-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+          <button class="btn details-btn" data-i18n="view_details">${t('view_details')}</button>
+          ${isMine ? `
+            <button class="btn edit-my-btn" data-i18n="edit">✏️ ${t('edit')}</button>
+            <button class="btn delete-my-btn" data-i18n="delete">🗑️ ${t('delete')}</button>
+          ` : `
+            <button class="btn remove-saved-btn" data-i18n="remove_saved">🗑 ${t('remove_saved')}</button>
+          `}
+        </div>
+      `;
 
-    div.innerHTML = `
-      ${privateTag}
-      <h4>${e.title}</h4>
-      <p>${e.description}</p>
-      ${addressBlock}
-      <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
-      <p><em>${e.city} — ${e.category}</em></p>
-      <div class="event-actions" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-        <button class="btn details-btn">${t('view_details')}</button>
-        ${isMine ? `
-          <button class="btn edit-my-btn">✏️ ${t('edit')}</button>
-          <button class="btn delete-my-btn">🗑️ ${t('delete')}</button>
-        ` : `
-          <button class="btn remove-saved-btn">🗑 ${t('remove_saved')}</button>
-        `}
-      </div>
-    `;
+      // ─── View Details ─────────
+      div.querySelector('.details-btn').addEventListener('click', () => {
+        document.getElementById('modal-title').textContent       = e.title;
+        document.getElementById('modal-description').textContent = e.description;
+        document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(e.date).toLocaleString(currentLang)}`;
+        document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${e.city}`;
+        document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${e.category}`;
+        document.getElementById('modal-address').textContent     = e.address || '—';
+        document.getElementById('event-modal').classList.remove('hidden');
+        loadEventWeather(e.city, e.date);
 
-    // ─── View Details ─────────
-    div.querySelector('.details-btn').addEventListener('click', () => {
-      document.getElementById('modal-title').textContent       = e.title;
-      document.getElementById('modal-description').textContent = e.description;
-      document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(e.date).toLocaleString(currentLang)}`;
-      document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${e.city}`;
-      document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${e.category}`;
-      document.getElementById('modal-address').textContent     = e.address || '—';
-      document.getElementById('event-modal').classList.remove('hidden');
-      loadEventWeather(e.city, e.date);
+        setTimeout(() => {
+          const lat = parseFloat(e.lat);
+          const lon = parseFloat(e.lon);
+          const mapEl = document.getElementById('modal-map');
+          if (!isNaN(lat) && !isNaN(lon)) {
+            while (mapEl.firstChild) mapEl.removeChild(mapEl.firstChild);
+            if (mapEl._leaflet_id) mapEl._leaflet_id = null;
 
-      setTimeout(() => {
-        const lat = parseFloat(e.lat);
-        const lon = parseFloat(e.lon);
-        const mapEl = document.getElementById('modal-map');
-        if (!isNaN(lat) && !isNaN(lon)) {
-          while (mapEl.firstChild) mapEl.removeChild(mapEl.firstChild);
-          if (mapEl._leaflet_id) mapEl._leaflet_id = null;
+            const modalMap = L.map(mapEl, {
+              attributionControl: false,
+              zoomControl: false,
+              dragging: false
+            }).setView([lat, lon], 13);
 
-          const modalMap = L.map(mapEl, {
-            attributionControl: false,
-            zoomControl: false,
-            dragging: false
-          }).setView([lat, lon], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
+            L.marker([lat, lon]).addTo(modalMap).bindPopup(e.title).openPopup();
+            window._modalMap = modalMap;
 
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(modalMap);
-          L.marker([lat, lon]).addTo(modalMap).bindPopup(e.title).openPopup();
-          window._modalMap = modalMap;
+            document.getElementById('modal-close').addEventListener('click', () => {
+              modalMap.remove();
+              window._modalMap = null;
+            }, { once: true });
+          } else {
+            mapEl.innerHTML = `<p style="color:gray;">${t('no_map')}</p>`;
+          }
+        }, 100);
+      });
 
-          document.getElementById('modal-close').addEventListener('click', () => {
-            modalMap.remove();
-            window._modalMap = null;
-          }, { once: true });
-        } else {
-          mapEl.innerHTML = `<p style="color:gray;">${t('no_map')}</p>`;
-        }
-      }, 100);
+      // ─── If Owner ─────────────
+      if (isMine) {
+        div.querySelector('.edit-my-btn').addEventListener('click', () => {
+          document.getElementById('edit-evt-title').value     = e.title;
+          document.getElementById('edit-evt-desc').value      = e.description;
+          document.getElementById('edit-evt-date').value      = e.date;
+          document.getElementById('edit-evt-city').value      = e.city;
+          document.getElementById('edit-evt-category').value  = e.category;
+          document.getElementById('edit-evt-address').value   = e.address || '';
+          document.getElementById('edit-evt-private').checked = !!e.private;
+
+          const coordsEl = document.getElementById('edit-picked-coords');
+          if (coordsEl && e.lat && e.lon) {
+            coordsEl.textContent = `${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`;
+            coordsEl.style.color = '#aaa';
+          }
+
+          pickedLat = e.lat;
+          pickedLon = e.lon;
+          editEventId = e.id;
+
+          document.getElementById('edit-event-form-container').style.display = 'flex';
+        });
+
+        div.querySelector('.delete-my-btn').addEventListener('click', () => {
+          const index = events.findIndex(ev => ev.id === e.id);
+          if (index !== -1) {
+            events.splice(index, 1);
+            renderMyEvents();
+            renderEvents();
+          }
+        });
+      } else {
+        div.querySelector('.remove-saved-btn').addEventListener('click', () => {
+          toggleSaveEvent(e.id);
+          renderMyEvents();
+        });
+      }
+
+      container.appendChild(div);
     });
 
-    // ─── If Owner ─────────────
-    if (isMine) {
-      div.querySelector('.edit-my-btn').addEventListener('click', () => {
-        document.getElementById('edit-evt-title').value     = e.title;
-        document.getElementById('edit-evt-desc').value      = e.description;
-        document.getElementById('edit-evt-date').value      = e.date;
-        document.getElementById('edit-evt-city').value      = e.city;
-        document.getElementById('edit-evt-category').value  = e.category;
-        document.getElementById('edit-evt-address').value   = e.address || '';
-        document.getElementById('edit-evt-private').checked = !!e.private;
+    // ─── Добавляем кнопку очистки избранного ─────────
+    const clearDiv = document.createElement('div');
+    clearDiv.style.textAlign = 'center';
+    clearDiv.style.marginTop = '1rem';
+    clearDiv.innerHTML = `
+      <button id="clear-saved-btn" class="btn clear-favorites-btn" data-i18n="clear_saved">
+        ${t('clear_saved')}
+      </button>
+    `;
+    container.appendChild(clearDiv);
+  }
 
-        const coordsEl = document.getElementById('edit-picked-coords');
-        if (coordsEl && e.lat && e.lon) {
-          coordsEl.textContent = `${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`;
-          coordsEl.style.color = '#aaa';
-        }
-
-        pickedLat = e.lat;
-        pickedLon = e.lon;
-        editEventId = e.id;
-
-        document.getElementById('edit-event-form-container').style.display = 'flex';
-      });
-
-      div.querySelector('.delete-my-btn').addEventListener('click', () => {
-        const index = events.findIndex(ev => ev.id === e.id);
-        if (index !== -1) {
-          events.splice(index, 1);
-          renderMyEvents();
-          renderEvents();
-        }
-      });
-    } else {
-      div.querySelector('.remove-saved-btn').addEventListener('click', () => {
-        toggleSaveEvent(e.id);
+  // ─── Обработчик кнопки очистки избранного ─────────
+  const clearBtn = document.getElementById('clear-saved-btn');
+  if (clearBtn) {
+    clearBtn.onclick = () => {
+      if (confirm(t('confirm_clear_saved'))) {
+        savedEvents = [];
+        localStorage.setItem('savedEvents', JSON.stringify(savedEvents));
         renderMyEvents();
-      });
-    }
-
-    container.appendChild(div);
-  });
+        renderEvents();
+      }
+    };
+  }
+  applyTranslations();
 }
+
 
 // 🧾 Populate User Profile Fields in User Panel //
 function populateProfile() {

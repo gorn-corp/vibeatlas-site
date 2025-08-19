@@ -118,5 +118,7 @@
   "logout": "Se déconnecter",
   "logout_button": "Se déconnecter",
   "edit_event_title": "Modifier l'événement",
-  "update_event": "Mettre à jour l'événement"
+  "update_event": "Mettre à jour l'événement",
+  "clear_saved": "🗑️ Effacer les favoris",
+  "confirm_clear_saved": "Voulez-vous vraiment effacer tous les éléments enregistrés ?"
 }

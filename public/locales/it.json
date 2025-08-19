@@ -118,5 +118,7 @@
   "logout": "Disconnetti",
   "logout_button": "Esci",
   "edit_event_title": "Modifica evento",
-  "update_event": "Aggiorna evento"
+  "update_event": "Aggiorna evento",
+  "clear_saved": "🗑️ Cancella salvati",
+  "confirm_clear_saved": "Sei sicuro di voler cancellare tutti gli elementi salvati?"
 }

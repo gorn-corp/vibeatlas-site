@@ -118,5 +118,7 @@
   "logout": "Sair",
   "logout_button": "Sair",
   "edit_event_title": "Editar evento",
-  "update_event": "Atualizar evento"
+  "update_event": "Atualizar evento",
+  "clear_saved": "🗑️ Limpar salvos",
+  "confirm_clear_saved": "Tem certeza de que deseja limpar todos os itens salvos?"
 }
