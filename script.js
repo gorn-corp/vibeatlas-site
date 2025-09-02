@@ -155,81 +155,92 @@ async function loadCities() {
 // 4.0 Load events from Google Sheets CSV //
 async function loadEvents() {
   try {
-    const res    = await fetch(SHEET_CSV_URL);
-    const csv    = await res.text();
-    const parsed = Papa.parse(csv, { header: true, dynamicTyping: true });
+    // 1) Попытка загрузить ранее сохранённые события из localStorage
+    const storedEvents = JSON.parse(localStorage.getItem('events') || 'null');
+    if (storedEvents && Array.isArray(storedEvents) && storedEvents.length) {
+      // гарантируем, что id — строки
+      events = storedEvents.map(e => ({ ...e, id: String(e.id) }));
+      console.log('✅ Loaded events from localStorage:', events.length);
+    } else {
+      // 2) Если нет сохранённых — подтянуть CSV и сохранить
+      const res    = await fetch(SHEET_CSV_URL);
+      const csv    = await res.text();
+      const parsed = Papa.parse(csv, { header: true, dynamicTyping: true });
 
-    events = parsed.data.map(r => ({
-      id:          r.id,
-      city:        r.city,
-      title:       r.title,
-      description: r.description,
-      date:        r.date,
-      category:    r.category,
-      lat:         parseFloat(r.lat),
-      lon:         parseFloat(r.lon)
-    }));
+      events = parsed.data
+        .filter(r => r && (r.title || r.id))
+        .map(r => ({
+          id: String(r.id || `csv_${Date.now()}_${Math.random().toString(36).slice(2,6)}`),
+          city: r.city || '',
+          title: r.title || '',
+          description: r.description || '',
+          date: r.date || '',
+          category: r.category || '',
+          lat: (r.lat !== undefined && r.lat !== '') ? parseFloat(r.lat) : null,
+          lon: (r.lon !== undefined && r.lon !== '') ? parseFloat(r.lon) : null,
+          owner: r.owner || ''
+        }));
 
-    const now = new Date();
-    const testKyotoEvents = [
-      {
-        id: 'kyoto1',
-        city: 'Kyoto',
-        title: 'Zen Meditation Workshop',
-        description: 'Morning meditation in a 600-year-old temple.',
-        date: new Date(now.getTime()).toISOString(),
-        category: 'Spiritual',
-        lat: 35.0031,
-        lon: 135.7788
-      },
-      {
-        id: 'kyoto2',
-        city: 'Kyoto',
-        title: 'Gion Matsuri Night Parade',
-        description: 'The ancient float festival in full neon glow.',
-        date: new Date(now.getTime() + 1 * 86400000).toISOString(),
-        category: 'Culture',
-        lat: 35.0039,
-        lon: 135.7780
-      },
-      {
-        id: 'kyoto3',
-        city: 'Kyoto',
-        title: 'Street Food Fiesta',
-        description: 'Local snacks and tea tasting near Nishiki Market.',
-        date: new Date(now.getTime() + 2 * 86400000).toISOString(),
-        category: 'Food',
-        lat: 35.0042,
-        lon: 135.7661
-      },
-      {
-        id: 'kyoto4',
-        city: 'Kyoto',
-        title: 'Anime Music Live',
-        description: 'Orchestra playing Studio Ghibli and classics.',
-        date: new Date(now.getTime() + 3 * 86400000).toISOString(),
-        category: 'Music',
-        lat: 35.0007,
-        lon: 135.7725
-      },
-      {
-        id: 'kyoto5',
-        city: 'Kyoto',
-        title: 'AI + Zen Symposium',
-        description: 'Nova тоже будет, но в голограмме.',
-        date: new Date(now.getTime() + 5 * 86400000).toISOString(),
-        category: 'Tech',
-        lat: 35.0116,
-        lon: 135.7681
-      }
-    ];
+      // Встроенные тестовые события (оставил два из твоего файла)
+      const now = new Date();
+      const testKyotoEvents = [
+        {
+          id: 'kyoto1',
+          city: 'Kyoto',
+          title: 'Zen Meditation Workshop',
+          description: 'Morning meditation in a 600-year-old temple.',
+          date: new Date(now.getTime()).toISOString(),
+          category: 'Spiritual',
+          lat: 35.0031,
+          lon: 135.7788,
+          owner: ''
+        },
+        {
+          id: 'kyoto2',
+          city: 'Kyoto',
+          title: 'Gion Matsuri Night Parade',
+          description: 'The ancient float festival in full neon glow.',
+          date: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+          category: 'Festival',
+          lat: 35.0039,
+          lon: 135.7800,
+          owner: ''
+        }
+      ];
 
-    events = [...events, ...testKyotoEvents];
-    console.log('✅ events loaded:', events);
+      events = [...events, ...testKyotoEvents];
+
+      // Сохраняем в localStorage, чтобы в следующий раз загружалось оттуда
+      localStorage.setItem('events', JSON.stringify(events));
+      console.log('✅ Fetched CSV and saved events to localStorage. Total:', events.length);
+    }
+
+    // 3) Если пользователь залогинен — подмешать его персональные события (my_events_<email>)
+    const storedUser = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+    if (storedUser?.email) {
+      const key = `my_events_${storedUser.email}`;
+      const myEvents = JSON.parse(localStorage.getItem(key) || '[]');
+      myEvents.forEach(me => {
+        if (!events.find(ev => String(ev.id) === String(me.id))) {
+          events.push(me);
+        }
+      });
+      // Обновляем глобальное хранилище — теперь в events есть всё
+      localStorage.setItem('events', JSON.stringify(events));
+    }
+
+    populateFilters();
+    renderEvents();
+    initEmbla();
 
   } catch (err) {
-    console.error('❌ loadEvents error', err);
-    events = [];
+    console.error('❌ loadEvents error:', err);
+    // fallback: попытка загрузить только из localStorage
+    const stored = JSON.parse(localStorage.getItem('events') || '[]');
+    events = stored || [];
+    populateFilters();
+    renderEvents();
+    initEmbla();
   }
 }
 
@@ -800,7 +811,7 @@ if (eventForm) {
     const newId = (mode === 'edit' && editEventId) ? editEventId : Date.now().toString();
 
     const newEvent = {
-      id: newId,
+      id: String(newId),
       city: cityVal,
       title,
       description: desc,
@@ -814,17 +825,28 @@ if (eventForm) {
     };
 
     if (mode === 'edit' && editEventId) {
-      const index = events.findIndex(ev => ev.id === editEventId);
+      // Обновляем глобальный массив
+      const index = events.findIndex(ev => String(ev.id) === String(editEventId));
       if (index !== -1) events[index] = newEvent;
+      // Обновляем персональное хранилище пользователя
+      const key = `my_events_${currentUser.email}`;
+      let myEvents = JSON.parse(localStorage.getItem(key) || '[]');
+      const myIndex = myEvents.findIndex(ev => String(ev.id) === String(editEventId));
+      if (myIndex !== -1) myEvents[myIndex] = newEvent;
+      else myEvents.push(newEvent);
+      localStorage.setItem(key, JSON.stringify(myEvents));
       editEventId = null;
     } else {
+      // Добавляем новое событие
       events.push(newEvent);
-
       const key = `my_events_${currentUser.email}`;
       const myEvents = JSON.parse(localStorage.getItem(key) || '[]');
       myEvents.push(newEvent);
       localStorage.setItem(key, JSON.stringify(myEvents));
     }
+
+    // Сохраняем глобальную коллекцию событий
+    localStorage.setItem('events', JSON.stringify(events));
 
     populateFilters();
     renderEvents();
@@ -887,14 +909,14 @@ if (editForm) {
       return;
     }
 
-    const index = events.findIndex(ev => ev.id === editEventId);
+    const index = events.findIndex(ev => String(ev.id) === String(editEventId));
     if (index === -1) {
       alert('Event not found.');
       return;
     }
 
-    events[index] = {
-      id: editEventId,
+    const updated = {
+      id: String(editEventId),
       city: cityVal,
       title,
       description: desc,
@@ -906,6 +928,19 @@ if (editForm) {
       private: !!isPrivate,
       owner: currentUser.email
     };
+
+    events[index] = updated;
+
+    // Сохраняем глобально
+    localStorage.setItem('events', JSON.stringify(events));
+
+    // Обновляем персональное хранилище
+    const key = `my_events_${currentUser.email}`;
+    let myEvents = JSON.parse(localStorage.getItem(key) || '[]');
+    const mi = myEvents.findIndex(ev => String(ev.id) === String(editEventId));
+    if (mi !== -1) myEvents[mi] = updated;
+    else myEvents.push(updated);
+    localStorage.setItem(key, JSON.stringify(myEvents));
 
     editEventId = null;
     populateFilters();
@@ -1958,10 +1993,18 @@ function renderMyEvents() {
           document.getElementById('edit-event-form-container').style.display = 'flex';
         });
 
-        div.querySelector('.delete-my-btn').addEventListener('click', () => {
-          const index = events.findIndex(ev => ev.id === e.id);
+                div.querySelector('.delete-my-btn').addEventListener('click', () => {
+          const index = events.findIndex(ev => String(ev.id) === String(e.id));
           if (index !== -1) {
+            // удаляем из глобального массива
             events.splice(index, 1);
+            // удаляем из персонального хранилища
+            const key = `my_events_${currentUser.email}`;
+            let myEvents = JSON.parse(localStorage.getItem(key) || '[]');
+            myEvents = myEvents.filter(me => String(me.id) !== String(e.id));
+            localStorage.setItem(key, JSON.stringify(myEvents));
+            // сохраняем глобально и обновляем UI
+            localStorage.setItem('events', JSON.stringify(events));
             renderMyEvents();
             renderEvents();
           }
@@ -2003,8 +2046,7 @@ function renderMyEvents() {
   applyTranslations();
 }
 
-
-// 🧾 Populate User Profile Fields in User Panel //
+// 8.5.1 🧾 Populate User Profile Fields in User Panel //
 function populateProfile() {
   const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
   if (!user) return;
