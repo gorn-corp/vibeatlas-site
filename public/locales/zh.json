@@ -120,5 +120,6 @@
   "edit_event_title": "编辑活动",
   "update_event": "更新活动",
   "clear_saved": "🗑️ 清除已保存",
-  "confirm_clear_saved": "确定要清除所有已保存的项目吗？"
+  "confirm_clear_saved": "确定要清除所有已保存的项目吗？",
+  "memory_archive": "记忆档案"
 }

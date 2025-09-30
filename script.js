@@ -220,11 +220,29 @@ async function loadEvents() {
     if (storedUser?.email) {
       const key = `my_events_${storedUser.email}`;
       const myEvents = JSON.parse(localStorage.getItem(key) || '[]');
+
+      // Подмешиваем события пользователя (если их ещё нет в events)
       myEvents.forEach(me => {
         if (!events.find(ev => String(ev.id) === String(me.id))) {
           events.push(me);
         }
       });
+
+      // Обозначаем события, которые присутствуют в myEvents, как принадлежащие текущему пользователю,
+      // но только если у них нет явного owner (чтобы не перезаписывать реальные владельцы).
+      try {
+        const myIds = myEvents.map(me => String(me.id));
+        events = events.map(ev => {
+          if (ev && myIds.includes(String(ev.id)) && (!ev.owner || String(ev.owner).trim() === '')) {
+            return { ...ev, owner: storedUser.email };
+          }
+          return ev;
+        });
+      } catch (err) {
+        // noop — не ломаем загрузку из-за ошибки в тестовых данных
+        console.warn('⚠️ loadEvents: error while marking myEvents owner', err);
+      }
+
       // Обновляем глобальное хранилище — теперь в events есть всё
       localStorage.setItem('events', JSON.stringify(events));
     }
@@ -1208,16 +1226,19 @@ document.getElementById('modal-close').addEventListener('click', () => {
 });
 
 // ─── 8. User Panel: Open/Close and Custom Buttons ─────────
+
+// Ожидаю, что переменные userBtn, userPanel, closeUserPanel уже объявлены выше
 userBtn.addEventListener('click', () => {
   userPanel.classList.add('open');
-  showTab('my-tab');
+  hideAllTabs();        // при открытии скрываем всё
+  deactivateAllButtons();
 });
 
 closeUserPanel.addEventListener('click', () => {
   userPanel.classList.remove('open');
 });
 
-// 🔘 Profile Details
+// Profile Details toggle
 document.getElementById('toggle-profile-details')?.addEventListener('click', () => {
   const extra = document.getElementById('profile-extra');
   if (extra) {
@@ -1226,62 +1247,66 @@ document.getElementById('toggle-profile-details')?.addEventListener('click', () 
   }
 });
 
-// 🔘 Settings toggle
-document.getElementById('toggle-settings-btn')?.addEventListener('click', () => {
-  const isVisible = !document.getElementById('settings-tab').classList.contains('hidden');
-  if (isVisible) {
-    document.getElementById('settings-tab').classList.add('hidden');
-    document.getElementById('toggle-settings-btn').classList.remove('active');
-  } else {
-    showTab('settings-tab');
-    populateProfile();
-  }
-});
-
-// 🔘 Events toggle
-document.getElementById('toggle-events-tab')?.addEventListener('click', () => {
-  const isVisible = !document.getElementById('my-tab').classList.contains('hidden');
-  if (isVisible) {
-    document.getElementById('my-tab').classList.add('hidden');
-    document.getElementById('toggle-events-tab').classList.remove('active');
-  } else {
-    showTab('my-tab');
-    renderMyEvents();
-  }
-});
-
-// 🔘 Memory Mode toggle
+// Memory Mode toggle
 document.getElementById('toggle-memory-mode')?.addEventListener('click', () => {
   const memoryOptions = document.getElementById('memory-mode-options');
-  if (memoryOptions) {
-    memoryOptions.classList.toggle('hidden');
-  }
+  if (memoryOptions) memoryOptions.classList.toggle('hidden');
 
-  // Обновим подпись кнопки, если нет i18n
   const mmBtn = document.getElementById('toggle-memory-mode');
-  if (mmBtn && !mmBtn.dataset.i18n) {
-    mmBtn.textContent = '🧠 Memory Mode';
-  }
+  if (mmBtn && !mmBtn.dataset.i18n) mmBtn.textContent = '🧠 Memory Mode';
 });
 
-// 🧠 Общая функция переключения вкладок
-function showTab(id) {
-  ['my-tab', 'settings-tab'].forEach(tabId => {
+// Events toggle
+document.getElementById('toggle-events-tab')?.addEventListener('click', () => {
+  toggleTab('my-tab', 'toggle-events-tab', renderMyEvents);
+});
+
+// Archive toggle
+document.getElementById('toggle-archive-tab')?.addEventListener('click', () => {
+  toggleTab('archive-tab', 'toggle-archive-tab', renderArchiveEvents);
+});
+
+// Settings toggle
+document.getElementById('toggle-settings-btn')?.addEventListener('click', () => {
+  toggleTab('settings-tab', 'toggle-settings-btn', populateProfile);
+});
+
+// универсальная функция переключения
+function toggleTab(tabId, btnId, callback) {
+  const tab = document.getElementById(tabId);
+  const btn = document.getElementById(btnId);
+  const isVisible = tab && tab.classList.contains('active');
+
+  hideAllTabs();
+  deactivateAllButtons();
+
+  if (!isVisible) {
+    if (tab) {
+      tab.classList.add('active');
+      tab.classList.remove('hidden');
+    }
+    if (btn) btn.classList.add('active');
+    if (typeof callback === 'function') callback();
+  }
+}
+
+// helper: скрыть все табы
+function hideAllTabs() {
+  ['my-tab', 'archive-tab', 'settings-tab'].forEach(tabId => {
     const tab = document.getElementById(tabId);
-    if (tab) tab.classList.add('hidden');
+    if (tab) {
+      tab.classList.remove('active', 'hidden');
+      tab.classList.add('hidden');
+    }
   });
+}
 
-  const target = document.getElementById(id);
-  if (target) target.classList.remove('hidden');
-
-  // Обновить активную кнопку
-  ['toggle-events-tab', 'toggle-settings-btn'].forEach(btnId => {
+// helper: убрать active со всех кнопок
+function deactivateAllButtons() {
+  ['toggle-events-tab', 'toggle-archive-tab', 'toggle-settings-btn'].forEach(btnId => {
     const btn = document.getElementById(btnId);
     if (btn) btn.classList.remove('active');
   });
-
-  const activeBtn = id === 'my-tab' ? 'toggle-events-tab' : 'toggle-settings-btn';
-  document.getElementById(activeBtn)?.classList.add('active');
 }
 
 // 8.1 User Login Logic //
@@ -1895,10 +1920,28 @@ function renderMyEvents() {
   container.innerHTML = '';
 
   const currentUser = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+  const now = new Date();
 
+  // helper: считается ли событие прошедшим (валидная дата и дата < now)
+  const isPast = ev => {
+    if (!ev || !ev.date) return false;
+    const d = new Date(ev.date);
+    return !isNaN(d.getTime()) && d < now;
+  };
+
+  // saved (как было) — не трогаем (в архив попадают только OWN события)
   const saved = events.filter(e => savedEvents.includes(String(e.id)));
-  const mine  = events.filter(e => e.owner === currentUser.email);
-  const all   = [...saved, ...mine];
+
+  // mine — только текущие / будущие события владельца (прошедшие убираем)
+  const mine  = events.filter(e => e.owner === currentUser.email && !isPast(e));
+
+  // объединяем saved + mine, убираем дубликаты по id
+  const allMap = new Map();
+  [...saved, ...mine].forEach(ev => {
+    const key = String(ev.id);
+    if (!allMap.has(key)) allMap.set(key, ev);
+  });
+  const all = Array.from(allMap.values());
 
   if (all.length === 0) {
     container.innerHTML = `<p style="text-align:center;">${t('no_events_found')}</p>`;
@@ -1993,7 +2036,7 @@ function renderMyEvents() {
           document.getElementById('edit-event-form-container').style.display = 'flex';
         });
 
-                div.querySelector('.delete-my-btn').addEventListener('click', () => {
+        div.querySelector('.delete-my-btn').addEventListener('click', () => {
           const index = events.findIndex(ev => String(ev.id) === String(e.id));
           if (index !== -1) {
             // удаляем из глобального массива
@@ -2046,6 +2089,131 @@ function renderMyEvents() {
   applyTranslations();
 }
 
+// 8.5.0.1 Render Archive Events (past events only) //
+function renderArchiveEvents() {
+  const container = document.getElementById('archive-events-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const currentUser = JSON.parse(localStorage.getItem('vibe_user') || '{}');
+  const now = new Date();
+
+  // savedEvents может быть глобальной переменной — если нет, берём из localStorage
+  let savedIds = [];
+  if (typeof savedEvents !== 'undefined' && Array.isArray(savedEvents)) {
+    savedIds = savedEvents.map(String);
+  } else {
+    try {
+      savedIds = JSON.parse(localStorage.getItem('savedEvents') || '[]').map(String);
+    } catch (err) {
+      savedIds = [];
+    }
+  }
+
+  // архив = прошедшие события, которые РАНЬШЕ были в My Events текущего пользователя
+  const archived = events.filter(e => {
+    if (!e || !e.date) return false;
+    const d = new Date(e.date);
+    if (isNaN(d.getTime())) return false;
+    if (d >= now) return false; // не прошедшие
+    // попадали ли они в My Events: владелец или сохранены текущим пользователем
+    const wasInMyEvents = (String(e.owner) === String(currentUser.email)) || savedIds.includes(String(e.id));
+    return wasInMyEvents;
+  });
+
+  if (archived.length === 0) {
+    container.innerHTML = `<p style="text-align:center;">${t('no_events_found')}</p>`;
+    applyTranslations();
+    return;
+  }
+
+  archived.forEach(e => {
+    const div = document.createElement('div');
+    div.className = 'event-card';
+
+    const privateTag = e.private ? `<span class="private-tag">🔒 ${t('private_event')}</span><br />` : '';
+    const addressBlock = e.address ? `<p><strong>${t('address_label')}:</strong> ${e.address}</p>` : '';
+    const isMine = String(e.owner) === String(currentUser.email);
+
+    div.innerHTML = `
+      ${privateTag}
+      <h4>${e.title}</h4>
+      <p>${e.description}</p>
+      ${addressBlock}
+      <p><small>${new Date(e.date).toLocaleString(currentLang)}</small></p>
+      <p><em>${e.city} — ${e.category}</em></p>
+      <div class="event-actions" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem;">
+        <button class="btn details-btn" data-i18n="view_details">${t('view_details')}</button>
+        <button class="btn delete-archive-btn" data-i18n="delete">🗑️ ${t('delete')}</button>
+      </div>
+    `;
+
+    // ─── View Details ─────────
+    div.querySelector('.details-btn').addEventListener('click', () => {
+      document.getElementById('modal-title').textContent       = e.title;
+      document.getElementById('modal-description').textContent = e.description;
+      document.getElementById('modal-date').textContent        = `${t('modal_date')}: ${new Date(e.date).toLocaleString(currentLang)}`;
+      document.getElementById('modal-city').textContent        = `${t('modal_city')}: ${e.city}`;
+      document.getElementById('modal-category').textContent    = `${t('modal_category')}: ${e.category}`;
+      document.getElementById('modal-address').textContent     = e.address || '—';
+      document.getElementById('event-modal').classList.remove('hidden');
+      loadEventWeather(e.city, e.date);
+    });
+
+    // ─── Delete from Archive ─────────────
+    div.querySelector('.delete-archive-btn').addEventListener('click', () => {
+      const idStr = String(e.id);
+      const index = events.findIndex(ev => String(ev.id) === idStr);
+      if (index === -1) return;
+
+      // сохраняем владельца до удаления
+      const ownerEmail = events[index].owner;
+
+      // удаляем событие из глобального массива
+      events.splice(index, 1);
+      localStorage.setItem('events', JSON.stringify(events));
+
+      // удаляем из savedEvents если есть
+      try {
+        let savedArr = (typeof savedEvents !== 'undefined' && Array.isArray(savedEvents)) ? savedEvents.slice() : JSON.parse(localStorage.getItem('savedEvents') || '[]');
+        if (savedArr.includes(idStr)) {
+          savedArr = savedArr.filter(sid => String(sid) !== idStr);
+          if (typeof savedEvents !== 'undefined') savedEvents = savedArr;
+          localStorage.setItem('savedEvents', JSON.stringify(savedArr));
+        }
+      } catch (err) {
+        // noop
+      }
+
+      // удаляем из my_events текущего пользователя (если есть)
+      try {
+        const keyCur = `my_events_${currentUser.email}`;
+        let myCur = JSON.parse(localStorage.getItem(keyCur) || '[]');
+        myCur = myCur.filter(me => String(me.id) !== idStr);
+        localStorage.setItem(keyCur, JSON.stringify(myCur));
+      } catch (err) { /* noop */ }
+
+      // удаляем из my_events владельца события (если владелец задан)
+      try {
+        if (ownerEmail) {
+          const keyOwner = `my_events_${ownerEmail}`;
+          let ownerArr = JSON.parse(localStorage.getItem(keyOwner) || '[]');
+          ownerArr = ownerArr.filter(me => String(me.id) !== idStr);
+          localStorage.setItem(keyOwner, JSON.stringify(ownerArr));
+        }
+      } catch (err) { /* noop */ }
+
+      // обновляем UI
+      renderArchiveEvents();
+      renderEvents();
+    });
+
+    container.appendChild(div);
+  });
+
+  applyTranslations();
+}
+
 // 8.5.1 🧾 Populate User Profile Fields in User Panel //
 function populateProfile() {
   const user = JSON.parse(localStorage.getItem('vibe_user') || '{}');
@@ -2073,18 +2241,36 @@ function populateProfile() {
 }
 
 // 8.6 Tabs Logic //
-document.querySelectorAll('.user-panel-tabs .btn').forEach(btn => {
+document.querySelectorAll('.user-action-buttons .btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.user-panel-tabs .btn').forEach(b => b.classList.remove('active'));
+    // переключаем класс active на кнопках в панели действий
+    document.querySelectorAll('.user-action-buttons .btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const target = btn.dataset.tab;
+
+    // определяем целевую вкладку: сначала data-tab, затем по id (fallback)
+    let target = btn.dataset.tab;
+    if (!target) {
+      const idMap = {
+        'toggle-events-tab': 'my-tab',
+        'toggle-archive-tab': 'archive-tab',
+        'toggle-settings-btn': 'settings-tab'
+      };
+      target = idMap[btn.id] || null;
+    }
+
+    if (!target) return;
+
+    // скрываем все вкладки и показываем нужную
     document.querySelectorAll('.user-tab').forEach(tab => tab.classList.add('hidden'));
     document.getElementById(target)?.classList.remove('hidden');
 
+    // вызываем рендер соответствующей вкладки
     if (target === 'my-tab') {
       renderMyEvents();
     } else if (target === 'saved-tab') {
-      renderSavedEvents();
+      renderSavedEvents && renderSavedEvents();
+    } else if (target === 'archive-tab') {
+      renderArchiveEvents && renderArchiveEvents();
     } else if (target === 'settings-tab') {
       populateProfile();
     }

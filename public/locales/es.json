@@ -120,5 +120,6 @@
   "edit_event_title": "Editar evento",
   "update_event": "Actualizar evento",
   "clear_saved": "🗑️ Borrar guardados",
-  "confirm_clear_saved": "¿Seguro que quieres borrar todos los elementos guardados?"
+  "confirm_clear_saved": "¿Seguro que quieres borrar todos los elementos guardados?",
+  "memory_archive": "Archivo de Memoria"
 }

@@ -120,5 +120,6 @@
   "edit_event_title": "イベントを編集",
   "update_event": "イベントを更新",
   "clear_saved": "🗑️ 保存をクリア",
-  "confirm_clear_saved": "保存済みの項目をすべて削除しますか？"
+  "confirm_clear_saved": "保存済みの項目をすべて削除しますか？",
+  "memory_archive": "メモリーアーカイブ"
 }

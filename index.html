@@ -247,6 +247,7 @@
     <p id="user-role-display" style="font-size: 0.85rem; color: #ccc;"></p>
 
     <div class="user-action-buttons" style="display: flex; flex-direction: column; gap: 0.4rem; margin-top: 1rem;">
+      <!-- Profile -->
       <button id="toggle-profile-details" class="btn full" data-i18n="profile_details">📄 Profile Details</button>
       <div id="profile-extra" style="display: none; font-size: 0.85rem; color: white;">
         <p><strong data-i18n="reg_lastname">Last Name:</strong> <span id="profile-lastname">—</span></p>
@@ -257,9 +258,9 @@
       </div>
 
       <button id="edit-profile-btn" class="btn full" data-i18n="edit_profile">✏️ Edit Profile</button>
-      <button id="toggle-settings-btn" class="btn full" data-i18n="settings">⚙️ Settings</button>
       <button id="toggle-memory-mode" class="btn full" data-i18n="memory_mode">🧠 MM</button>
 
+      <!-- Memory Mode Options -->
       <div id="memory-mode-options" class="memory-options" style="display: none;">
         <button id="memory-photo-btn" class="btn memory-btn" data-i18n="memory_photo">📷 Photo</button>
         <div id="memory-photo-area" style="display: none; margin-top: 0.5rem;">
@@ -273,33 +274,40 @@
           <input type="file" id="video-upload" accept="video/*" style="display: none;" />
         </div>
 
-        <!-- Кнопка Notes -->
+        <!-- Notes -->
         <button id="memory-notes-btn" class="btn memory-btn" data-i18n="memory_notes">🧾 Notes</button>
-        <!-- Блок Notes -->
         <div id="memory-notes-area" style="display: none; margin-top: 0.5rem;">
           <textarea id="memory-note-input" maxlength="500" placeholder="Enter your memory note..." style="width: 280px; height: 100px; resize: none; padding: 0.5rem; border-radius: 6px;"></textarea>
           <div id="memory-note-feedback" style="font-size: 0.75rem; color: #ccc; margin-top: 0.25rem;"></div>
         </div>
       </div>
 
-      <button id="toggle-events-tab" class="btn full active" data-i18n="my_events">🧍 My Events</button>
-    </div>
-  </div>
+      <!-- My Events -->
+      <button id="toggle-events-tab" class="btn full" data-i18n="my_events">🧍 My Events</button>
+      <div id="events-extra" class="hidden">
+        <div id="my-tab" class="user-tab">
+          <div id="my-events-container"></div>
+        </div>
+      </div>
 
-  <!-- Вкладка событий -->
-  <div id="events-extra" style="display: none; margin-top: 0.5rem;">
-    <div id="my-tab" class="user-tab active">
-      <div id="my-events-container"></div>
-    </div>
-  </div>
+      <!-- Archive -->
+      <button id="toggle-archive-tab" class="btn full" data-i18n="memory_archive">📚 Memory Archive</button>
+      <div id="archive-extra" class="hidden">
+        <div id="archive-tab" class="user-tab">
+          <div id="archive-events-container"></div>
+        </div>
+      </div>
 
-  <!-- Настройки -->
-  <div id="settings-tab" style="display: none; margin-top: 0.5rem; font-size: 0.85rem; color: white;">
-    <label for="lang-switcher" data-i18n="language_label"
-      style="color: white; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
-      🌐 Language:
-    </label>
-    <select id="lang-switcher" class="lang-dropdown" style="margin-left: 1mm;"></select>
+      <!-- Settings -->
+      <button data-tab="settings-tab" id="toggle-settings-btn" class="btn full" data-i18n="settings">⚙️ Settings</button>
+      <div id="settings-tab" class="user-tab hidden">
+        <label for="lang-switcher" data-i18n="language_label"
+          style="color: white; font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">
+          🌐 Language:
+        </label>
+        <select id="lang-switcher" class="lang-dropdown" style="margin-left: 1mm;"></select>
+      </div>
+    </div>
   </div>
 </div>
 

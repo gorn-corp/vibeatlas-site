@@ -904,16 +904,16 @@ select.lang-dropdown:hover {
   background: #ff6b6b;
 }
 
-/* 🔧 Исправлено: выравнивание кнопок профиля */
+/* 🔧 Унифицированные кнопки в панели */
 .user-action-buttons {
   display: flex;
-  justify-content: space-between;
-  gap: 0.55rem;               /* Внутренний отступ между двумя кнопками  */
-  margin-bottom: 0.55rem;     /* Вертикальный отступ перед вкладками  */
+  flex-direction: column;
+  gap: 0.4rem;          /* одинаковый зазор между всеми кнопками */
+  margin-top: 1rem;
 }
 
 .user-action-buttons .btn {
-  flex: 1;
+  flex: none;
   text-align: center;
   font-size: 0.95rem;
 }
@@ -1197,4 +1197,11 @@ input[type="radio"] {
   max-width: 400px;
   border-radius: 8px;
   margin-top: 1rem;
+}
+
+/* 🔧 Единый стиль для внутренних блоков в User Panel */
+#events-extra,
+#archive-extra,
+#settings-extra {
+  margin-top: 0;   /* убираем зазор */
 }

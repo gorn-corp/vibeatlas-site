@@ -120,5 +120,6 @@
   "edit_event_title": "تعديل الحدث",
   "update_event": "تحديث الحدث",
   "clear_saved": "🗑️ مسح المحفوظات",
-  "confirm_clear_saved": "هل تريد بالتأكيد مسح جميع العناصر المحفوظة؟"
+  "confirm_clear_saved": "هل تريد بالتأكيد مسح جميع العناصر المحفوظة؟",
+  "memory_archive": "أرشيف الذكريات"
 }

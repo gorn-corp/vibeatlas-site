@@ -120,5 +120,6 @@
   "edit_event_title": "Edit Event",
   "update_event": "Update Event",
   "clear_saved": "🗑️ Clear Saved",
-  "confirm_clear_saved": "Are you sure you want to clear all saved items?"
+  "confirm_clear_saved": "Are you sure you want to clear all saved items?",
+  "memory_archive": "Memory Archive"
 }

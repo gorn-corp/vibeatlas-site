@@ -120,5 +120,6 @@
   "edit_event_title": "Veranstaltung bearbeiten",
   "update_event": "Veranstaltung aktualisieren",
   "clear_saved": "🗑️ Gespeicherte löschen",
-  "confirm_clear_saved": "Möchten Sie wirklich alle gespeicherten Elemente löschen?"
+  "confirm_clear_saved": "Möchten Sie wirklich alle gespeicherten Elemente löschen?",
+  "memory_archive": "Erinnerungsarchiv"
 }
