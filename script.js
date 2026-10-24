@@ -126,6 +126,115 @@ const tabSettings       = document.getElementById('settings-tab');
 const tabSettingsBtn    = document.querySelector('[data-tab="settings-tab"]');
 const langSwitcher      = document.getElementById('lang-switcher');
 
+// 3.1 Общие Helpers //
+function toggleProfileDetails() {
+  const details = document.getElementById('profile-extra');
+  if (!details) return;
+
+  const isHidden = details.style.display === 'none' || details.style.display === '';
+  details.style.display = isHidden ? 'block' : 'none';
+}
+
+function getCityCoordinates(cityName) {
+  const fallback = { lat: 35.0116, lon: 135.7681 };
+
+  if (!cityName || !Array.isArray(citiesList)) return fallback;
+
+  const city = citiesList.find(item => item.name === cityName);
+  if (!city) return fallback;
+
+  return {
+    lat: Number(city.lat),
+    lon: Number(city.lon)
+  };
+}
+
+function openMapPicker({ cityName, coordsDisplay, addressInput, onPick }) {
+  if (!coordsDisplay || !addressInput || document.getElementById('map-popup')) return;
+
+  const { lat: startLat, lon: startLon } = getCityCoordinates(cityName);
+
+  const modal = document.createElement('div');
+  modal.id = 'map-popup';
+  modal.style.position = 'fixed';
+  modal.style.top = 0;
+  modal.style.left = 0;
+  modal.style.width = '100vw';
+  modal.style.height = '100vh';
+  modal.style.zIndex = 9999;
+  modal.style.background = '#000000b0';
+  modal.style.display = 'flex';
+  modal.style.justifyContent = 'center';
+  modal.style.alignItems = 'center';
+
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'relative';
+  wrapper.style.width = '80%';
+  wrapper.style.height = '80%';
+  wrapper.style.borderRadius = '8px';
+  wrapper.style.overflow = 'hidden';
+  modal.appendChild(wrapper);
+
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '×';
+  closeBtn.style.position = 'absolute';
+  closeBtn.style.top = '10px';
+  closeBtn.style.right = '15px';
+  closeBtn.style.zIndex = 1000;
+  closeBtn.style.fontSize = '1.5rem';
+  closeBtn.style.background = 'transparent';
+  closeBtn.style.color = 'white';
+  closeBtn.style.border = 'none';
+  closeBtn.style.cursor = 'pointer';
+  wrapper.appendChild(closeBtn);
+
+  const mapDiv = document.createElement('div');
+  mapDiv.style.width = '100%';
+  mapDiv.style.height = '100%';
+  wrapper.appendChild(mapDiv);
+
+  document.body.appendChild(modal);
+
+  const map = L.map(mapDiv).setView([startLat, startLon], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+  let marker = null;
+
+  map.on('click', e => {
+    if (marker) map.removeLayer(marker);
+    marker = L.marker(e.latlng).addTo(map);
+
+    const lat = e.latlng.lat;
+    const lon = e.latlng.lng;
+
+    if (typeof onPick === 'function') onPick({ lat, lon });
+
+    coordsDisplay.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+    coordsDisplay.style.color = '#aaa';
+
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data?.display_name) {
+          addressInput.value = data.display_name;
+        }
+      })
+      .catch(err => console.warn('Geocoding error:', err));
+  });
+
+  closeBtn.addEventListener('click', () => {
+    map.remove();
+    modal.remove();
+  });
+
+  modal.addEventListener('click', e => {
+    if (e.target === modal) {
+      map.remove();
+      modal.remove();
+    }
+  });
+}
+
 // ─── 4. Core Functions ─────────
 
 // 4.0.0 Load cities list from public/cities.json //
@@ -682,12 +791,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-document.getElementById('toggle-profile-details')?.addEventListener('click', () => {
-  const details = document.getElementById('profile-extra');
-  if (details) {
-    details.style.display = details.style.display === 'none' ? 'block' : 'none';
-  }
-});
+document.getElementById('toggle-profile-details')?.addEventListener('click', toggleProfileDetails);
 
 // ─── 6. Show/Hide Add Event Form ─────────
 if (addEventBtn && eventFormContainer) {
@@ -988,94 +1092,13 @@ const userEventsKey = 'my_events';
 
 if (pickBtn && pickedCoordsDisplay && addressInput) {
   pickBtn.addEventListener('click', () => {
-    if (document.getElementById('map-popup')) return;
-
-    // Определяем координаты выбранного города из выпадашки
-    let startLat = 35.0116;
-    let startLon = 135.7681;
-    const selectedCity = document.getElementById('city-filter')?.value;
-    if (selectedCity && Array.isArray(citiesList)) {
-      const cityObj = citiesList.find(c => c.name === selectedCity);
-      if (cityObj) {
-        startLat = cityObj.lat;
-        startLon = cityObj.lon;
-      }
-    }
-
-    const modal = document.createElement('div');
-    modal.id = 'map-popup';
-    modal.style.position = 'fixed';
-    modal.style.top = 0;
-    modal.style.left = 0;
-    modal.style.width = '100vw';
-    modal.style.height = '100vh';
-    modal.style.zIndex = 9999;
-    modal.style.background = '#000000b0';
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
-
-    const wrapper = document.createElement('div');
-    wrapper.style.position = 'relative';
-    wrapper.style.width = '80%';
-    wrapper.style.height = '80%';
-    wrapper.style.borderRadius = '8px';
-    wrapper.style.overflow = 'hidden';
-    modal.appendChild(wrapper);
-
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = '×';
-    closeBtn.style.position = 'absolute';
-    closeBtn.style.top = '10px';
-    closeBtn.style.right = '15px';
-    closeBtn.style.zIndex = 1000;
-    closeBtn.style.fontSize = '1.5rem';
-    closeBtn.style.background = 'transparent';
-    closeBtn.style.color = 'white';
-    closeBtn.style.border = 'none';
-    closeBtn.style.cursor = 'pointer';
-    wrapper.appendChild(closeBtn);
-
-    const mapDiv = document.createElement('div');
-    mapDiv.style.width = '100%';
-    mapDiv.style.height = '100%';
-    wrapper.appendChild(mapDiv);
-
-    document.body.appendChild(modal);
-
-    const map = L.map(mapDiv).setView([startLat, startLon], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-    let marker = null;
-    map.on('click', e => {
-      if (marker) map.removeLayer(marker);
-      marker = L.marker(e.latlng).addTo(map);
-
-      pickedLat = e.latlng.lat;
-      pickedLon = e.latlng.lng;
-
-      pickedCoordsDisplay.textContent = `${pickedLat.toFixed(4)}, ${pickedLon.toFixed(4)}`;
-      pickedCoordsDisplay.style.color = '#aaa';
-
-      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pickedLat}&lon=${pickedLon}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data?.display_name) {
-            addressInput.value = data.display_name;
-          }
-        })
-        .catch(err => console.warn('Geocoding error:', err));
-    });
-
-    closeBtn.addEventListener('click', () => {
-      map.remove();
-      modal.remove();
-    });
-
-    modal.addEventListener('click', e => {
-      if (e.target === modal) {
-        map.remove();
-        modal.remove();
+    openMapPicker({
+      cityName: document.getElementById('city-filter')?.value || evtCitySelect?.value || selectedCity,
+      coordsDisplay: pickedCoordsDisplay,
+      addressInput,
+      onPick: ({ lat, lon }) => {
+        pickedLat = lat;
+        pickedLon = lon;
       }
     });
   });
@@ -1088,93 +1111,13 @@ const editAddressInput = document.getElementById('edit-evt-address');
 
 if (editPickBtn && editCoordsDisplay && editAddressInput) {
   editPickBtn.addEventListener('click', () => {
-    if (document.getElementById('map-popup')) return;
-
-    let startLat = 35.0116;
-    let startLon = 135.7681;
-    const selectedCity = document.getElementById('edit-evt-city')?.value;
-    if (selectedCity && Array.isArray(citiesList)) {
-      const cityObj = citiesList.find(c => c.name === selectedCity);
-      if (cityObj) {
-        startLat = cityObj.lat;
-        startLon = cityObj.lon;
-      }
-    }
-
-    const modal = document.createElement('div');
-    modal.id = 'map-popup';
-    modal.style.position = 'fixed';
-    modal.style.top = 0;
-    modal.style.left = 0;
-    modal.style.width = '100vw';
-    modal.style.height = '100vh';
-    modal.style.zIndex = 9999;
-    modal.style.background = '#000000b0';
-    modal.style.display = 'flex';
-    modal.style.justifyContent = 'center';
-    modal.style.alignItems = 'center';
-
-    const wrapper = document.createElement('div');
-    wrapper.style.position = 'relative';
-    wrapper.style.width = '80%';
-    wrapper.style.height = '80%';
-    wrapper.style.borderRadius = '8px';
-    wrapper.style.overflow = 'hidden';
-    modal.appendChild(wrapper);
-
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = '×';
-    closeBtn.style.position = 'absolute';
-    closeBtn.style.top = '10px';
-    closeBtn.style.right = '15px';
-    closeBtn.style.zIndex = 1000;
-    closeBtn.style.fontSize = '1.5rem';
-    closeBtn.style.background = 'transparent';
-    closeBtn.style.color = 'white';
-    closeBtn.style.border = 'none';
-    closeBtn.style.cursor = 'pointer';
-    wrapper.appendChild(closeBtn);
-
-    const mapDiv = document.createElement('div');
-    mapDiv.style.width = '100%';
-    mapDiv.style.height = '100%';
-    wrapper.appendChild(mapDiv);
-
-    document.body.appendChild(modal);
-
-    const map = L.map(mapDiv).setView([startLat, startLon], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-    let marker = null;
-    map.on('click', e => {
-      if (marker) map.removeLayer(marker);
-      marker = L.marker(e.latlng).addTo(map);
-
-      pickedLat = e.latlng.lat;
-      pickedLon = e.latlng.lng;
-
-      editCoordsDisplay.textContent = `${pickedLat.toFixed(4)}, ${pickedLon.toFixed(4)}`;
-      editCoordsDisplay.style.color = '#aaa';
-
-      fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pickedLat}&lon=${pickedLon}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data?.display_name) {
-            editAddressInput.value = data.display_name;
-          }
-        })
-        .catch(err => console.warn('Geocoding error:', err));
-    });
-
-    closeBtn.addEventListener('click', () => {
-      map.remove();
-      modal.remove();
-    });
-
-    modal.addEventListener('click', e => {
-      if (e.target === modal) {
-        map.remove();
-        modal.remove();
+    openMapPicker({
+      cityName: document.getElementById('edit-evt-city')?.value || selectedCity,
+      coordsDisplay: editCoordsDisplay,
+      addressInput: editAddressInput,
+      onPick: ({ lat, lon }) => {
+        pickedLat = lat;
+        pickedLon = lon;
       }
     });
   });
@@ -1236,15 +1179,6 @@ userBtn.addEventListener('click', () => {
 
 closeUserPanel.addEventListener('click', () => {
   userPanel.classList.remove('open');
-});
-
-// Profile Details toggle
-document.getElementById('toggle-profile-details')?.addEventListener('click', () => {
-  const extra = document.getElementById('profile-extra');
-  if (extra) {
-    const isHidden = extra.style.display === 'none' || extra.style.display === '';
-    extra.style.display = isHidden ? 'block' : 'none';
-  }
 });
 
 // Memory Mode toggle
